@@ -87,13 +87,14 @@ run: coffee
 play: run
 	@timidity $(MIDI_FILE)
 
-auto: play fclean
+rmmidi:
 	@rm -f $(MIDI_FILE)
 	@echo "$(COLOR)$(MIDI_FILE) \033[100D\033[40C\0033[1;31m[Removed]\0033[1;37m"
 
+auto: play fclean rmmidi
 
 define print_aligned_coffee
-    @t=$(NAME); \
+	@t=$(NAME); \
 	l=$${#t};\
 	i=$$((8 - l / 2));\
 	echo "\0033[1;32m\033[3C\033[$${i}CAnd Your Program \"$(NAME)\" \0033[1;37m"
@@ -120,4 +121,4 @@ coffee: all clean
 	@echo "\0033[1;32m\033[3C          Take Your Coffee"
 	$(call print_aligned_coffee)
 
-.PHONY: all clean fclean re coffee
+.PHONY: all clean fclean re run play auto rmmidi coffee

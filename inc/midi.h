@@ -13,7 +13,7 @@
 # define phaser 0x5F
 
 void	midi_test(char *filename);
-void ecrire_piste1(FILE *fichier);
+void write_metadata(FILE *fichier, unsigned long tempo);
 void MIDI_tempo(FILE *fichier, unsigned long duree);
 void MIDI_delta_time(FILE *fichier, unsigned long duree);
 void ecrire_variable_length_quantity(FILE *fichier, unsigned long i);

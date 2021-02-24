@@ -1,10 +1,18 @@
 #include "../../inc/midi.h"
 
-void ecrire_piste1(FILE *fichier)
-{   
+/**
+  * Write the details of the function here
+  * @param [in] (input parameter description, including the role of each parameter, the value and the relationship between parameters)
+  * @param [out] (description of output parameters)
+  * @return (description of return value)
+  * @see (this function refers to other related functions, here as a link)
+  * @note (description of the need to pay attention to the problem)
+*/
+void write_metadata(FILE *fichier, unsigned long tempo)
+{
 	unsigned long marque = MIDI_ecrire_en_tete_piste(fichier) ;
 	// 500000 = 0.5 sec de tempo (120 noires par min)
-	MIDI_tempo(fichier, 500000) ;   
+	MIDI_tempo(fichier, tempo) ;   
 	MIDI_fin_de_la_piste(fichier) ;
 	ecrire_taille_finale_piste(fichier, marque) ;    
 }
@@ -173,7 +181,7 @@ void	midi_test(char *filename)
 	FILE *fichier_midi = fopen(filename, "wb") ;
 	MIDI_ecrire_en_tete(fichier_midi, 1, 2, noire) ;
 	//metadatas
-	ecrire_piste1(fichier_midi);
+	write_metadata(fichier_midi, 500000);
 	//musique
 	ecrire_piste2(fichier_midi) ;
 	fclose(fichier_midi) ; 
