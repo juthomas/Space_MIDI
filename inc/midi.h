@@ -12,7 +12,7 @@
 # define chorus 0x5D
 # define phaser 0x5F
 
-void	midi_test();
+void	midi_test(char *filename);
 void ecrire_piste1(FILE *fichier);
 void MIDI_tempo(FILE *fichier, unsigned long duree);
 void MIDI_delta_time(FILE *fichier, unsigned long duree);

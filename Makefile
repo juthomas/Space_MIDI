@@ -1,9 +1,10 @@
-
-  
-
 ## Name of Project
 
 NAME = midi_controller
+
+## Name of Midi output file
+
+MIDI_FILE = output.mid
 
 ## Color for compilating (pink)
 
@@ -78,12 +79,24 @@ fclean: clean
 
 re: fclean all
 
+run: coffee
+	@echo ""
+	@echo "$(COLOR)\"$(NAME)\" \033[100D\033[40C\0033[1;32m[Launched]\0033[1;37m"
+	@./$(NAME) $(MIDI_FILE)
+
+play: run
+	@timidity $(MIDI_FILE)
+
+auto: play fclean
+	@rm -f $(MIDI_FILE)
+	@echo "$(COLOR)$(MIDI_FILE) \033[100D\033[40C\0033[1;31m[Removed]\0033[1;37m"
+
 
 define print_aligned_coffee
     @t=$(NAME); \
 	l=$${#t};\
 	i=$$((8 - l / 2));\
-	echo "\0033[1;32m\033[3C\033[$${i}CAnd Your Program \"$(NAME)\" "
+	echo "\0033[1;32m\033[3C\033[$${i}CAnd Your Program \"$(NAME)\" \0033[1;37m"
 endef
 
 coffee: all clean
