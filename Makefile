@@ -60,7 +60,7 @@ $(OBJ_DIRS):
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDES)
 	@$(CC) -c $< -o $@
-	@echo "$(COLOR)$(@:$(OBJ_DIR)/%=%) \033[100D\033[40C\0033[1;32m[Compiled]\0033[1;37m"
+	@echo "$(COLOR)$@ \033[100D\033[40C\0033[1;32m[Compiled]\0033[1;37m"
 
 $(NAME): $(OBJ_DIRS) $(SRC) $(INCLUDES)
 	@$(MAKE) -j $(OBJ)
@@ -83,7 +83,7 @@ define print_aligned_coffee
     @t=$(NAME); \
 	l=$${#t};\
 	i=$$((8 - l / 2));\
-	echo "\0033[1;32m\033[3C\033[$${i}CAnd Your program \"$(NAME)\" "
+	echo "\0033[1;32m\033[3C\033[$${i}CAnd Your Program \"$(NAME)\" "
 endef
 
 coffee: all clean
