@@ -8,82 +8,129 @@
   * @see (this function refers to other related functions, here as a link)
   * @note (description of the need to pay attention to the problem)
 */
-void write_metadata(FILE *fichier, unsigned long tempo)
+void useless_function()
 {
-	unsigned long marque = MIDI_ecrire_en_tete_piste(fichier) ;
+
+}
+
+/**
+  * Write metadata Midi line
+  * @param [file] Midi file pointer
+  * @param [tempo] quarter note (noire) value in micro-seconds
+*/
+void write_metadata(FILE *file, unsigned long tempo)
+{
+	unsigned long header_index = MIDI_ecrire_en_tete_piste(file);
 	// 500000 = 0.5 sec de tempo (120 noires par min)
-	MIDI_tempo(fichier, tempo) ;   
-	MIDI_fin_de_la_piste(fichier) ;
-	ecrire_taille_finale_piste(fichier, marque) ;    
+	MIDI_tempo(file, tempo);
+	MIDI_fin_de_la_piste(file);
+	ecrire_taille_finale_piste(file, header_index);
 }
 
-void MIDI_tempo(FILE *fichier, unsigned long duree)
+/**
+  * Write tempo in Midi line
+  * @param [file] Midi file pointer
+  * @param [tempo] quarter note (noire) value in micro-seconds
+*/
+void MIDI_tempo(FILE *file, unsigned long tempo)
 {
-	MIDI_delta_time(fichier, 0) ;
-	unsigned char octets[6] = {0xFF, 0x51, 0x03} ;
-	octets[3] = duree >> 16 ;
-	octets[4] = duree >> 8 ;
-	octets[5] = duree ;
-	fwrite(&octets, 6, 1, fichier) ;
+	MIDI_delta_time(file, 0) ;
+	unsigned char bytes[6] = {0xFF, 0x51, 0x03} ;
+	bytes[3] = tempo >> 16 ;
+	bytes[4] = tempo >> 8 ;
+	bytes[5] = tempo ;
+	fwrite(&bytes, 6, 1, file) ;
 }
 
-void MIDI_delta_time(FILE *fichier, unsigned long duree)
+/**
+  * Write Delta time
+  * @param [file] Midi file pointer
+  * @param [duration] Waiting duration in micro-seconds
+*/
+void MIDI_delta_time(FILE *file, unsigned long duration)
 {
-	ecrire_variable_length_quantity(fichier, duree) ;
+	write_variable_length_quantity(file, duration) ;
 }
 
-void ecrire_variable_length_quantity(FILE *fichier, unsigned long i)
+/**
+  * Write variable lenght quantity
+  * @param [file] Midi file pointer
+  * @param [duration] Waiting duration in micro-seconds
+*/
+void write_variable_length_quantity(FILE *file, unsigned long duration)
 {
-	bool continuer ;
-	if (i > 0x0FFFFFFF) {
-		printf("ERREUR : delai > 0x0FFFFFFF ! \n") ;
+	bool pass;
+	
+	if (duration > 0x0FFFFFFF) {
+		printf("ERROR : delay > 0x0FFFFFFF ! \n") ;
 		exit(EXIT_FAILURE) ;
 	}
 	
-	unsigned long filo = i & 0x7F ;
-	i = i >> 7 ;
-	while (i != 0)
+	unsigned long filo = duration & 0x7F ;
+	duration = duration >> 7 ;
+	while (duration != 0)
 	{
-		filo = (filo << 8)  + ((i & 0x7F) | 0x80) ;
-		i = i >> 7 ;
+		filo = (filo << 8)  + ((duration & 0x7F) | 0x80) ;
+		duration = duration >> 7 ;
 	}
 	
 	do
 	{
-		fwrite(&filo, 1, 1, fichier) ;
-		continuer = filo & 0x80 ;
-		if (continuer)
+		fwrite(&filo, 1, 1, file) ;
+		pass = filo & 0x80 ;
+		if (pass)
 		{
 			filo = filo >> 8 ;
 		}
-	} while (continuer) ;
+	} while (pass) ;
 }
 
-//changer d'instrument
-void MIDI_Program_Change(FILE *fichier, unsigned char canal, unsigned char instrument)
+/**
+  * Instrument change or instrument selection
+  * @param [file] Midi file pointer
+  * @param [channel] Selection of midi channel (0-16)
+  * @param [instrument] Selection of midi instrument (1-128)
+*/
+void MIDI_Instrument_Change(FILE *fichier, unsigned char channel, unsigned char instrument)
 {
 	unsigned char octets[2] ;
 	MIDI_delta_time(fichier, 0) ;
-	octets[0] = 0xC0 + canal % 16 ;//16 canaux max
+	octets[0] = 0xC0 + channel % 16 ;//16 canaux max
 	octets[1] = instrument % 128 ;//128 instruments max
 	fwrite(&octets, 2, 1, fichier) ;
 }
 
-void MIDI_Note(unsigned char etat, FILE *fichier, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite)
+/**
+  * Instrument change or instrument selection
+  * @param [file] Midi file pointer
+  * @param [state] Logic state of note (ON/OFF)
+  * @param [channel] Selection of midi channel (0-16)
+  * @param [MIDI_note] Selection of midi note (1-127)
+  * @param [velocity] Selection of velocity (power) (1-127)
+*/
+void MIDI_Note(FILE *file, unsigned char state, unsigned char channel, unsigned char MIDI_note, unsigned char velocity)
 {
-	unsigned char octets[3] ;
-	octets[0] = etat + canal % 16 ;
-	octets[1] = Note_MIDI % 128 ;
-	octets[2] = velocite % 128 ;//Volume
-	fwrite(&octets, 3, 1, fichier) ;
+	unsigned char bytes[3] ;
+	bytes[0] = state + channel % 16 ;
+	bytes[1] = MIDI_note % 128 ;
+	bytes[2] = velocity % 128 ;//Volume
+	fwrite(&bytes, 3, 1, file) ;
 }
 
-void Note_unique_avec_duree(FILE *fichier, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite, unsigned long duree)
+/**
+  * One note pressed with duration
+  * @param [file] Midi file pointer
+  * @param [state] Logic state of note (ON/OFF)
+  * @param [channel] Selection of midi channel (0-16)
+  * @param [MIDI_note] Selection of midi note (1-127)
+  * @param [velocity] Selection of velocity (power) (1-127)
+*/
+void Only_one_note_with_duration(FILE *file, unsigned char channel, unsigned char MIDI_note, unsigned char velocity, unsigned long duration)
 {
-	MIDI_delta_time(fichier, 0) ;
-	MIDI_Note(ON,  fichier, canal, Note_MIDI, velocite) ;
-	MIDI_delta_time(fichier, duree) ;
-	MIDI_Note(OFF, fichier, canal, Note_MIDI, 0) ;
+	MIDI_delta_time(file, 0) ;
+	MIDI_Note(file, ON, channel, MIDI_note, velocity) ;
+	MIDI_delta_time(file, duration) ;
+	MIDI_Note(file, OFF, channel, MIDI_note, 0) ;
 }
 
 // parametrage midi (attack, pitch, release, etc..)
@@ -146,20 +193,20 @@ void ecrire_piste2(FILE *fichier)
 {
 	unsigned long marque = MIDI_ecrire_en_tete_piste(fichier) ;
 	
-	MIDI_Program_Change(fichier, 0, 90) ;
+	MIDI_Instrument_Change(fichier, 0, 90) ;
 	for(int i=C3 ; i<=C3+12 ; i=i+1){
-		Note_unique_avec_duree(fichier, 1, i, 64, noire) ;        
+		Only_one_note_with_duration(fichier, 1, i, 64, noire) ;        
 	}
 	MIDI_delta_time(fichier, 0) ;
-	MIDI_Note(ON,  fichier, 1, C3, 64) ;
+	MIDI_Note(fichier, ON, 1, C3, 64) ;
 
 	MIDI_delta_time(fichier, 0) ;
-	MIDI_Note(ON,  fichier, 1, C3+2, 64) ;
+	MIDI_Note(fichier, ON, 1, C3+2, 64) ;
 
 	MIDI_delta_time(fichier, noire*2) ;
-	MIDI_Note(OFF, fichier, 1, C3, 0) ;
+	MIDI_Note(fichier, OFF, 1, C3, 0) ;
 	MIDI_delta_time(fichier, noire*2) ;
-	MIDI_Note(OFF, fichier, 1, C3+2, 0) ;
+	MIDI_Note(fichier, OFF, 1, C3+2, 0) ;
 
 
 

@@ -64,7 +64,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDES)
 	@echo "$(COLOR)$@ \033[100D\033[40C\0033[1;32m[Compiled]\0033[1;37m"
 
 $(NAME): $(OBJ_DIRS) $(SRC) $(INCLUDES)
-	@$(MAKE) -j $(OBJ)
+	@$(MAKE) -s -j $(OBJ)
 	@echo "$(COLOR)Objects \033[100D\033[40C\0033[1;32m[Created]\0033[1;37m"
 	@$(CC) $(OBJ) -o $@
 	@echo "$(COLOR)$(NAME) \033[100D\033[40C\0033[1;32m[Created]\0033[1;37m"
