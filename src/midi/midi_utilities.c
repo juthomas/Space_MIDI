@@ -1,8 +1,26 @@
 #include "../../inc/midi.h"
 
-
-
-
+/*
+ * HOW TO BASICS :
+ *
+ * [x] = required
+ * [o] = optional (melody part)
+ * [...] part [...] = can be repeated
+ * 
+ * [x] FILE *file_file = fopen(filename, "wb") ;
+ * [x] MIDI_write_file_header(midi_file, 1, 2, QUARTER) ;
+ * [x] MIDI_write_metadata(midi_file, 500000); //120bpm
+ *    [...]
+ *    [x] uint64_t mark = MIDI_write_track_header(file);
+ *    [o] MIDI_Instrument_Change(fichier, 0, 90);
+ *    [o] MIDI_only_one_note_with_duration(file, 1, i, 64, QUARTER);
+ *    [o] MIDI_Note(file, ON, 1, C3, 64);
+ *    [o] MIDI_delta_time(file, QUARTER);
+ *    [x] MIDI_write_end_of_track(file);
+ *    [x] MIDI_write_track_lengh(file, mark);
+ *    [...]
+ * [x] fclose(midi_file);
+*/
 
 
 /**
@@ -222,37 +240,37 @@ void MIDI_write_track_lengh(FILE *file, unsigned long mark)
 	fseek(file, 0, SEEK_END);
 }
 
-void ecrire_piste2(FILE *fichier)
+void ecrire_piste2(FILE *file)
 {
-	unsigned long marque = MIDI_write_track_header(fichier) ;
+	uint64_t mark = MIDI_write_track_header(file);
 	
-	MIDI_Instrument_Change(fichier, 0, 90) ;
+	MIDI_Instrument_Change(file, 0, 90) ;
 	for(int i=C3 ; i<=C3+12 ; i=i+1)
 	{
-		MIDI_only_one_note_with_duration(fichier, 1, i, 64, noire) ;        
+		MIDI_only_one_note_with_duration(file, 1, i, 64, QUARTER) ;        
 	}
-	MIDI_delta_time(fichier, 0) ;
-	MIDI_Note(fichier, ON, 1, C3, 64) ;
+	MIDI_delta_time(file, 0) ;
+	MIDI_Note(file, ON, 1, C3, 64) ;
 
-	MIDI_delta_time(fichier, 0) ;
-	MIDI_Note(fichier, ON, 1, C3+2, 64) ;
+	MIDI_delta_time(file, 0) ;
+	MIDI_Note(file, ON, 1, C3+2, 64);
 
-	MIDI_delta_time(fichier, noire*2) ;
-	MIDI_Note(fichier, OFF, 1, C3, 0) ;
-	MIDI_delta_time(fichier, noire*2) ;
-	MIDI_Note(fichier, OFF, 1, C3+2, 0) ;
+	MIDI_delta_time(file, QUARTER*2) ;
+	MIDI_Note(file, OFF, 1, C3, 0) ;
+	MIDI_delta_time(file, QUARTER*2) ;
+	MIDI_Note(file, OFF, 1, C3+2, 0) ;
 
 
 
 
 
 	// for(int i=0 ; i<=127 ; i=i+1){
-	// 	MIDI_Program_Change(fichier, 0, i) ;
-	// 	Note_unique_avec_duree(fichier, 0, C3 + 9, 64, noire) ;        
+	// 	MIDI_Program_Change(file, 0, i) ;
+	// 	Note_unique_avec_duree(file, 0, C3 + 9, 64, noire) ;        
 	// }
 	
-	MIDI_write_end_of_track(fichier) ;
-	MIDI_write_track_lengh(fichier, marque) ;
+	MIDI_write_end_of_track(file) ;
+	MIDI_write_track_lengh(file, mark);
 }
 
 
@@ -260,7 +278,7 @@ void	midi_test(char *filename)
 {
 	printf("Hello World !\n");
 	FILE *fichier_midi = fopen(filename, "wb") ;
-	MIDI_write_file_header(fichier_midi, 1, 2, noire) ;
+	MIDI_write_file_header(fichier_midi, 1, 2, QUARTER) ;
 	//metadatas
 	MIDI_write_metadata(fichier_midi, 500000);
 	//musique

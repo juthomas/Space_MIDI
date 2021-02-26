@@ -3,7 +3,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <stdbool.h>
-# define noire 128
+# define QUARTER 128 //noire
 # define ON  0x90
 # define OFF 0x80
 # define C3  60
