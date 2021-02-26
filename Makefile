@@ -121,4 +121,17 @@ coffee: all clean
 	@echo "\0033[1;32m\033[3C          Take Your Coffee"
 	$(call print_aligned_coffee)
 
+help:
+	@echo "$(COLOR)Options :\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10C \033[100D\033[40C\0033[1;31mCreate executable program\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Cclean\033[100D\033[40C\0033[1;31mClean program objects\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Cfclean\033[100D\033[40C\0033[1;31mCall \"clean\" and remove executable\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Cre\033[100D\033[40C\0033[1;31mCall \"fclean\" and make\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Ccoffee\033[100D\033[40C\0033[1;31mCall make and \"clean\"\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Crun\033[100D\033[40C\0033[1;31mCall \"coffee\" and launch executable \0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Cplay\033[100D\033[40C\0033[1;31mCall \"run\" and play the midi file created\0033[1;37m"
+	@echo "\033[100D\033[5C\0033[1;32mmake\033[100D\033[10Cauto\033[100D\033[40C\0033[1;31mCall \"play\", \"fclean\" and remove midi file\0033[1;37m"
+
+
+
 .PHONY: all clean fclean re run play auto rmmidi coffee
