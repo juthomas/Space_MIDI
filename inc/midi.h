@@ -13,18 +13,18 @@
 # define phaser 0x5F
 
 void	midi_test(char *filename);
-void	write_metadata(FILE *file, unsigned long tempo);
+void	MIDI_write_metadata(FILE *file, unsigned long tempo);
 void	MIDI_tempo(FILE *file, unsigned long tempo);
 void	MIDI_delta_time(FILE *fichier, unsigned long duree);
-void	write_variable_length_quantity(FILE *fichier, unsigned long i);
+void	MIDI_write_variable_length_quantity(FILE *fichier, unsigned long i);
 void	MIDI_Instrument_Change(FILE *fichier, unsigned char canal, unsigned char instrument);
 void	MIDI_Note(FILE *fichier, unsigned char etat, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite);
-void	Only_one_note_with_duration(FILE *fichier, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite, unsigned long duree);
+void	MIDI_only_one_note_with_duration(FILE *fichier, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite, unsigned long duree);
 void	MIDI_Control_Change(FILE *fichier, unsigned char canal, unsigned char type, unsigned char valeur);
-void	MIDI_ecrire_en_tete(FILE *fichier, unsigned char SMF, unsigned short pistes, unsigned short nbdiv);
-unsigned long MIDI_ecrire_en_tete_piste(FILE *fichier);
-void MIDI_fin_de_la_piste(FILE *fichier);
-void ecrire_taille_finale_piste(FILE *fichier, unsigned long marque);
+void	MIDI_write_file_header(FILE *fichier, unsigned char SMF, unsigned short pistes, unsigned short nbdiv);
+unsigned long MIDI_write_track_header(FILE *fichier);
+void MIDI_write_end_of_track(FILE *fichier);
+void MIDI_write_track_lengh(FILE *fichier, unsigned long marque);
 void ecrire_piste2(FILE *fichier);
 
 
