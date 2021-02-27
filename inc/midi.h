@@ -3,6 +3,19 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <stdbool.h>
+
+// TCP
+# include <netdb.h> 
+# include <netinet/in.h> 
+# include <string.h> 
+# include <sys/socket.h> 
+# include <sys/types.h> 
+# include <unistd.h>
+# define PORT 3001 
+void	tcp_connection();
+
+// TCP
+
 # define QUARTER 128 //noire
 # define ON  0x90
 # define OFF 0x80

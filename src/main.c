@@ -44,5 +44,7 @@ void	midi_test(char *filename)
 
 int main(int argc, char **argv)
 {
+	tcp_connection();
+
 	midi_test(argc == 2 ? argv[1] : "output.mid");
 }

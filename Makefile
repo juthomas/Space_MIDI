@@ -18,6 +18,7 @@ SRC_DIR = src
 
 # Add dirs here
 MIDI_DIR = midi
+TCP_DIR = tcp
 
 ## Compilating Utilities
 FAST = -Ofast
@@ -34,18 +35,22 @@ INC_H = midi
 
 MIDI_FT = midi_utilities
 
+TCP_FT = tcp_sockets
+
 SRC_FT = main
 
 
 ## List of Utilities
 
 SRC = $(SRC_FT:%=$(SRC_DIR)/%.c) \
-	$(MIDI_FT:%=$(SRC_DIR)/$(MIDI_DIR)/%.c)
+	$(MIDI_FT:%=$(SRC_DIR)/$(MIDI_DIR)/%.c) \
+	$(TCP_FT:%=$(SRC_DIR)/$(TCP_DIR)/%.c)
 
 OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 OBJ_DIRS = $(OBJ_DIR) \
-	$(MIDI_DIR:%=$(OBJ_DIR)/%)
+	$(MIDI_DIR:%=$(OBJ_DIR)/%) \
+	$(TCP_DIR:%=$(OBJ_DIR)/%)
 
 INCLUDES = $(INCLUDE_H:%=./$(INC_DIR)/%.h)
 
