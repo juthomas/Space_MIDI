@@ -21,9 +21,10 @@ MIDI_DIR = midi
 TCP_DIR = tcp
 
 ## Compilating Utilities
-FAST = -Ofast
-# DEBUG = -g3 -fsanitize=address
-FLAGS = -Wall -Wextra -Werror $(FAST) #$(DEBUG) -D_REENTRANT
+# FAST = -Ofast
+DEBUG = -g #3 -fsanitize=address
+# WARNINGS = -Wall -Wextra -Werror
+FLAGS = $(WARNINGS) $(FAST) $(DEBUG)# -D_REENTRANT
 
 INC = $(INC_DIR:%=-I./%)
 

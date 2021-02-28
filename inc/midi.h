@@ -3,6 +3,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <stdbool.h>
+# include <sys/time.h>
 
 // TCP
 # include <netdb.h> 
@@ -12,7 +13,6 @@
 # include <sys/types.h> 
 # include <unistd.h>
 # define PORT 3001 
-void	tcp_connection();
 
 // TCP
 
@@ -25,19 +25,41 @@ void	tcp_connection();
 # define chorus 0x5D
 # define phaser 0x5F
 
+typedef struct		s_server_data
+{
+	uint8_t			is_setup;
+	int				sockfd;
+	int				connfd;
+	int				read_state;
+	int32_t			temperature;
+	int32_t			light;
+}					t_server_data;
+
+typedef struct		s_music_data
+{
+	// uint32_t		quarter_value;
+	uint32_t		measure_value;
+	struct timeval	last_measure;
+	struct timeval	entry_time;
+	
+}					t_music_data;
+
+void	tcp_connection(t_server_data *data);
+// t_server_data		g_server_data;
+
 void	midi_test(char *filename);
-void	MIDI_write_metadata(FILE *file, unsigned long tempo);
-void	MIDI_tempo(FILE *file, unsigned long tempo);
-void	MIDI_delta_time(FILE *fichier, unsigned long duree);
-void	MIDI_write_variable_length_quantity(FILE *fichier, unsigned long i);
+void	MIDI_write_metadata(FILE *file, uint32_t tempo);
+void	MIDI_tempo(FILE *file, uint32_t tempo);
+void	MIDI_delta_time(FILE *fichier, uint32_t duree);
+void	MIDI_write_variable_length_quantity(FILE *fichier, uint32_t i);
 void	MIDI_Instrument_Change(FILE *fichier, unsigned char canal, unsigned char instrument);
 void	MIDI_Note(FILE *fichier, unsigned char etat, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite);
 void	MIDI_only_one_note_with_duration(FILE *fichier, unsigned char canal, unsigned char Note_MIDI, unsigned char velocite, unsigned long duree);
 void	MIDI_Control_Change(FILE *fichier, unsigned char canal, unsigned char type, unsigned char valeur);
 void	MIDI_write_file_header(FILE *fichier, unsigned char SMF, unsigned short pistes, unsigned short nbdiv);
-unsigned long MIDI_write_track_header(FILE *fichier);
+uint32_t MIDI_write_track_header(FILE *fichier);
 void MIDI_write_end_of_track(FILE *fichier);
-void MIDI_write_track_lengh(FILE *fichier, unsigned long marque);
+void MIDI_write_track_lengh(FILE *fichier, uint32_t marque);
 void ecrire_piste2(FILE *fichier);
 
 

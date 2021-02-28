@@ -44,7 +44,37 @@ void	midi_test(char *filename)
 
 int main(int argc, char **argv)
 {
-	tcp_connection();
+	t_server_data server_data = {.is_setup = 0, .sockfd = 0, .light = 0, .temperature = 0};
+	struct timeval tv;
+	t_music_data music_data = {.measure_value=500000};
+
+	tcp_connection(&server_data);
+
+
+	gettimeofday(&music_data.last_measure ,NULL);
+	gettimeofday(&tv, NULL);
+	// uint32_t micro_time = gettimeofday_in_usecs();
+	printf("secs : %ld\n", tv.tv_sec );
+	printf("micros : %d\n", tv.tv_usec);
+	for (int i = 0; i < 8;i++)
+	{
+		//Appel pour voir les valeurs du serv
+		struct timeval tv_tmp;
+		gettimeofday(&tv_tmp, NULL);
+		uint32_t diff_value =
+		(tv_tmp.tv_sec - music_data.last_measure.tv_sec) * 1000000 + 
+		(tv_tmp.tv_usec - music_data.last_measure.tv_usec);
+		
+		//Rattraper les mesures de retard si besoin
+		//Attendre le temps restant
+
+		usleep(500000);
+		printf("Paf : %d\n", i);
+		printf("Diff : %u\n", diff_value);
+		//Ecrire mesure
+	}
+
+	// tcp_connection(&server_data);
 
 	midi_test(argc == 2 ? argv[1] : "output.mid");
 }
