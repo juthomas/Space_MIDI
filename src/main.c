@@ -3,7 +3,7 @@
 
 void ecrire_piste2(FILE *file)
 {
-	uint64_t mark = MIDI_write_track_header(file);
+	uint32_t mark = MIDI_write_track_header(file);
 	
 	MIDI_Instrument_Change(file, 0, 90) ;
 	for(int i=C3 ; i<=C3+12 ; i=i+1)
@@ -42,6 +42,48 @@ void	midi_test(char *filename)
 	fclose(fichier_midi) ; 
 }
 
+void	midi_setup_file(char *filename, t_music_data *music_data)
+{
+	music_data->midi_file = fopen(filename, "wb") ;
+	MIDI_write_file_header(music_data->midi_file, 1, 2, QUARTER) ;
+	//metadatas
+	MIDI_write_metadata(music_data->midi_file, music_data->quarter_value);
+	music_data->midi_mark = MIDI_write_track_header(music_data->midi_file);
+	MIDI_Instrument_Change(music_data->midi_file, 0, 90) ;
+
+}
+
+void	midi_write_measure(t_server_data *server_data, \
+		t_music_data *music_data, uint32_t measures_to_write)
+{
+	MIDI_delta_time(music_data->midi_file, 0) ;
+	MIDI_Note(music_data->midi_file, ON, 1, C3, 64) ;
+
+	// MIDI_delta_time(music_data->midi_file, 0) ;
+	// MIDI_Note(music_data->midi_file, ON, 1, C3+2, 64);
+
+	MIDI_delta_time(music_data->midi_file, QUARTER) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, C3, 0) ;
+
+	MIDI_delta_time(music_data->midi_file, 0) ;
+	MIDI_Note(music_data->midi_file, ON, 1, C3, 0) ;
+
+	MIDI_delta_time(music_data->midi_file, QUARTER*3) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, C3, 0) ;
+
+
+	// MIDI_delta_time(music_data->midi_file, QUARTER*2) ;
+	// MIDI_Note(music_data->midi_file, OFF, 1, C3+2, 0) ;
+
+}
+
+void	midi_write_end(t_music_data *music_data)
+{
+	MIDI_write_end_of_track(music_data->midi_file);
+	MIDI_write_track_lengh(music_data->midi_file, music_data->midi_mark);
+	fclose(music_data->midi_file); 
+}
+
 uint32_t get_delta_time(struct timeval old, struct timeval recent)
 {
 	return ((recent.tv_sec - old.tv_sec) * 1000000 \
@@ -65,11 +107,15 @@ uint32_t get_measures_to_write(t_music_data music_data, \
 int main(int argc, char **argv)
 {
 	t_server_data server_data = {.is_setup = 0, .sockfd = 0, .light = 0, .temperature = 0};
-	t_music_data music_data = {.partition_duration=20000000 ,.measure_value=500000 * 4,.measures_writed=0};
-	// uint32_t		partition_duration = 20000000;
+	t_music_data music_data = {.partition_duration=20000000,
+	.measure_value=500000 * 4,
+	.measures_writed=0,
+	.quarter_value=500000
+	};
 
 	tcp_connect(&server_data);
 	wait_for_connection(&server_data);
+	midi_setup_file(argc == 2 ? argv[1] : "output.mid", &music_data);
 
 
 	gettimeofday(&music_data.entry_time ,NULL);
@@ -100,13 +146,17 @@ int main(int argc, char **argv)
 		if (get_measures_to_write(music_data, tv_tmp))
 		{
 			//call midi write measure
+			midi_write_measure(&server_data, &music_data, get_measures_to_write(music_data, tv_tmp));
 			music_data.measures_writed += get_measures_to_write(music_data, tv_tmp);
 		}
 
 		usleep(500000);
 	}
 
+	midi_write_end(&music_data);
+	close(server_data.sockfd);
+
 	// tcp_connection(&server_data);
 
-	midi_test(argc == 2 ? argv[1] : "output.mid");
+	// midi_test(argc == 2 ? argv[1] : "output.mid");
 }

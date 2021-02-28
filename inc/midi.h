@@ -37,7 +37,9 @@ typedef struct		s_server_data
 
 typedef struct		s_music_data
 {
-	// uint32_t		quarter_value;
+	uint32_t		quarter_value;
+	FILE			*midi_file;
+	uint32_t		midi_mark;
 	uint32_t		partition_duration;
 	uint32_t		measure_value;
 	uint32_t		measures_writed;
