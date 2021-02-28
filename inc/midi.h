@@ -38,13 +38,16 @@ typedef struct		s_server_data
 typedef struct		s_music_data
 {
 	// uint32_t		quarter_value;
+	uint32_t		partition_duration;
 	uint32_t		measure_value;
+	uint32_t		measures_writed;
 	struct timeval	last_measure;
 	struct timeval	entry_time;
 	
 }					t_music_data;
-
-void	tcp_connection(t_server_data *data);
+void wait_for_connection(t_server_data *data);
+int32_t tcp_get_fresh_data(t_server_data *data);
+void	tcp_connect(t_server_data *data);
 // t_server_data		g_server_data;
 
 void	midi_test(char *filename);

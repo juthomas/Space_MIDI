@@ -42,36 +42,68 @@ void	midi_test(char *filename)
 	fclose(fichier_midi) ; 
 }
 
+uint32_t get_delta_time(struct timeval old, struct timeval recent)
+{
+	return ((recent.tv_sec - old.tv_sec) * 1000000 \
+		+ (recent.tv_usec - old.tv_usec));
+}
+
+uint32_t get_time_to_measures(t_music_data music_data, \
+			 struct timeval current_time)
+{
+	return ((uint32_t)(get_delta_time(music_data.entry_time, current_time) \
+			/ music_data.measure_value));
+}
+
+uint32_t get_measures_to_write(t_music_data music_data, \
+			 struct timeval current_time)
+{
+	return (get_time_to_measures(music_data, current_time) \
+			- music_data.measures_writed);
+}
+
 int main(int argc, char **argv)
 {
 	t_server_data server_data = {.is_setup = 0, .sockfd = 0, .light = 0, .temperature = 0};
-	struct timeval tv;
-	t_music_data music_data = {.measure_value=500000};
+	t_music_data music_data = {.partition_duration=20000000 ,.measure_value=500000 * 4,.measures_writed=0};
+	// uint32_t		partition_duration = 20000000;
 
-	tcp_connection(&server_data);
+	tcp_connect(&server_data);
+	wait_for_connection(&server_data);
 
 
-	gettimeofday(&music_data.last_measure ,NULL);
-	gettimeofday(&tv, NULL);
-	// uint32_t micro_time = gettimeofday_in_usecs();
-	printf("secs : %ld\n", tv.tv_sec );
-	printf("micros : %d\n", tv.tv_usec);
-	for (int i = 0; i < 8;i++)
+	gettimeofday(&music_data.entry_time ,NULL);
+	music_data.last_measure = music_data.entry_time;
+
+	while (get_delta_time(music_data.entry_time, music_data.last_measure) \
+		< music_data.partition_duration)
 	{
 		//Appel pour voir les valeurs du serv
+		while (!tcp_get_fresh_data(&server_data))
+		{
+			wait_for_connection(&server_data);
+		}
+
 		struct timeval tv_tmp;
 		gettimeofday(&tv_tmp, NULL);
-		uint32_t diff_value =
-		(tv_tmp.tv_sec - music_data.last_measure.tv_sec) * 1000000 + 
-		(tv_tmp.tv_usec - music_data.last_measure.tv_usec);
-		
+		uint32_t diff_value = get_delta_time(music_data.last_measure, tv_tmp);
+
+		music_data.last_measure = tv_tmp;
 		//Rattraper les mesures de retard si besoin
 		//Attendre le temps restant
+		printf("data = t:%d, l:%d\n",server_data.temperature, server_data.light);
+
+
+		printf("Diff : %u\n", diff_value);
+		printf("Musures ecrites : %d\n", music_data.measures_writed);
+		printf("Mesures a ecrire : %d\n", get_measures_to_write(music_data, tv_tmp));
+		if (get_measures_to_write(music_data, tv_tmp))
+		{
+			//call midi write measure
+			music_data.measures_writed += get_measures_to_write(music_data, tv_tmp);
+		}
 
 		usleep(500000);
-		printf("Paf : %d\n", i);
-		printf("Diff : %u\n", diff_value);
-		//Ecrire mesure
 	}
 
 	// tcp_connection(&server_data);

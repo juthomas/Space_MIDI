@@ -1,10 +1,10 @@
 #include "../../inc/midi.h"
 #define MAX 65536
 
-int32_t		get_param_from_server_data(char *data, char *param_name)
+int32_t get_param_from_server_data(char *data, char *param_name)
 {
 	char *tmp = strstr(data, param_name);
-	int32_t		param_nu;
+	int32_t param_nu;
 
 	if (tmp)
 	{
@@ -14,7 +14,6 @@ int32_t		get_param_from_server_data(char *data, char *param_name)
 	}
 	return (0);
 }
-
 
 static void msg_listener(t_server_data *data)
 {
@@ -39,8 +38,8 @@ static void msg_listener(t_server_data *data)
 			char *lastmsg = strrchr(buff, '|');
 			if (lastmsg)
 			{
-				data->temperature = get_param_from_server_data(lastmsg,"temperature :");
-				data->light = get_param_from_server_data(lastmsg,"light :");
+				data->temperature = get_param_from_server_data(lastmsg, "temperature :");
+				data->light = get_param_from_server_data(lastmsg, "light :");
 				printf("Temp nu%d\n\n", data->temperature);
 				printf("Light nu%d\n\n", data->light);
 			}
@@ -76,6 +75,25 @@ static void connect_loop(t_server_data *data)
 	}
 }
 
+void wait_for_connection(t_server_data *data)
+{
+	// Accept the data packet from client and verification
+	uint32_t len;
+	struct sockaddr_in cli;
+
+	len = sizeof(cli);
+	data->connfd = accept(data->sockfd, (struct sockaddr *)&cli, &len);
+	if (data->connfd < 0)
+	{
+		printf("server acccept failed...\n");
+		exit(0);
+	}
+	else
+	{
+		printf("server acccept the client...\n");
+	}
+}
+
 int32_t tcp_get_fresh_data(t_server_data *data)
 {
 	char *buff;
@@ -94,20 +112,20 @@ int32_t tcp_get_fresh_data(t_server_data *data)
 		char *lastmsg = strrchr(buff, '|');
 		if (lastmsg)
 		{
-			data->temperature = get_param_from_server_data(lastmsg,"temperature :");
-			data->light = get_param_from_server_data(lastmsg,"light :");
-			printf("Temp nu%d\n\n", data->temperature);
-			printf("Light nu%d\n\n", data->light);
+			data->temperature = get_param_from_server_data(lastmsg, "temperature :");
+			data->light = get_param_from_server_data(lastmsg, "light :");
+			// printf("Temp nu%d\n\n", data->temperature);
+			// printf("Light nu%d\n\n", data->light);
 		}
 
-		printf("Last msg :%s\n", lastmsg);
-		printf("From client: %s\n", buff);
+		// printf("Last msg :%s\n", lastmsg);
+		// printf("From client: %s\n", buff);
 	}
 	free(buff);
 	return (data->read_state);
 }
 
-void tcp_connection(t_server_data *data)
+void tcp_connect(t_server_data *data)
 {
 	struct sockaddr_in servaddr;
 
@@ -148,9 +166,9 @@ void tcp_connection(t_server_data *data)
 	{
 		printf("Server listening..\n");
 	}
-	
-	connect_loop(data);
+
+	// connect_loop(data);
 
 	// After chatting close the socket
-	close(data->sockfd);
+	// close(data->sockfd);
 }
