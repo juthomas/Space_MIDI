@@ -66,7 +66,7 @@ void	midi_write_measure(t_server_data *server_data, \
 {
 	// T = 1/4
 	//Code part
-	midi_write_measure_note(music_data, ON, 1, C4, 64);
+	midi_write_measure_note(music_data, ON, 1, A3, 64);
 
 	//Code part
 	MIDI_delta_time(music_data->midi_file, 0) ;
@@ -76,7 +76,7 @@ void	midi_write_measure(t_server_data *server_data, \
 	MIDI_delta_time(music_data->midi_file, QUARTER) ;
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 	//Code part
-	midi_write_measure_note(music_data, OFF, 1, C4, 0);
+	midi_write_measure_note(music_data, OFF, 1, A3, 0);
 	if (server_data->temperature > 0)
 	{
 		midi_write_measure_note(music_data, ON, 1,
