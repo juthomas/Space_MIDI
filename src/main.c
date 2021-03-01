@@ -53,27 +53,79 @@ void	midi_setup_file(char *filename, t_music_data *music_data)
 
 }
 
+void	midi_write_measure_note(t_music_data *music_data, unsigned char state, \
+		unsigned char channel, unsigned char note, unsigned char velocity)
+{
+	MIDI_delta_time(music_data->midi_file, 0) ;
+	MIDI_Note(music_data->midi_file, state, channel, note, velocity) ;
+
+}
+
 void	midi_write_measure(t_server_data *server_data, \
 		t_music_data *music_data, uint32_t measures_to_write)
 {
-	MIDI_delta_time(music_data->midi_file, 0) ;
-	MIDI_Note(music_data->midi_file, ON, 1, C3, 64) ;
+	// T = 1/4
+	//Code part
+	midi_write_measure_note(music_data, ON, 1, C4, 64);
 
-	// MIDI_delta_time(music_data->midi_file, 0) ;
-	// MIDI_Note(music_data->midi_file, ON, 1, C3+2, 64);
+	//Code part
+	MIDI_delta_time(music_data->midi_file, 0) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64) ;
+
+	// T = 2/4
+	MIDI_delta_time(music_data->midi_file, QUARTER) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
+	//Code part
+	midi_write_measure_note(music_data, OFF, 1, C4, 0);
+	if (server_data->temperature > 0)
+	{
+		midi_write_measure_note(music_data, ON, 1,
+		A0 + (server_data->temperature/3), server_data->light);
+	}
+
+	//Code part
+	MIDI_delta_time(music_data->midi_file, 0) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
+
+	// T = 3/4
 
 	MIDI_delta_time(music_data->midi_file, QUARTER) ;
-	MIDI_Note(music_data->midi_file, OFF, 1, C3, 0) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
+	//Code part
+	if (server_data->temperature > 0)
+	{
+		midi_write_measure_note(music_data, OFF, 1, A0 + (server_data->temperature/3), 0);
+	}
+	if (server_data->motors_activity > 0)
+	{
+		midi_write_measure_note(music_data, ON, 1,
+		A0 + (server_data->motors_activity/3), server_data->vibrations);
+	}
 
+	//Code part
 	MIDI_delta_time(music_data->midi_file, 0) ;
-	MIDI_Note(music_data->midi_file, ON, 1, C3, 0) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 
-	MIDI_delta_time(music_data->midi_file, QUARTER*3) ;
-	MIDI_Note(music_data->midi_file, OFF, 1, C3, 0) ;
+	// T = 4/4
+	MIDI_delta_time(music_data->midi_file, QUARTER) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
+	//Code part
+	if (server_data->motors_activity > 0)
+	{
+		midi_write_measure_note(music_data, OFF, 1, A0 + (server_data->motors_activity/3), 0);
+	}
 
+	//Code part
+	MIDI_delta_time(music_data->midi_file, 0) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 
-	// MIDI_delta_time(music_data->midi_file, QUARTER*2) ;
-	// MIDI_Note(music_data->midi_file, OFF, 1, C3+2, 0) ;
+	// T = end
+	MIDI_delta_time(music_data->midi_file, QUARTER) ;
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
+	// MIDI_delta_time(music_data->midi_file, 0) ;
+	// MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
+
+	// MIDI_Note(music_data->midi_file, OFF, 1, C3, 0) ;
 
 }
 
@@ -107,10 +159,10 @@ uint32_t get_measures_to_write(t_music_data music_data, \
 int main(int argc, char **argv)
 {
 	t_server_data server_data = {.is_setup = 0, .sockfd = 0, .light = 0, .temperature = 0};
-	t_music_data music_data = {.partition_duration=20000000,
-	.measure_value=500000 * 4,
+	t_music_data music_data = {.partition_duration=40000000,
+	.measure_value=500000 * 4 * 2,
 	.measures_writed=0,
-	.quarter_value=500000
+	.quarter_value=500000 * 2
 	};
 
 	tcp_connect(&server_data);

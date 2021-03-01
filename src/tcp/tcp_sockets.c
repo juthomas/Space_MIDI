@@ -114,6 +114,8 @@ int32_t tcp_get_fresh_data(t_server_data *data)
 		{
 			data->temperature = get_param_from_server_data(lastmsg, "temperature :");
 			data->light = get_param_from_server_data(lastmsg, "light :");
+			data->motors_activity = get_param_from_server_data(lastmsg, "motors-activity :");
+			data->vibrations = get_param_from_server_data(lastmsg, "vibrations :");
 			// printf("Temp nu%d\n\n", data->temperature);
 			// printf("Light nu%d\n\n", data->light);
 		}

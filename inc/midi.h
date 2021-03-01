@@ -16,10 +16,11 @@
 
 // TCP
 
+# include "./midi_notes.h"
 # define QUARTER 128 //noire
 # define ON  0x90
 # define OFF 0x80
-# define C3  60
+// # define C3  60
 # define percu 9
 # define reverb 0x5B
 # define chorus 0x5D
@@ -33,6 +34,9 @@ typedef struct		s_server_data
 	int				read_state;
 	int32_t			temperature;
 	int32_t			light;
+	int32_t			motors_activity;
+	int32_t			vibrations;
+
 }					t_server_data;
 
 typedef struct		s_music_data

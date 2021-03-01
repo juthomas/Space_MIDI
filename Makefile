@@ -32,7 +32,7 @@ CC = clang $(FLAGS) $(INC)
 
 ## List of Headers and C files 
 
-INC_H = midi
+INC_H = midi midi_notes
 
 MIDI_FT = midi_utilities
 
