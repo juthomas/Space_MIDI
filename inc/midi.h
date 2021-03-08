@@ -5,6 +5,9 @@
 # include <stdbool.h>
 # include <sys/time.h>
 
+// Folder, (ls)
+# include <dirent.h> 
+
 // TCP
 # include <netdb.h> 
 # include <netinet/in.h> 
@@ -26,18 +29,6 @@
 # define chorus 0x5D
 # define phaser 0x5F
 
-typedef struct		s_server_data
-{
-	uint8_t			is_setup;
-	int				sockfd;
-	int				connfd;
-	int				read_state;
-	int32_t			temperature;
-	int32_t			light;
-	int32_t			motors_activity;
-	int32_t			vibrations;
-
-}					t_server_data;
 
 typedef struct		s_music_data
 {
@@ -51,9 +42,7 @@ typedef struct		s_music_data
 	struct timeval	entry_time;
 	
 }					t_music_data;
-void wait_for_connection(t_server_data *data);
-int32_t tcp_get_fresh_data(t_server_data *data);
-void	tcp_connect(t_server_data *data);
+
 // t_server_data		g_server_data;
 
 void	midi_test(char *filename);

@@ -1,46 +1,7 @@
 #include "../inc/midi.h"
 
 
-void ecrire_piste2(FILE *file)
-{
-	uint32_t mark = MIDI_write_track_header(file);
-	
-	MIDI_Instrument_Change(file, 0, 90) ;
-	for(int i=C3 ; i<=C3+12 ; i=i+1)
-	{
-		MIDI_only_one_note_with_duration(file, 1, i, 64, QUARTER) ;        
-	}
-	MIDI_delta_time(file, 0) ;
-	MIDI_Note(file, ON, 1, C3, 64) ;
 
-	MIDI_delta_time(file, 0) ;
-	MIDI_Note(file, ON, 1, C3+2, 64);
-
-	MIDI_delta_time(file, QUARTER*2) ;
-	MIDI_Note(file, OFF, 1, C3, 0) ;
-	MIDI_delta_time(file, QUARTER*2) ;
-	MIDI_Note(file, OFF, 1, C3+2, 0) ;
-	// for(int i=0 ; i<=127 ; i=i+1){
-	// 	MIDI_Program_Change(file, 0, i) ;
-	// 	Note_unique_avec_duree(file, 0, C3 + 9, 64, noire) ;        
-	// }
-
-	MIDI_write_end_of_track(file) ;
-	MIDI_write_track_lengh(file, mark);
-}
-
-
-void	midi_test(char *filename)
-{
-	printf("Hello World !\n");
-	FILE *fichier_midi = fopen(filename, "wb") ;
-	MIDI_write_file_header(fichier_midi, 1, 2, QUARTER) ;
-	//metadatas
-	MIDI_write_metadata(fichier_midi, 500000);
-	//musique
-	ecrire_piste2(fichier_midi) ;
-	fclose(fichier_midi) ; 
-}
 
 void	midi_setup_file(char *filename, t_music_data *music_data)
 {
@@ -61,8 +22,8 @@ void	midi_write_measure_note(t_music_data *music_data, unsigned char state, \
 
 }
 
-void	midi_write_measure(t_server_data *server_data, \
-		t_music_data *music_data, uint32_t measures_to_write)
+void	midi_write_measure(t_music_data *music_data, \
+			uint32_t measures_to_write)
 {
 	// T = 1/4
 	//Code part
@@ -77,11 +38,9 @@ void	midi_write_measure(t_server_data *server_data, \
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 	//Code part
 	midi_write_measure_note(music_data, OFF, 1, A3, 0);
-	if (server_data->temperature > 0)
-	{
-		midi_write_measure_note(music_data, ON, 1,
-		A0 + (server_data->temperature/3), server_data->light);
-	}
+
+	midi_write_measure_note(music_data, ON, 1,
+	A0, 128);
 
 	//Code part
 	MIDI_delta_time(music_data->midi_file, 0) ;
@@ -92,15 +51,12 @@ void	midi_write_measure(t_server_data *server_data, \
 	MIDI_delta_time(music_data->midi_file, QUARTER) ;
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 	//Code part
-	if (server_data->temperature > 0)
-	{
-		midi_write_measure_note(music_data, OFF, 1, A0 + (server_data->temperature/3), 0);
-	}
-	if (server_data->motors_activity > 0)
-	{
+
+	midi_write_measure_note(music_data, OFF, 1, A0, 0);
+	
+
 		midi_write_measure_note(music_data, ON, 1,
-		A0 + (server_data->motors_activity/3), server_data->vibrations);
-	}
+		A0, 128);
 
 	//Code part
 	MIDI_delta_time(music_data->midi_file, 0) ;
@@ -110,10 +66,7 @@ void	midi_write_measure(t_server_data *server_data, \
 	MIDI_delta_time(music_data->midi_file, QUARTER) ;
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 	//Code part
-	if (server_data->motors_activity > 0)
-	{
-		midi_write_measure_note(music_data, OFF, 1, A0 + (server_data->motors_activity/3), 0);
-	}
+	midi_write_measure_note(music_data, OFF, 1, A0, 0);
 
 	//Code part
 	MIDI_delta_time(music_data->midi_file, 0) ;
@@ -136,79 +89,129 @@ void	midi_write_end(t_music_data *music_data)
 	fclose(music_data->midi_file); 
 }
 
-uint32_t get_delta_time(struct timeval old, struct timeval recent)
+void	terminate_session(int signal, void *ptr)
 {
-	return ((recent.tv_sec - old.tv_sec) * 1000000 \
-		+ (recent.tv_usec - old.tv_usec));
+
 }
 
-uint32_t get_time_to_measures(t_music_data music_data, \
-			 struct timeval current_time)
-{
-	return ((uint32_t)(get_delta_time(music_data.entry_time, current_time) \
-			/ music_data.measure_value));
-}
 
-uint32_t get_measures_to_write(t_music_data music_data, \
-			 struct timeval current_time)
+//probably replaced by a simple strcmp
+int8_t	cmp_filename(struct dirent* file1, struct dirent* file2)
 {
-	return (get_time_to_measures(music_data, current_time) \
-			- music_data.measures_writed);
+	char* name1tmp = file1->d_name;
+
+	printf("Name = %s\n", name1tmp);
+	uint32_t DD = strtol(name1tmp, &name1tmp, 10);
+	if (*name1tmp == '_')
+	{
+		name1tmp++;
+	}
+	else
+	{
+		return (-1);
+	}
+	uint32_t MM = strtol(name1tmp, &name1tmp, 10);
+	if (*name1tmp == '_')
+	{
+		name1tmp++;
+	}
+	else
+	{
+		return (-1);
+	}
+	uint32_t YY = strtol(name1tmp, &name1tmp, 10);
+	if (*name1tmp == '_' && *(name1tmp + 1) == '_')
+	{
+		(name1tmp)+=2;
+	}
+	else
+	{
+		return (-1);
+	}
+	uint32_t HH = strtol(name1tmp, &name1tmp, 10);
+	if (*name1tmp == '_')
+	{
+		name1tmp++;
+	}
+	else
+	{
+		return (-1);
+	}
+	uint32_t mm = strtol(name1tmp, &name1tmp, 10);
+	if (*name1tmp == '_')
+	{
+		name1tmp++;
+	}
+	else
+	{
+		return (-1);
+	}
+	uint32_t SS = strtol(name1tmp, &name1tmp, 10);
+	printf("Time : %d/%d/%d %d:%d:%d\n", DD, MM, YY, HH, mm, SS);
+
 }
 
 int main(int argc, char **argv)
 {
-	t_server_data server_data = {.is_setup = 0, .sockfd = 0, .light = 0, .temperature = 0};
+	signal(SIGTERM, (void (*)(int))terminate_session);
 	t_music_data music_data = {.partition_duration=40000000,
 	.measure_value=500000 * 4 * 2,
 	.measures_writed=0,
 	.quarter_value=500000 * 2
 	};
+	midi_setup_file("Test.midi", &music_data);
 
-	tcp_connect(&server_data);
-	wait_for_connection(&server_data);
-	midi_setup_file(argc == 2 ? argv[1] : "output.mid", &music_data);
-
-
-	gettimeofday(&music_data.entry_time ,NULL);
-	music_data.last_measure = music_data.entry_time;
-
-	while (get_delta_time(music_data.entry_time, music_data.last_measure) \
-		< music_data.partition_duration)
+	DIR* rep = NULL;
+	struct dirent* currentFile = NULL;
+	struct dirent* tmpFile = NULL;
+	rep = opendir("./data_files");
+	if (rep == NULL) /* Si le dossier n'a pas pu être ouvert */
 	{
-		//Appel pour voir les valeurs du serv
-		while (!tcp_get_fresh_data(&server_data))
-		{
-			wait_for_connection(&server_data);
-		}
+		exit(1);
+	}
+	
+	while ((currentFile = readdir(rep)) != NULL)
+	{
+		printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
+		cmp_filename(currentFile, NULL);
 
-		struct timeval tv_tmp;
-		gettimeofday(&tv_tmp, NULL);
-		uint32_t diff_value = get_delta_time(music_data.last_measure, tv_tmp);
-
-		music_data.last_measure = tv_tmp;
-		//Rattraper les mesures de retard si besoin
-		//Attendre le temps restant
-		printf("data = t:%d, l:%d\n",server_data.temperature, server_data.light);
-
-
-		printf("Diff : %u\n", diff_value);
-		printf("Musures ecrites : %d\n", music_data.measures_writed);
-		printf("Mesures a ecrire : %d\n", get_measures_to_write(music_data, tv_tmp));
-		if (get_measures_to_write(music_data, tv_tmp))
-		{
-			//call midi write measure
-			midi_write_measure(&server_data, &music_data, get_measures_to_write(music_data, tv_tmp));
-			music_data.measures_writed += get_measures_to_write(music_data, tv_tmp);
-		}
-
-		usleep(500000);
 	}
 
+	for (;;)
+	{
+	//	regarder dans le dossier des inputs Json
+	//	Si il y a des fichiers qui correspondent a ceux des datas
+		// {
+		//		Parser le Json
+		//		Si Fichier midi pas encore cree 
+				// {
+					// Creer un nouveau fichier Midi
+				// }
+				// Tant que le json est pas fini
+				// {
+					// Creer nouveau fichier midi si il existe pas encore 
+					// faire des mesures 
+					// {
+						// Creer en fonction des donnees du json + trucs dans la struct
+					// }
+					
+					// Si c'est la fin du midi (defini dans un poich), save, en ouvrir un nouveau
+				// }
+				//detruire le json
+		// }
+	}
+
+
+	// Signaux -> 
+	// Fini le midi, (lui donne un nom avec date debut/fin)
+	// Note dans les LOGS le temps d'arret midi et log
+	// Free
+	// exit
+
+
+
+
+
+	// midi_write_measure(&server_data, &music_data, get_measures_to_write(music_data, tv_tmp));
 	midi_write_end(&music_data);
-	close(server_data.sockfd);
-
-	// tcp_connection(&server_data);
-
-	// midi_test(argc == 2 ? argv[1] : "output.mid");
 }
