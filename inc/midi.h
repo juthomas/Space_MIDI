@@ -35,14 +35,15 @@ int JSON_cmp(const char *json, jsmntok_t *tok, const char *s);
 # define phaser 0x5F
 
 typedef struct		s_sensors
-{
-	uint32_t		date;
-	uint32_t		time;
-	float			photodiode;
-	float			temperature;
-	float			comsumption;
-	float			position;
-	float			orgue;
+{	
+	uint32_t			date;
+	uint32_t			time;
+	float				photodiode;
+	float				temperature;
+	float				comsumption;
+	float				position;
+	float				orgue;
+	struct s_sensors	*next;
 }					t_sensors;
 
 

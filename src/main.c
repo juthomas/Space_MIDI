@@ -86,6 +86,26 @@ void terminate_session(int signal, void *ptr)
 {
 }
 
+
+uint8_t	date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *time)
+{
+	uint32_t DD = 0;
+	uint32_t MM = 0;
+	uint32_t YY = 0;
+	uint32_t HH = 0;
+	uint32_t mm = 0;
+	uint32_t SS = 0;
+	uint32_t ret = 0;
+
+	if (sscanf(date_time, "%d/%d/%d %d:%d:%d", &YY, &MM, &DD, &HH, &mm, &SS) != 6) 
+	{
+		return (0);
+	}
+	*date = YY * 10000 + MM * 100 + DD;
+	*time = HH * 10000 + mm * 100 + SS;
+	return (1);
+}
+
 //probably replaced by a simple strcmp
 int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
 {
@@ -112,6 +132,36 @@ int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
 	printf("Time : %d/%d/%d %d:%d:%d\n", DD, MM, YY, HH, mm, SS);
 }
 
+void print_sensors_data(t_sensors *sensors_data)
+{
+	t_sensors *sensors_tmp;
+
+	sensors_tmp = sensors_data;
+
+	printf("Struct print :\n");
+	while(sensors_tmp)
+	{
+		printf("photodiode : %f\n", sensors_tmp->photodiode);
+		printf("temperature : %f\n", sensors_tmp->temperature);
+		printf("comsumption : %f\n", sensors_tmp->comsumption);
+		printf("position : %f\n", sensors_tmp->position);
+		printf("orgue : %f\n", sensors_tmp->orgue);
+		sensors_tmp = sensors_tmp->next;
+	}
+}
+
+void	clear_sensors_data(t_sensors *sensors_data)
+{
+	t_sensors	*sensors_tmp;
+
+	while (sensors_data)
+	{
+		sensors_tmp = sensors_data->next;
+		free(sensors_data);
+		sensors_data = sensors_tmp;
+	}
+}
+
 void json_deserialize(uint32_t file_length, char *file_content)
 {
 	jsmn_parser p;
@@ -136,27 +186,78 @@ void json_deserialize(uint32_t file_length, char *file_content)
 	}
 	uint32_t	nu_of_measures = 0;
 	uint32_t	obj_size;
+
+	t_sensors	*sensors_data;
+	t_sensors	*current_sensors;
+
+	current_sensors = (t_sensors*)malloc(sizeof(t_sensors));
+	sensors_data = current_sensors;
+
+	printf("main addr : %p\n", sensors_data);
 	for (i = 1; i < r; i++)
 	{
-		// printf("type maillon %d : %d, taille : %d\n", i, t[i].type, t[i].size);
-		// printf("%.*s\n", t[i].end - t[i].start,
-			//    file_content + t[i].start);
 		if (t[i].type == JSMN_OBJECT && t[i].size == 6)
 		{
+			printf("\n");
+			printf("addr :%p\n", current_sensors);
 			obj_size = t[i].size;
 			i++;
 			if (JSON_cmp(file_content, &t[i], "Time") == 0)
 			{
 				printf("- Time: %.*s\n", t[i + 1].end - t[i + 1].start,
 					file_content + t[i + 1].start);
+				i += 2;
 			}
-
-
-
+			if (JSON_cmp(file_content, &t[i], "Photodiode") == 0)
+			{
+				printf("- Photodiode: %.*s\n", t[i + 1].end - t[i + 1].start,
+					file_content + t[i + 1].start);
+				current_sensors->photodiode = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature") == 0)
+			{
+				printf("- Temperature: %.*s\n", t[i + 1].end - t[i + 1].start,
+					file_content + t[i + 1].start);
+				current_sensors->temperature = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Consumption") == 0)
+			{
+				printf("- Consumption: %.*s\n", t[i + 1].end - t[i + 1].start,
+					file_content + t[i + 1].start);
+				current_sensors->comsumption = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Position") == 0)
+			{
+				printf("- Position: %.*s\n", t[i + 1].end - t[i + 1].start,
+					file_content + t[i + 1].start);
+				current_sensors->position = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Orgue") == 0)
+			{
+				printf("- Orgue: %.*s\n", t[i + 1].end - t[i + 1].start,
+					file_content + t[i + 1].start);
+				current_sensors->orgue = atof(file_content + t[i + 1].start);
+				i += 1;
+			}
+			if (i + 12 < r)
+			{
+				(current_sensors->next) = (t_sensors*)malloc(sizeof(t_sensors));
+				current_sensors = current_sensors->next;
+			}
+			else
+			{
+				current_sensors->next = NULL;
+			}
 		}
-		
 	}
+	printf("main addr : %p\n", sensors_data);
 	printf("Number of measures : %d\n", nu_of_measures);
+	print_sensors_data(sensors_data);
+	clear_sensors_data(sensors_data);
 }
 
 int main(int argc, char **argv)
