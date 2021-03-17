@@ -34,6 +34,17 @@ int JSON_cmp(const char *json, jsmntok_t *tok, const char *s);
 # define chorus 0x5D
 # define phaser 0x5F
 
+typedef struct		s_sensors
+{
+	uint32_t		date;
+	uint32_t		time;
+	float			photodiode;
+	float			temperature;
+	float			comsumption;
+	float			position;
+	float			orgue;
+}					t_sensors;
+
 
 typedef struct		s_music_data
 {
