@@ -101,52 +101,23 @@ int8_t	cmp_filename(struct dirent* file1, struct dirent* file2)
 	char* name1tmp = file1->d_name;
 
 	printf("Name = %s\n", name1tmp);
-	uint32_t DD = strtol(name1tmp, &name1tmp, 10);
-	if (*name1tmp == '_')
-	{
-		name1tmp++;
-	}
-	else
-	{
-		return (-1);
-	}
-	uint32_t MM = strtol(name1tmp, &name1tmp, 10);
-	if (*name1tmp == '_')
-	{
-		name1tmp++;
-	}
-	else
-	{
-		return (-1);
-	}
-	uint32_t YY = strtol(name1tmp, &name1tmp, 10);
-	if (*name1tmp == '_' && *(name1tmp + 1) == '_')
-	{
-		(name1tmp)+=2;
-	}
-	else
-	{
-		return (-1);
-	}
-	uint32_t HH = strtol(name1tmp, &name1tmp, 10);
-	if (*name1tmp == '_')
-	{
-		name1tmp++;
-	}
-	else
-	{
-		return (-1);
-	}
-	uint32_t mm = strtol(name1tmp, &name1tmp, 10);
-	if (*name1tmp == '_')
-	{
-		name1tmp++;
-	}
-	else
-	{
-		return (-1);
-	}
-	uint32_t SS = strtol(name1tmp, &name1tmp, 10);
+	uint32_t DD = 0;
+
+	uint32_t MM = 0;
+
+	uint32_t YY = 0;
+
+	uint32_t HH = 0;
+
+	uint32_t mm = 0;
+
+	uint32_t SS = 0;
+
+	uint32_t ret = 0;
+
+	ret = sscanf(name1tmp, "%d_%d_%d__%d_%d_%d.json", &YY, &MM, &DD, &HH, &mm, &SS);
+	
+	printf("ret : %d\n", ret);
 	printf("Time : %d/%d/%d %d:%d:%d\n", DD, MM, YY, HH, mm, SS);
 
 }
@@ -161,6 +132,7 @@ int main(int argc, char **argv)
 	};
 	midi_setup_file("Test.midi", &music_data);
 
+	FILE *file_ptr;
 	DIR* rep = NULL;
 	struct dirent* currentFile = NULL;
 	struct dirent* tmpFile = NULL;
@@ -173,10 +145,24 @@ int main(int argc, char **argv)
 	while ((currentFile = readdir(rep)) != NULL)
 	{
 		printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
+		// sscanf("")
+		
 		cmp_filename(currentFile, NULL);
 
 	}
 
+
+	char file_content[1000];
+	if (!(file_ptr = fopen("./data_files/2021_03_09__23_13_24.json", "r")) )
+	{
+		printf("Error while creating file\n");
+		exit(-1);
+	}
+	printf("Hello world bis\n");
+	fgets(file_content, 1000, file_ptr);
+	printf("File content : %s\n", file_content);
+	printf("End of content\n");
+	fclose(file_ptr);
 	for (;;)
 	{
 	//	regarder dans le dossier des inputs Json

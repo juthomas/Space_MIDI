@@ -17,6 +17,7 @@ OBJ_DIR = obj
 SRC_DIR = src
 
 # Add dirs here
+JSON_DIR = json
 MIDI_DIR = midi
 TCP_DIR = tcp
 
@@ -32,7 +33,9 @@ CC = clang $(FLAGS) $(INC)
 
 ## List of Headers and C files 
 
-INC_H = midi midi_notes
+INC_H = midi midi_notes json_parser
+
+JSON_FT = json_utilities
 
 MIDI_FT = midi_utilities
 
@@ -44,12 +47,14 @@ SRC_FT = main
 ## List of Utilities
 
 SRC = $(SRC_FT:%=$(SRC_DIR)/%.c) \
+	$(JSON_FT:%=$(SRC_DIR)/$(JSON_DIR)/%.c) \
 	$(MIDI_FT:%=$(SRC_DIR)/$(MIDI_DIR)/%.c) \
 	$(TCP_FT:%=$(SRC_DIR)/$(TCP_DIR)/%.c)
 
 OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 OBJ_DIRS = $(OBJ_DIR) \
+	$(JSON_DIR:%=$(OBJ_DIR)/%) \
 	$(MIDI_DIR:%=$(OBJ_DIR)/%) \
 	$(TCP_DIR:%=$(OBJ_DIR)/%)
 

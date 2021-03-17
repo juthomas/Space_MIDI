@@ -17,8 +17,13 @@
 # include <unistd.h>
 # define PORT 3001 
 
-// TCP
 
+// JSON
+#include "./json_parser.h"
+int JSON_cmp(const char *json, jsmntok_t *tok, const char *s);
+
+
+// MIDI
 # include "./midi_notes.h"
 # define QUARTER 128 //noire
 # define ON  0x90
