@@ -141,6 +141,7 @@ void print_sensors_data(t_sensors *sensors_data)
 	printf("Struct print :\n");
 	while(sensors_tmp)
 	{
+		printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
 		printf("photodiode : %f\n", sensors_tmp->photodiode);
 		printf("temperature : %f\n", sensors_tmp->temperature);
 		printf("comsumption : %f\n", sensors_tmp->comsumption);
@@ -206,6 +207,8 @@ void json_deserialize(uint32_t file_length, char *file_content)
 			{
 				printf("- Time: %.*s\n", t[i + 1].end - t[i + 1].start,
 					file_content + t[i + 1].start);
+				date_time_to_date_and_time(file_content + t[i + 1].start,
+					&current_sensors->date, &current_sensors->time);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode") == 0)
@@ -288,9 +291,9 @@ int main(int argc, char **argv)
 	}
 
 	char *file_content;
-	if (!(file_ptr = fopen("./data_files/2021_03_09__23_13_24.json", "r")))
+	if (!(file_ptr = fopen("./data_files/2021_03_19__00_08_58.json", "r")))
 	{
-		printf("Error while creating file\n");
+		printf("Error while opening file\n");
 		exit(-1);
 	}
 	printf("Hello world bis\n");
