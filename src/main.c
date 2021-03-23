@@ -86,8 +86,7 @@ void terminate_session(int signal, void *ptr)
 {
 }
 
-
-uint8_t	date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *time)
+uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *time)
 {
 	uint32_t DD = 0;
 	uint32_t MM = 0;
@@ -97,7 +96,7 @@ uint8_t	date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
 	uint32_t SS = 0;
 	uint32_t ret = 0;
 
-	if (sscanf(date_time, "%d/%d/%d %d:%d:%d", &YY, &MM, &DD, &HH, &mm, &SS) != 6) 
+	if (sscanf(date_time, "%d/%d/%d %d:%d:%d", &YY, &MM, &DD, &HH, &mm, &SS) != 6)
 	{
 		return (0);
 	}
@@ -130,6 +129,7 @@ int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
 
 	printf("ret : %d\n", ret);
 	printf("Time : %d/%d/%d %d:%d:%d\n", DD, MM, YY, HH, mm, SS);
+	return (ret == 6);
 }
 
 void print_sensors_data(t_sensors *sensors_data)
@@ -139,7 +139,7 @@ void print_sensors_data(t_sensors *sensors_data)
 	sensors_tmp = sensors_data;
 
 	printf("Struct print :\n");
-	while(sensors_tmp)
+	while (sensors_tmp)
 	{
 		printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
 		printf("photodiode : %f\n", sensors_tmp->photodiode);
@@ -151,9 +151,9 @@ void print_sensors_data(t_sensors *sensors_data)
 	}
 }
 
-void	clear_sensors_data(t_sensors *sensors_data)
+void clear_sensors_data(t_sensors *sensors_data)
 {
-	t_sensors	*sensors_tmp;
+	t_sensors *sensors_tmp;
 
 	while (sensors_data)
 	{
@@ -185,13 +185,13 @@ void json_deserialize(uint32_t file_length, char *file_content)
 		printf("Object expected\n");
 		return;
 	}
-	uint32_t	nu_of_measures = 0;
-	uint32_t	obj_size;
+	uint32_t nu_of_measures = 0;
+	uint32_t obj_size;
 
-	t_sensors	*sensors_data;
-	t_sensors	*current_sensors;
+	t_sensors *sensors_data;
+	t_sensors *current_sensors;
 
-	current_sensors = (t_sensors*)malloc(sizeof(t_sensors));
+	current_sensors = (t_sensors *)malloc(sizeof(t_sensors));
 	sensors_data = current_sensors;
 
 	printf("main addr : %p\n", sensors_data);
@@ -206,49 +206,49 @@ void json_deserialize(uint32_t file_length, char *file_content)
 			if (JSON_cmp(file_content, &t[i], "Time") == 0)
 			{
 				printf("- Time: %.*s\n", t[i + 1].end - t[i + 1].start,
-					file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				date_time_to_date_and_time(file_content + t[i + 1].start,
-					&current_sensors->date, &current_sensors->time);
+										   &current_sensors->date, &current_sensors->time);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode") == 0)
 			{
 				printf("- Photodiode: %.*s\n", t[i + 1].end - t[i + 1].start,
-					file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				current_sensors->photodiode = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature") == 0)
 			{
 				printf("- Temperature: %.*s\n", t[i + 1].end - t[i + 1].start,
-					file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				current_sensors->temperature = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Consumption") == 0)
 			{
 				printf("- Consumption: %.*s\n", t[i + 1].end - t[i + 1].start,
-					file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				current_sensors->comsumption = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Position") == 0)
 			{
 				printf("- Position: %.*s\n", t[i + 1].end - t[i + 1].start,
-					file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				current_sensors->position = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Orgue") == 0)
 			{
 				printf("- Orgue: %.*s\n", t[i + 1].end - t[i + 1].start,
-					file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				current_sensors->orgue = atof(file_content + t[i + 1].start);
 				i += 1;
 			}
 			if (i + 12 < r)
 			{
-				(current_sensors->next) = (t_sensors*)malloc(sizeof(t_sensors));
+				(current_sensors->next) = (t_sensors *)malloc(sizeof(t_sensors));
 				current_sensors = current_sensors->next;
 			}
 			else
@@ -263,8 +263,41 @@ void json_deserialize(uint32_t file_length, char *file_content)
 	clear_sensors_data(sensors_data);
 }
 
+int get_first_data_file_in_directory(char *directory, char *file_path)
+{
+	DIR *rep = NULL;
+	struct dirent *currentFile = NULL;
+
+	rep = opendir(directory);
+	if (rep == NULL) /* Si le dossier n'a pas pu être ouvert */
+	{
+		printf("Exit failure (Directory Error) : %s\n", directory);
+		exit(1);
+	}
+	strcpy(file_path, "");
+	printf("¦¦¦Blank string : %s\n", file_path);
+	while ((currentFile = readdir(rep)) != NULL)
+	{
+		printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
+		if (cmp_filename(currentFile, NULL))
+		{
+			printf("--This is a data file\n");
+			file_path = strcat(strcat(strcpy(file_path, directory), "/"), currentFile->d_name);
+			printf("--This is the Path : %s\n", file_path);
+			return (1);
+			break;
+		}
+		else
+		{
+			printf("--This is not a data file\n");
+		}
+	}
+	return (0);
+}
+
 int main(int argc, char **argv)
 {
+	char *filesDirectory = "./data_files";
 	signal(SIGTERM, (void (*)(int))terminate_session);
 	t_music_data music_data = {.partition_duration = 40000000,
 							   .measure_value = 500000 * 4 * 2,
@@ -276,7 +309,13 @@ int main(int argc, char **argv)
 	DIR *rep = NULL;
 	struct dirent *currentFile = NULL;
 	struct dirent *tmpFile = NULL;
-	rep = opendir("./data_files");
+
+	char *currentDataFileName;
+
+	currentDataFileName = (char *)malloc(sizeof(char) * 200);
+
+	// rep = opendir("./data_files");
+	rep = opendir(filesDirectory);
 	if (rep == NULL) /* Si le dossier n'a pas pu être ouvert */
 	{
 		exit(1);
@@ -287,7 +326,14 @@ int main(int argc, char **argv)
 		printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
 		// sscanf("")
 
-		cmp_filename(currentFile, NULL);
+		if (cmp_filename(currentFile, NULL))
+		{
+			printf("--This is a data file\n");
+		}
+		else
+		{
+			printf("--This is not a data file\n");
+		}
 	}
 
 	char *file_content;
@@ -309,9 +355,44 @@ int main(int argc, char **argv)
 	printf("End of content\n");
 	json_deserialize(file_length, file_content);
 	fclose(file_ptr);
-	for (;;)
+	for (int index = 0; index < 1; index++)
 	{
 		//	regarder dans le dossier des inputs Json
+							// rep = opendir(filesDirectory);
+							// if (rep == NULL) /* Si le dossier n'a pas pu être ouvert */
+							// {
+							// 	exit(1);
+							// }
+							// strcpy(currentDataFileName, "");
+							// printf("¦¦¦Blank string : %s\n", currentDataFileName);
+							// while ((currentFile = readdir(rep)) != NULL)
+							// {
+							// 	printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
+							// 	if (cmp_filename(currentFile, NULL))
+							// 	{
+							// 		printf("--This is a data file\n");
+							// 		currentDataFileName = strcat(strcat(strcpy(currentDataFileName, filesDirectory), "/"), currentFile->d_name);
+							// 		printf("--This is the Path : %s\n", currentDataFileName);
+							// 		break;
+							// 	}
+							// 	else
+							// 	{
+							// 		printf("--This is not a data file\n");
+							// 	}
+							// }
+		if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
+		{
+			printf("__Fichier trouvé : %s\n", currentDataFileName);
+			if (!remove(currentDataFileName))
+			{
+				printf("Error while deleting file\n");
+			}
+			else
+			{
+				printf("File succefully deleted\n");
+			}
+		}
+
 		//	Si il y a des fichiers qui correspondent a ceux des datas
 		// {
 		//		Parser le Json
@@ -341,4 +422,5 @@ int main(int argc, char **argv)
 
 	// midi_write_measure(&server_data, &music_data, get_measures_to_write(music_data, tv_tmp));
 	midi_write_end(&music_data);
+	return (0);
 }
