@@ -267,31 +267,36 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 {
 	DIR *rep = NULL;
 	struct dirent *currentFile = NULL;
+	struct dirent **namelist;
+	int numberOfFiles;
 
-	rep = opendir(directory);
-	if (rep == NULL) /* Si le dossier n'a pas pu être ouvert */
+	numberOfFiles = scandir(directory, &namelist, 0, alphasort);
+	if (numberOfFiles < 0)
 	{
-		printf("Exit failure (Directory Error) : %s\n", directory);
-		exit(1);
+		printf("Error scandir\n");
 	}
-	strcpy(file_path, "");
-	printf("¦¦¦Blank string : %s\n", file_path);
-	while ((currentFile = readdir(rep)) != NULL)
+	else
 	{
-		printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
-		if (cmp_filename(currentFile, NULL))
+		for (int currentIndex = 0; currentIndex < numberOfFiles; currentIndex++)
 		{
-			printf("--This is a data file\n");
-			file_path = strcat(strcat(strcpy(file_path, directory), "/"), currentFile->d_name);
-			printf("--This is the Path : %s\n", file_path);
-			return (1);
-			break;
-		}
-		else
-		{
-			printf("--This is not a data file\n");
+			printf("Le fichier lu s'appelle '%s'\n", namelist[currentIndex]->d_name);
+			if (cmp_filename(namelist[currentIndex], NULL))
+			{
+				printf("--This is a data file\n");
+				file_path = strcat(strcat(strcpy(file_path, directory), "/"), namelist[currentIndex]->d_name);
+				printf("--This is the Path : %s\n", file_path);
+				return (1);
+				break;
+			}
+			else
+			{
+				printf("--This is not a data file\n");
+			}
 		}
 	}
+	// need to :
+	// free(namelist[n]);
+	// free(namelist);
 	return (0);
 }
 
