@@ -336,54 +336,47 @@ int main(int argc, char **argv)
 		}
 	}
 
-	char *file_content;
-	if (!(file_ptr = fopen("./data_files/2021_03_19__00_08_58.json", "r")))
-	{
-		printf("Error while opening file\n");
-		exit(-1);
-	}
-	printf("Hello world bis\n");
-	uint32_t file_length;
-	fseek(file_ptr, 0, SEEK_END);
-	file_length = ftell(file_ptr);
-	fseek(file_ptr, 0, SEEK_SET);
-	file_content = malloc(file_length);
-	fread(file_content, 1, file_length, file_ptr);
+	// char *file_content;
+	// if (!(file_ptr = fopen("./data_files/2021_03_19__00_08_58.json", "r")))
+	// {
+	// 	printf("Error while opening file\n");
+	// 	exit(-1);
+	// }
+	// printf("Hello world bis\n");
+	// uint32_t file_length;
+	// fseek(file_ptr, 0, SEEK_END);
+	// file_length = ftell(file_ptr);
+	// fseek(file_ptr, 0, SEEK_SET);
+	// file_content = malloc(file_length);
+	// fread(file_content, 1, file_length, file_ptr);
 
-	// fgets(file_content, 1000, file_ptr);
-	printf("File content : %s\n", file_content);
-	printf("End of content\n");
-	json_deserialize(file_length, file_content);
-	fclose(file_ptr);
+	// // fgets(file_content, 1000, file_ptr);
+	// printf("File content : %s\n", file_content);
+	// printf("End of content\n");
+	// json_deserialize(file_length, file_content);
+	// fclose(file_ptr);
 	for (int index = 0; index < 1; index++)
 	{
 		//	regarder dans le dossier des inputs Json
-							// rep = opendir(filesDirectory);
-							// if (rep == NULL) /* Si le dossier n'a pas pu être ouvert */
-							// {
-							// 	exit(1);
-							// }
-							// strcpy(currentDataFileName, "");
-							// printf("¦¦¦Blank string : %s\n", currentDataFileName);
-							// while ((currentFile = readdir(rep)) != NULL)
-							// {
-							// 	printf("Le fichier lu s'appelle '%s'\n", currentFile->d_name);
-							// 	if (cmp_filename(currentFile, NULL))
-							// 	{
-							// 		printf("--This is a data file\n");
-							// 		currentDataFileName = strcat(strcat(strcpy(currentDataFileName, filesDirectory), "/"), currentFile->d_name);
-							// 		printf("--This is the Path : %s\n", currentDataFileName);
-							// 		break;
-							// 	}
-							// 	else
-							// 	{
-							// 		printf("--This is not a data file\n");
-							// 	}
-							// }
 		if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
 		{
 			printf("__Fichier trouvé : %s\n", currentDataFileName);
-			if (!remove(currentDataFileName))
+			//deserialize lá
+			if (!(file_ptr = fopen(currentDataFileName, "r")))
+			{
+				printf("Error while opening file\n");
+				exit(-1);
+			}
+			char *file_content;
+			uint32_t file_length;
+			fseek(file_ptr, 0, SEEK_END);
+			file_length = ftell(file_ptr);
+			fseek(file_ptr, 0, SEEK_SET);
+			file_content = malloc(file_length);
+			fread(file_content, 1, file_length, file_ptr);
+			json_deserialize(file_length, file_content);
+			fclose(file_ptr);
+			if (remove(currentDataFileName))
 			{
 				printf("Error while deleting file\n");
 			}
@@ -391,6 +384,10 @@ int main(int argc, char **argv)
 			{
 				printf("File succefully deleted\n");
 			}
+		}
+		else
+		{
+			printf("Pas de fichiers trouvés\n");
 		}
 
 		//	Si il y a des fichiers qui correspondent a ceux des datas
