@@ -17,7 +17,7 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
 }
 
-void midi_write_measure(t_music_data *music_data,
+void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data, 
 						uint32_t measures_to_write)
 {
 	// T = 1/4
@@ -374,10 +374,12 @@ int main(int argc, char **argv)
 
 	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
-	for (int index = 0; index < 1; index++)
+	for (int index = 0; index < 4; index++)
 	{
-		//	regarder dans le dossier des inputs Json
-		if (!sensorsData)
+		// Si on a fini les datas actuelles,
+		// regarder dans le dossier des inputs Json si il y en a des nouvelles
+		// si oui, on les parse
+		if (!sensorsData || !sensorsData->next)
 		{
 			if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
 			{
@@ -392,7 +394,17 @@ int main(int argc, char **argv)
 				}
 				// printf("File length : %d\n", file_length);
 				// printf("File content : %s\n", file_content);
-				sensorsData = json_deserialize(file_length, file_content);
+				
+				if (!sensorsData)
+				{
+					sensorsData = json_deserialize(file_length, file_content);
+				}
+				else
+				{
+					//verifier si ca c'est legit
+					sensorsData->next = json_deserialize(file_length, file_content);
+				}
+				
 				print_sensors_data(sensorsData);
 
 				// fclose(file_ptr);
@@ -408,31 +420,52 @@ int main(int argc, char **argv)
 			else
 			{
 				printf("Pas de fichiers trouvés\n");
+				sleep(5);
 			}
 		}
+		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
 		if (!music_data.midi_file)
 		{
-
+			//Crash ici
+			create_dated_midi_file(&music_data, outputDirectory);
+			music_data.measures_writed = 0;
+			music_data.data_time = 0;
 		}
-		//	Si il y a des fichiers qui correspondent a ceux des datas
-		// {
-		//		Parser le Json
-		//		Si Fichier midi pas encore cree
-		// {
-		// Creer un nouveau fichier Midi
-		// }
-		// Tant que le json est pas fini
-		// {
-		// Creer nouveau fichier midi si il existe pas encore
-		// faire des mesures
-		// {
-		// Creer en fonction des donnees du json + trucs dans la struct
-		// }
-
-		// Si c'est la fin du midi (defini dans un poich), save, en ouvrir un nouveau
-		// }
-		//detruire le json
-		// }
+		// Tant que les datas ne sont pas finies et qu'il reste 
+		// des mesures á ecrire dans le fichier midi, on ecrit les
+		// datas dans le fichier midi
+		while (music_data.midi_file && sensorsData)
+		{
+			if (music_data.data_time == 0)
+			{
+				music_data.data_time = sensorsData->time;// * 1000000;
+				music_data.entry_data_time = sensorsData->time;
+			}
+			midi_write_measure(&music_data, sensorsData, 0);
+			music_data.measures_writed++;
+			music_data.data_time += music_data.measure_value / 1000000;
+			
+			if (music_data.measure_value * music_data.measures_writed
+				>= music_data.partition_duration)
+			{
+				midi_write_end(&music_data);
+			}
+			if (!sensorsData->next)
+			{
+				break;
+				// go aller rechercher des données (et pas passer au next)
+			}
+			// if (music_data.data_time > sensorsData->next->time)//while
+			while (sensorsData->next && music_data.data_time > sensorsData->next->time)//while
+			{
+				t_sensors *sensors_tmp;
+				sensors_tmp = sensorsData->next;
+				free(sensorsData);
+				sensorsData = sensors_tmp;
+				// free(sensorsData);
+				// sensorsData = sensorsData->next;
+			}
+		}
 	}
 
 	// Signaux ->
@@ -442,8 +475,11 @@ int main(int argc, char **argv)
 	// exit
 
 	// midi_write_measure(&server_data, &music_data, get_measures_to_write(music_data, tv_tmp));
-	midi_write_end(&music_data);
-	for(;;);
+	if (music_data.midi_file)
+	{
+		midi_write_end(&music_data);
+	}
+	// for(;;);
 
 	return (0);
 }

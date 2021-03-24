@@ -55,8 +55,11 @@ typedef struct		s_music_data
 	uint32_t		partition_duration;
 	uint32_t		measure_value;
 	uint32_t		measures_writed;
-	struct timeval	last_measure;
-	struct timeval	entry_time;
+	uint32_t		data_time;
+
+	uint32_t		entry_data_time;
+	struct timeval	last_measure;//
+	struct timeval	entry_time;//
 	
 }					t_music_data;
 
