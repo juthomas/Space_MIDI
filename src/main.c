@@ -45,42 +45,70 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data,
 
 	printf("\n\n");
 
-	// T = 1/4
-	//Code part
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 1/4                       ||
+//  ||                                                    ||
 	midi_write_measure_note(music_data, ON, 1, A3, 64);
+//  ||                                                    ||
+//  ||                      T = 1/4                       ||
+//  ||                                                    ||
+//    ====================================================
 
-	//Code part
 	midi_delay_quarter(music_data);
-	// T = 2/4
 	
-	//Code part
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 2/4                       ||
+//  ||                                                    ||
 	midi_write_measure_note(music_data, OFF, 1, A3, 0);
 
 	midi_write_measure_note(music_data, ON, 1,
 							(sensors_data->photodiode - 40) * 3 + 50 , 64);
+//  ||                                                    ||
+//  ||                      T = 2/4                       ||
+//  ||                                                    ||
+//    ====================================================
 
-	//Code part
 	midi_delay_quarter(music_data);
-	// T = 3/4
-	//Code part
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 3/4                       ||
+//  ||                                                    ||
 	midi_write_measure_note(music_data, OFF, 1, (sensors_data->photodiode - 40) * 3 + 50, 0);
 	midi_write_measure_note(music_data, ON, 1,
 							(sensors_data->temperature - 40) * 3 + 50, 64);
-	//Code part
+//  ||                                                    ||
+//  ||                      T = 3/4                       ||
+//  ||                                                    ||
+//    ====================================================
+
 	midi_delay_quarter(music_data);
-	// T = 4/4
-	//Code part
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 4/4                       ||
+//  ||                                                    ||
 	midi_write_measure_note(music_data, OFF, 1, (sensors_data->temperature - 40) * 3 + 50, 0);
 	midi_write_measure_note(music_data, ON, 1,
 							(sensors_data->comsumption - 40) * 3 + 50, 64);
-	//Code part
-	// T = end
+//  ||                                                    ||
+//  ||                      T = 4/4                       ||
+//  ||                                                    ||
+//    ====================================================
 
-	//Code part
 	midi_delay_quarter(music_data);
-
+	
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = END                       ||
+//  ||                                                    ||
 	midi_write_measure_note(music_data, OFF, 1, (sensors_data->comsumption - 40) * 3 + 50, 0);
-
+//  ||                                                    ||
+//  ||                      T = END                       ||
+//  ||                                                    ||
+//    ====================================================
 }
 
 void midi_write_end(t_music_data *music_data)
