@@ -17,62 +17,70 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
 }
 
+void midi_delay_quarter(t_music_data *music_data)
+{
+	MIDI_delta_time(music_data->midi_file, 0);
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
+
+	MIDI_delta_time(music_data->midi_file, QUARTER);
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
+}
+
+void midi_end_measure(t_music_data *music_data)
+{
+
+}
+
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data, 
 						uint32_t measures_to_write)
 {
+	printf("In midi Sensors data : \n");
+	printf("date : %d Time : %d\n", sensors_data->date, sensors_data->time);
+	printf("Music Time : %d\n", music_data->data_time);
+	printf("photodiode : %f\n", sensors_data->photodiode);
+	printf("temperature : %f\n", sensors_data->temperature);
+	printf("comsumption : %f\n", sensors_data->comsumption);
+	printf("position : %f\n", sensors_data->position);
+	printf("orgue : %f\n", sensors_data->orgue);
+
+	printf("\n\n");
+
 	// T = 1/4
 	//Code part
 	midi_write_measure_note(music_data, ON, 1, A3, 64);
 
 	//Code part
-	MIDI_delta_time(music_data->midi_file, 0);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
-
+	midi_delay_quarter(music_data);
 	// T = 2/4
-	MIDI_delta_time(music_data->midi_file, QUARTER);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
+	
 	//Code part
 	midi_write_measure_note(music_data, OFF, 1, A3, 0);
 
 	midi_write_measure_note(music_data, ON, 1,
-							A0, 128);
+							(sensors_data->photodiode - 40) * 3 + 50 , 64);
 
 	//Code part
-	MIDI_delta_time(music_data->midi_file, 0);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
-
+	midi_delay_quarter(music_data);
 	// T = 3/4
-
-	MIDI_delta_time(music_data->midi_file, QUARTER);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 	//Code part
-
-	midi_write_measure_note(music_data, OFF, 1, A0, 0);
-
+	midi_write_measure_note(music_data, OFF, 1, (sensors_data->photodiode - 40) * 3 + 50, 0);
 	midi_write_measure_note(music_data, ON, 1,
-							A0, 128);
-
+							(sensors_data->temperature - 40) * 3 + 50, 64);
 	//Code part
-	MIDI_delta_time(music_data->midi_file, 0);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
-
+	midi_delay_quarter(music_data);
 	// T = 4/4
-	MIDI_delta_time(music_data->midi_file, QUARTER);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 	//Code part
-	midi_write_measure_note(music_data, OFF, 1, A0, 0);
-
+	midi_write_measure_note(music_data, OFF, 1, (sensors_data->temperature - 40) * 3 + 50, 0);
+	midi_write_measure_note(music_data, ON, 1,
+							(sensors_data->comsumption - 40) * 3 + 50, 64);
 	//Code part
-	MIDI_delta_time(music_data->midi_file, 0);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
-
 	// T = end
-	MIDI_delta_time(music_data->midi_file, QUARTER);
-	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
-	// MIDI_delta_time(music_data->midi_file, 0) ;
-	// MIDI_Note(music_data->midi_file, OFF, 1, 10, 0) ;
 
-	// MIDI_Note(music_data->midi_file, OFF, 1, C3, 0) ;
+	//Code part
+	midi_delay_quarter(music_data);
+
+	midi_write_measure_note(music_data, OFF, 1, (sensors_data->comsumption - 40) * 3 + 50, 0);
+
 }
 
 void midi_write_end(t_music_data *music_data)
@@ -376,9 +384,6 @@ int main(int argc, char **argv)
 
 	for (int index = 0; index < 4; index++)
 	{
-		// Si on a fini les datas actuelles,
-		// regarder dans le dossier des inputs Json si il y en a des nouvelles
-		// si oui, on les parse
 		if (!sensorsData || !sensorsData->next)
 		{
 			if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
@@ -444,18 +449,30 @@ int main(int argc, char **argv)
 			midi_write_measure(&music_data, sensorsData, 0);
 			music_data.measures_writed++;
 			music_data.data_time += music_data.measure_value / 1000000;
-			
+			if (!sensorsData->next)
+			{
+				printf("***Pas de data next\n");
+			}
+			else
+			{
+				printf("***Next time : %d\n", sensorsData->next->time);
+				printf("***Music time : %d\n", music_data.data_time);
+			}
+
+
 			if (music_data.measure_value * music_data.measures_writed
 				>= music_data.partition_duration)
 			{
 				midi_write_end(&music_data);
 			}
+			
 			if (!sensorsData->next)
 			{
 				break;
 				// go aller rechercher des données (et pas passer au next)
 			}
 			// if (music_data.data_time > sensorsData->next->time)//while
+
 			while (sensorsData->next && music_data.data_time > sensorsData->next->time)//while
 			{
 				t_sensors *sensors_tmp;
