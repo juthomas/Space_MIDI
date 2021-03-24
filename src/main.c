@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 					//verifier si ca c'est legit
 					sensorsData->next = json_deserialize(file_length, file_content);
 				}
-				
+				free(file_content);
 				print_sensors_data(sensorsData);
 
 				// fclose(file_ptr);
