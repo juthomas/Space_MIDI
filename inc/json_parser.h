@@ -101,6 +101,9 @@ JSMN_API void jsmn_init(jsmn_parser *parser);
 JSMN_API int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
 						jsmntok_t *tokens, const unsigned int num_tokens);
 
+int JSON_cmp(const char *json, jsmntok_t *tok, const char *s);
+
+
 #ifndef JSMN_HEADER
 /**
  * Allocates a fresh unused token from the token pool.
@@ -281,7 +284,6 @@ static int jsmn_parse_string(jsmn_parser *parser, const char *js,
 	parser->pos = start;
 	return JSMN_ERROR_PART;
 }
-
 
 
 #endif /* JSMN_HEADER */

@@ -1,4 +1,5 @@
 #include "../../inc/midi.h"
+#include "../../inc/json_parser.h"
 
 int JSON_cmp(const char *json, jsmntok_t *tok, const char *s)
 {

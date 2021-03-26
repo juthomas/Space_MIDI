@@ -1,4 +1,5 @@
 #include "../../inc/midi.h"
+#include "../../inc/midi_notes.h"
 
 /*
  * HOW TO BASICS :

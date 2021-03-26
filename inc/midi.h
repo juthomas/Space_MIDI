@@ -19,12 +19,11 @@
 
 
 // JSON
-#include "./json_parser.h"
-int JSON_cmp(const char *json, jsmntok_t *tok, const char *s);
+// #include "./json_parser.h"
 
 
 // MIDI
-# include "./midi_notes.h"
+// # include "./midi_notes.h"
 # define QUARTER 128 //noire
 # define ON  0x90
 # define OFF 0x80
@@ -62,6 +61,12 @@ typedef struct		s_music_data
 	struct timeval	entry_time;//
 	
 }					t_music_data;
+
+static t_music_data g_music_data = {.partition_duration = 800000000,
+							   .measure_value = 500000 * 4 * 2,
+							   .measures_writed = 0,
+							   // valeur d'une noire en us (pour le tempo)
+							   .quarter_value = 500000 };;
 
 // t_server_data		g_server_data;
 
