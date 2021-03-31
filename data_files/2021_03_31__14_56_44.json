@@ -1,0 +1,84 @@
+{
+	"Datas" : [
+		{
+			"Time" : "2021/03/31 14:56:35",
+			"Photodiode" : 41.230770,
+			"Temperature" : 41.076923,
+			"Consumption" : 43.076923,
+			"Position" : 42.461540,
+			"Orgue" : 40.307693
+		},
+		{
+			"Time" : "2021/03/31 14:56:36",
+			"Photodiode" : 43.384617,
+			"Temperature" : 42.153847,
+			"Consumption" : 40.615383,
+			"Position" : 40.615383,
+			"Orgue" : 40.615383
+		},
+		{
+			"Time" : "2021/03/31 14:56:37",
+			"Photodiode" : 43.692307,
+			"Temperature" : 40.923077,
+			"Consumption" : 40.923077,
+			"Position" : 42.461540,
+			"Orgue" : 41.230770
+		},
+		{
+			"Time" : "2021/03/31 14:56:38",
+			"Photodiode" : 42.692307,
+			"Temperature" : 40.000000,
+			"Consumption" : 40.307693,
+			"Position" : 42.769230,
+			"Orgue" : 41.846153
+		},
+		{
+			"Time" : "2021/03/31 14:56:39",
+			"Photodiode" : 40.000000,
+			"Temperature" : 41.846153,
+			"Consumption" : 42.769230,
+			"Position" : 42.461540,
+			"Orgue" : 40.307693
+		},
+		{
+			"Time" : "2021/03/31 14:56:40",
+			"Photodiode" : 43.692307,
+			"Temperature" : 41.230770,
+			"Consumption" : 43.692307,
+			"Position" : 41.846153,
+			"Orgue" : 42.461540
+		},
+		{
+			"Time" : "2021/03/31 14:56:41",
+			"Photodiode" : 43.384617,
+			"Temperature" : 40.307693,
+			"Consumption" : 43.692307,
+			"Position" : 43.384617,
+			"Orgue" : 43.153847
+		},
+		{
+			"Time" : "2021/03/31 14:56:42",
+			"Photodiode" : 43.153847,
+			"Temperature" : 40.000000,
+			"Consumption" : 42.153847,
+			"Position" : 42.769230,
+			"Orgue" : 41.538460
+		},
+		{
+			"Time" : "2021/03/31 14:56:43",
+			"Photodiode" : 42.461540,
+			"Temperature" : 41.538460,
+			"Consumption" : 40.615383,
+			"Position" : 41.846153,
+			"Orgue" : 40.000000
+		},
+		{
+			"Time" : "2021/03/31 14:56:44",
+			"Photodiode" : 40.000000,
+			"Temperature" : 42.769230,
+			"Consumption" : 43.076923,
+			"Position" : 42.461540,
+			"Orgue" : 43.692307
+		}
+	]
+}

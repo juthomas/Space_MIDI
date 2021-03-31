@@ -29,7 +29,9 @@ FLAGS = $(WARNINGS) $(FAST) $(DEBUG)# -D_REENTRANT
 
 INC = $(INC_DIR:%=-I./%)
 
-CC = clang $(FLAGS) $(INC)
+#CC = clang $(FLAGS) $(INC)
+CC = gcc $(FLAGS) $(INC)
+
 
 ## List of Headers and C files 
 

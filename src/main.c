@@ -1,6 +1,8 @@
 #include "../inc/midi.h"
 #include "../inc/json_parser.h"
 #include "../inc/midi_notes.h"
+//#include <time.h>
+//#include <signal.h>
 
 void midi_setup_file(char *filename, t_music_data *music_data)
 {
@@ -389,8 +391,8 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 
 int main(int argc, char **argv)
 {
-	char *filesDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/data_files";
-	char *outputDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/midi_files";
+	char *filesDirectory = "../Space_MIDI/data_files";
+	char *outputDirectory = "../Space_MIDI/midi_files";
 	signal(SIGTERM, (void (*)(int))terminate_session);
 	// 							//durée d'une partition 40 000 000us
 	// t_music_data music_data = {.partition_duration = 40000000,

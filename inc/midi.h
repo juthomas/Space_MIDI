@@ -5,6 +5,9 @@
 # include <stdbool.h>
 # include <sys/time.h>
 
+# include <time.h> //ADD raspbian
+# include <signal.h> //ADD raspbian
+
 // Folder, (ls)
 # include <dirent.h> 
 
