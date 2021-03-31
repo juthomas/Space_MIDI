@@ -4,6 +4,11 @@
 //#include <time.h>
 //#include <signal.h>
 
+/**
+  * @brief Create and open a new midi file
+  * @param [filename] futur name of midi file
+  * @param [music_data] Midi struct
+*/
 void midi_setup_file(char *filename, t_music_data *music_data)
 {
 	music_data->midi_file = fopen(filename, "wb");
@@ -14,6 +19,13 @@ void midi_setup_file(char *filename, t_music_data *music_data)
 	MIDI_Instrument_Change(music_data->midi_file, 0, 90);
 }
 
+/**
+  * @brief Write a note state into "midi_write_measure" function
+  * @param [state] Logic state of note (ON/OFF)
+  * @param [channel] Selection of midi channel (0-16)
+  * @param [note] Selection of midi note (1-127)
+  * @param [velocity] Selection of velocity (power) (1-127)
+*/
 void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 							 unsigned char channel, unsigned char note, unsigned char velocity)
 {
@@ -21,6 +33,11 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
 }
 
+
+/**
+  * @brief Simply wait for a quarter of measure
+  * @param [music_data] Midi struct
+*/
 void midi_delay_quarter(t_music_data *music_data)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
@@ -30,6 +47,13 @@ void midi_delay_quarter(t_music_data *music_data)
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 }
 
+
+// TODO : rm measures to write
+/**
+  * @brief Function to write an 4 stroke measure
+  * @param [music_data] Midi struct
+  * @param [sensors_data] Struct that contain current sensors datas
+*/
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data, 
 						uint32_t measures_to_write)
 {
@@ -110,6 +134,10 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data,
 //    ====================================================
 }
 
+/**
+  * @brief Write end of midi file (and close it)
+  * @param [music_data] Midi struct of an opened midi file
+*/
 void midi_write_end(t_music_data *music_data)
 {
 	MIDI_write_end_of_track(music_data->midi_file);
@@ -118,6 +146,11 @@ void midi_write_end(t_music_data *music_data)
 	music_data->midi_file = NULL;// new
 }
 
+// TODO : rm ptr
+/**
+  * @brief Called when signal "SIGTERM" is sended
+  * @param [signal] Signal Number (Probably 15)
+*/
 void terminate_session(int signal, void *ptr)
 {
 	if (g_music_data.midi_file)
@@ -127,6 +160,12 @@ void terminate_session(int signal, void *ptr)
 	exit(0);
 }
 
+/**
+  * @brief Convert an string date to integer date and time
+  * @param [data_time] date to convert (format "YY/MM/DD HH:mm:ss")
+  * @param [date] date output (format "YYYYMMDD")
+  * @param [time] time output (format "HHmmSS")
+*/
 uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *time)
 {
 	uint32_t DD = 0;
@@ -146,7 +185,12 @@ uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
 	return (1);
 }
 
-//probably replaced by a simple strcmp
+// TODO : rm file2, rename file1 to file
+/**
+  * @brief Check if filename syntax is "YYYY_MM_DD__HH_mm_SS.json"
+  * @param [file] file to check
+  * @return 6 if filename seems correct else 0
+*/
 int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
 {
 	char *name1tmp = file1->d_name;
@@ -173,6 +217,10 @@ int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
 	return (ret == 6);
 }
 
+/**
+  * @brief Debug function, print current sensors datas
+  * @param [sensors_data] Struct that contain current sensors datas
+*/
 void print_sensors_data(t_sensors *sensors_data)
 {
 	t_sensors *sensors_tmp;
@@ -192,6 +240,10 @@ void print_sensors_data(t_sensors *sensors_data)
 	}
 }
 
+/**
+  * @brief Clear all sensors_data list
+  * @param [sensors_data] Struct that contain current sensors datas
+*/
 void clear_sensors_data(t_sensors *sensors_data)
 {
 	t_sensors *sensors_tmp;
@@ -204,6 +256,12 @@ void clear_sensors_data(t_sensors *sensors_data)
 	}
 }
 
+/**
+  * @brief Deserialize json file to t_sensors chained list
+  * @param [file_length] Length of json to parse (char number)
+  * @param [file_content] String that contain json file
+  * @return Chained list that contain all sensors datas
+*/
 t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 {
 	jsmn_parser p;
@@ -306,6 +364,13 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	// clear_sensors_data(sensors_data);
 }
 
+
+/**
+  * @brief Find the first file well formated alphabetically 
+  * @param [directory] Directory to scan
+  * @param [file_path] Futur path of file
+  * @return 1 if succeed else 0
+*/
 int get_first_data_file_in_directory(char *directory, char *file_path)
 {
 	DIR *rep = NULL;
@@ -351,6 +416,12 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 	return (0);
 }
 
+/**
+  * @brief Open file, save it to string (char*) and close it
+  * @param [file_length] Futur length of string
+  * @param [filename] File to open
+  * @return string (char*)
+*/
 char *load_file(uint32_t *file_length, char *fileName)
 {
 	FILE *file_ptr;
@@ -370,6 +441,13 @@ char *load_file(uint32_t *file_length, char *fileName)
 	return (file_content);
 }
 
+
+// TODO : change filename to current date in music data, not current time
+/**
+  * @brief Create midi file, name it with the date of current music data and open it 
+  * @param [music_data] Midi struct of midi file
+  * @param [output_directory] location of this midi file
+*/
 void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 {
 	time_t now;
@@ -391,8 +469,21 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 
 int main(int argc, char **argv)
 {
-	char *filesDirectory = "../Space_MIDI/data_files";
-	char *outputDirectory = "../Space_MIDI/midi_files";
+
+	char *filesDirectory = "/home/pi/Documents/ISS/Space_MIDI/data_files";
+	char *outputDirectory = "/home/pi/Documents/ISS/Space_MIDI/midi_files";
+
+//	char *filesDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/data_files";
+//	char *outputDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/midi_files";
+
+	printf("In MIDI prgm\n");	
+	if (argc == 3)
+	{
+		filesDirectory = argv[1];
+		outputDirectory = argv[2];
+	}
+	
+
 	signal(SIGTERM, (void (*)(int))terminate_session);
 	// 							//durée d'une partition 40 000 000us
 	// t_music_data music_data = {.partition_duration = 40000000,
@@ -414,6 +505,8 @@ int main(int argc, char **argv)
 
 	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
+
+	//Must be infinity
 	for (int index = 0; index < 200; index++)
 	{
 		if (!sensorsData || !sensorsData->next)

@@ -24,7 +24,7 @@ TCP_DIR = tcp
 ## Compilating Utilities
 # FAST = -Ofast
 DEBUG = -g #3 -fsanitize=address
-# WARNINGS = -Wall -Wextra -Werror
+WARNINGS = -Wall# -Wextra -Werror
 FLAGS = $(WARNINGS) $(FAST) $(DEBUG)# -D_REENTRANT
 
 INC = $(INC_DIR:%=-I./%)
