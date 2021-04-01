@@ -65,7 +65,7 @@ typedef struct		s_music_data
 	
 }					t_music_data;
 								//durée d'une partition 40 000 000us
-static t_music_data g_music_data = {.partition_duration = 400000000,
+static t_music_data g_music_data = {.partition_duration = 40000000,
 								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
 							   .measure_value = 500000 * 4,
 							   .measures_writed = 0,

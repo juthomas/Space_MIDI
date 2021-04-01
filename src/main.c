@@ -181,7 +181,8 @@ uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
 		return (0);
 	}
 	*date = YY * 10000 + MM * 100 + DD;
-	*time = HH * 10000 + mm * 100 + SS;
+	// *time = HH * 10000 + mm * 100 + SS;
+	*time = HH * 60 * 60 + mm * 60 + SS;
 	return (1);
 }
 
@@ -466,6 +467,11 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 
 }
 
+uint32_t reformat_time(uint32_t time)
+{
+	return (  time % 60);
+}
+
 
 int main(int argc, char **argv)
 {
@@ -574,6 +580,7 @@ int main(int argc, char **argv)
 			midi_write_measure(&g_music_data, sensorsData, 0);
 			g_music_data.measures_writed++;
 			g_music_data.data_time += g_music_data.measure_value / 1000000;
+			// g_music_data.data_time = 
 			if (!sensorsData->next)
 			{
 				printf("***Pas de data next\n");
@@ -588,6 +595,7 @@ int main(int argc, char **argv)
 			if (g_music_data.measure_value * g_music_data.measures_writed
 				>= g_music_data.partition_duration)
 			{
+				printf("Midi write end\n");
 				midi_write_end(&g_music_data);
 			}
 			
@@ -608,6 +616,7 @@ int main(int argc, char **argv)
 				// sensorsData = sensorsData->next;
 			}
 		}
+		printf("Fin de boucle \n");
 	}
 
 	// Signaux ->
