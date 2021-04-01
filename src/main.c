@@ -169,20 +169,20 @@ void terminate_session(int signal, void *ptr)
 uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *time)
 {
 	uint32_t DD = 0;
-	uint32_t MM = 0;
+	uint32_t mm = 0;
 	uint32_t YY = 0;
 	uint32_t HH = 0;
-	uint32_t mm = 0;
+	uint32_t MM = 0;
 	uint32_t SS = 0;
 	uint32_t ret = 0;
 
-	if (sscanf(date_time, "%d/%d/%d %d:%d:%d", &YY, &MM, &DD, &HH, &mm, &SS) != 6)
+	if (sscanf(date_time, "%d/%d/%d %d:%d:%d", &YY, &mm, &DD, &HH, &MM, &SS) != 6)
 	{
 		return (0);
 	}
-	*date = YY * 10000 + MM * 100 + DD;
+	*date = YY * 10000 + mm * 100 + DD;
 	// *time = HH * 10000 + mm * 100 + SS;
-	*time = HH * 60 * 60 + mm * 60 + SS;
+	*time = HH * 60 * 60 + MM * 60 + SS;
 	return (1);
 }
 
@@ -199,22 +199,22 @@ int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
 	printf("Name = %s\n", name1tmp);
 	uint32_t DD = 0;
 
-	uint32_t MM = 0;
+	uint32_t mm = 0;
 
 	uint32_t YY = 0;
 
 	uint32_t HH = 0;
 
-	uint32_t mm = 0;
+	uint32_t MM = 0;
 
 	uint32_t SS = 0;
 
 	uint32_t ret = 0;
 
-	ret = sscanf(name1tmp, "%d_%d_%d__%d_%d_%d.json", &YY, &MM, &DD, &HH, &mm, &SS);
+	ret = sscanf(name1tmp, "%d_%d_%d__%d_%d_%d.json", &YY, &mm, &DD, &HH, &MM, &SS);
 
 	printf("ret : %d\n", ret);
-	printf("Time : %d/%d/%d %d:%d:%d\n", DD, MM, YY, HH, mm, SS);
+	printf("Time : %d/%d/%d %d:%d:%d\n", DD, mm, YY, HH, MM, SS);
 	return (ret == 6);
 }
 
@@ -453,7 +453,7 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 {
 	time_t now;
 	struct tm tm_now;
-	char fileName[sizeof("AAAA_MM_JJ__HH_MM_SS.mid")];
+	char fileName[sizeof("AAAA_mm_JJ__HH_MM_SS.mid")];
 	char filePath[sizeof(fileName) + strlen(output_directory) + 1];
 	now = time(NULL);
 	tm_now = *localtime(&now);
