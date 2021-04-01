@@ -54,11 +54,6 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	printf("In midi Sensors data : \n");
 	printf("date : %d Time : %d\n", sensors_data->date, sensors_data->time);
 	printf("Music Time : %d\n", music_data->data_time);
-	printf("photodiode : %f\n", sensors_data->photodiode);
-	printf("temperature : %f\n", sensors_data->temperature);
-	printf("comsumption : %f\n", sensors_data->comsumption);
-	printf("position : %f\n", sensors_data->position);
-	printf("orgue : %f\n", sensors_data->orgue);
 
 	printf("\n\n");
 
@@ -81,7 +76,7 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_note(music_data, OFF, 1, A3, 0);
 
 	midi_write_measure_note(music_data, ON, 1,
-							(sensors_data->photodiode - 40) * 3 + 50 , 64);
+							(sensors_data->photodiode_1) * 3 + 50 , 64);
 //  ||                                                    ||
 //  ||                      T = 2/4                       ||
 //  ||                                                    ||
@@ -93,9 +88,9 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = 3/4                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, (sensors_data->photodiode - 40) * 3 + 50, 0);
+	midi_write_measure_note(music_data, OFF, 1, (sensors_data->photodiode_1) * 3 + 50, 0);
 	midi_write_measure_note(music_data, ON, 1,
-							(sensors_data->temperature - 40) * 3 + 50, 64);
+							(sensors_data->temperature_1) / 10 + 50, 64);
 //  ||                                                    ||
 //  ||                      T = 3/4                       ||
 //  ||                                                    ||
@@ -107,9 +102,9 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = 4/4                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, (sensors_data->temperature - 40) * 3 + 50, 0);
+	midi_write_measure_note(music_data, OFF, 1, (sensors_data->temperature_1) / 10 + 50, 0);
 	midi_write_measure_note(music_data, ON, 1,
-							(sensors_data->comsumption - 40) * 3 + 50, 64);
+							(sensors_data->vin_current) * 3 + 50, 64);
 //  ||                                                    ||
 //  ||                      T = 4/4                       ||
 //  ||                                                    ||
@@ -121,7 +116,7 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = END                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, (sensors_data->comsumption - 40) * 3 + 50, 0);
+	midi_write_measure_note(music_data, OFF, 1, (sensors_data->vin_current) * 3 + 50, 0);
 //  ||                                                    ||
 //  ||                      T = END                       ||
 //  ||                                                    ||
@@ -224,11 +219,37 @@ void print_sensors_data(t_sensors *sensors_data)
 	while (sensors_tmp)
 	{
 		printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
-		printf("photodiode : %f\n", sensors_tmp->photodiode);
-		printf("temperature : %f\n", sensors_tmp->temperature);
-		printf("comsumption : %f\n", sensors_tmp->comsumption);
-		printf("position : %f\n", sensors_tmp->position);
-		printf("orgue : %f\n", sensors_tmp->orgue);
+		printf("Photodiodes\n");
+		printf("          1 : %f\n", sensors_tmp->photodiode_1);
+		printf("          2 : %f\n", sensors_tmp->photodiode_2);
+		printf("          3 : %f\n", sensors_tmp->photodiode_3);
+		printf("          4 : %f\n", sensors_tmp->photodiode_4);
+		printf("          5 : %f\n", sensors_tmp->photodiode_5);
+		printf("          6 : %f\n", sensors_tmp->photodiode_6);
+		printf("Temperatures\n");
+		printf("vin current : %f\n", sensors_tmp->vin_current);
+		printf("          1 : %f\n", sensors_tmp->temperature_1);
+		printf("          2 : %f\n", sensors_tmp->temperature_2);
+		printf("          3 : %f\n", sensors_tmp->temperature_3);
+		printf("          4 : %f\n", sensors_tmp->temperature_4);
+		printf("          5 : %f\n", sensors_tmp->temperature_5);
+		printf("          6 : %f\n", sensors_tmp->temperature_6);
+		printf("          7 : %f\n", sensors_tmp->temperature_7);
+		printf("          8 : %f\n", sensors_tmp->temperature_8);
+		printf("          9 : %f\n", sensors_tmp->temperature_9);
+		printf("          10 : %f\n", sensors_tmp->temperature_10);
+		printf("lid state : %d\n", sensors_tmp->lid_state);
+		printf("first sample : %s\n", sensors_tmp->first_sample ? "true" : "false");
+		printf("spectro current : %f\n", sensors_tmp->spectro_current);
+		printf("electro current : %f\n", sensors_tmp->electro_current);
+		printf("organ current : %f\n", sensors_tmp->organ_current);
+		printf("q7 current : %f\n", sensors_tmp->q7_current);
+		printf("5v current : %f\n", sensors_tmp->t5v_current);
+		printf("3.3v current : %f\n", sensors_tmp->t3_3v_current);
+		printf("motor current : %f\n", sensors_tmp->motor_current);
+		printf("position 360 : %d\n", sensors_tmp->position_360);
+		printf("spectrum : %d\n", sensors_tmp->spectrum);
+		printf("organ : %f\n", sensors_tmp->organ);
 		sensors_tmp = sensors_tmp->next;
 	}
 }
@@ -287,9 +308,9 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	sensors_data = current_sensors;
 
 	// printf("main addr : %p\n", sensors_data);
-	for (i = 1; i < r; i++)
+	for (i = 3; i < r; i++)
 	{
-		if (t[i].type == JSMN_OBJECT && t[i].size == 6)
+		if (t[i].type == JSMN_OBJECT && t[i].size == (29 + 1))
 		{
 			// printf("\n");
 			// printf("addr :%p\n", current_sensors);
@@ -303,42 +324,163 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 										   &current_sensors->date, &current_sensors->time);
 				i += 2;
 			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode") == 0)
+			if (JSON_cmp(file_content, &t[i], "Photodiode_1") == 0)
 			{
-				// printf("- Photodiode: %.*s\n", t[i + 1].end - t[i + 1].start,
-					//    file_content + t[i + 1].start);
-				current_sensors->photodiode = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_1 = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
-			if (JSON_cmp(file_content, &t[i], "Temperature") == 0)
+			if (JSON_cmp(file_content, &t[i], "Photodiode_2") == 0)
 			{
-				// printf("- Temperature: %.*s\n", t[i + 1].end - t[i + 1].start,
-					//    file_content + t[i + 1].start);
-				current_sensors->temperature = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_2 = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
-			if (JSON_cmp(file_content, &t[i], "Consumption") == 0)
+			if (JSON_cmp(file_content, &t[i], "Photodiode_3") == 0)
 			{
-				// printf("- Consumption: %.*s\n", t[i + 1].end - t[i + 1].start,
-					//    file_content + t[i + 1].start);
-				current_sensors->comsumption = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_3 = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
-			if (JSON_cmp(file_content, &t[i], "Position") == 0)
+			if (JSON_cmp(file_content, &t[i], "Photodiode_4") == 0)
 			{
-				// printf("- Position: %.*s\n", t[i + 1].end - t[i + 1].start,
-					//    file_content + t[i + 1].start);
-				current_sensors->position = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_4 = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
-			if (JSON_cmp(file_content, &t[i], "Orgue") == 0)
+			if (JSON_cmp(file_content, &t[i], "Photodiode_5") == 0)
 			{
-				// printf("- Orgue: %.*s\n", t[i + 1].end - t[i + 1].start,
-					//    file_content + t[i + 1].start);
-				current_sensors->orgue = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_5 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Photodiode_6") == 0)
+			{
+				current_sensors->photodiode_6 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+
+			if (JSON_cmp(file_content, &t[i], "Temperature_1") == 0)
+			{
+				current_sensors->temperature_1 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_2") == 0)
+			{
+				current_sensors->temperature_2 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_3") == 0)
+			{
+				current_sensors->temperature_3 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_4") == 0)
+			{
+				current_sensors->temperature_4 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_5") == 0)
+			{
+				current_sensors->temperature_5 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_6") == 0)
+			{
+				current_sensors->temperature_6 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_7") == 0)
+			{
+				current_sensors->temperature_7 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_8") == 0)
+			{
+				current_sensors->temperature_8 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_9") == 0)
+			{
+				current_sensors->temperature_9 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Temperature_10") == 0)
+			{
+				current_sensors->temperature_10 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+
+
+
+
+			if (JSON_cmp(file_content, &t[i], "Lid_state") == 0)
+			{
+				current_sensors->lid_state = atoi(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "First_sample") == 0)
+			{
+				current_sensors->first_sample = atoi(file_content + t[i + 1].start);
+				i += 2;
+			}
+
+
+
+
+			if (JSON_cmp(file_content, &t[i], "Spectro_current") == 0)
+			{
+				current_sensors->spectro_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Electro_current") == 0)
+			{
+				current_sensors->electro_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Organ_current") == 0)
+			{
+				current_sensors->organ_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Vin_current") == 0)
+			{
+				current_sensors->vin_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Q7_current") == 0)
+			{
+				current_sensors->q7_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "5v_current") == 0)
+			{
+				current_sensors->t5v_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "3.3v_current") == 0)
+			{
+				current_sensors->t3_3v_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Motor_current") == 0)
+			{
+				current_sensors->motor_current = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+
+			if (JSON_cmp(file_content, &t[i], "Position_360") == 0)
+			{
+				current_sensors->position_360 = atoi(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Spectrum") == 0)
+			{
+				current_sensors->spectrum = atoi(file_content + t[i + 1].start);
+				i += 2;
+			}
+
+			if (JSON_cmp(file_content, &t[i], "Organ") == 0)
+			{
+				current_sensors->organ = atof(file_content + t[i + 1].start);
 				i += 1;
 			}
-			if (i + 12 < r)
+			if (i + (29 * 2 + 2) < r)
 			{
 				(current_sensors->next) = (t_sensors *)malloc(sizeof(t_sensors));
 				current_sensors = current_sensors->next;
