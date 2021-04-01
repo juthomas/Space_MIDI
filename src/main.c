@@ -454,9 +454,9 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 	midi_setup_file(filePath, music_data);
 }
 
-uint32_t reformat_time(uint32_t time)
+void print_time(char *beg,uint32_t time, char *end)
 {
-	return (  time % 60);
+	printf("%s%02dh%02dm%02ds%s", beg, time/60/60, time/60%60, time%60, end);
 }
 
 
@@ -465,9 +465,6 @@ int main(int argc, char **argv)
 
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
-
-//	char *filesDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/data_files";
-//	char *outputDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/midi_files";
 
 	printf("In MIDI prgm\n");	
 	if (argc == 3)
@@ -478,24 +475,14 @@ int main(int argc, char **argv)
 	
 
 	signal(SIGTERM, (void (*)(int))terminate_session);
-	// 							//durée d'une partition 40 000 000us
-	// t_music_data music_data = {.partition_duration = 40000000,
-	// 						   .measure_value = 500000 * 4 * 2,
-	// 						   .measures_writed = 0,
-	// 						   // valeur d'une noire en us (pour le tempo)
-	// 						   .quarter_value = 500000 * 2};
 	create_dated_midi_file(&g_music_data, outputDirectory);
-	// midi_setup_file("Test.midi", &music_data);
-
 
 	char *currentDataFileName;
 	t_sensors *sensorsData;
 	sensorsData = NULL;
-
 	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
-
-	//Must be infinity
+	//Main loop
 	for (;;)
 	{
 		if (!sensorsData || !sensorsData->next)
@@ -511,9 +498,7 @@ int main(int argc, char **argv)
 					printf("Error loading file\n");
 					exit(-1);
 				}
-				// printf("File length : %d\n", file_length);
-				// printf("File content : %s\n", file_content);
-				
+
 				if (!sensorsData)
 				{
 					sensorsData = json_deserialize(file_length, file_content);
@@ -526,7 +511,7 @@ int main(int argc, char **argv)
 				free(file_content);
 				print_sensors_data(sensorsData);
 
-				// fclose(file_ptr);
+				//Remove? reouvrir le precedent si SIGTERM? LOGS?
 				if (remove(currentDataFileName))
 				{
 					printf("Error while deleting file\n");
@@ -545,7 +530,6 @@ int main(int argc, char **argv)
 		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
 		if (!g_music_data.midi_file)
 		{
-			//Crash ici
 			create_dated_midi_file(&g_music_data, outputDirectory);
 			g_music_data.measures_writed = 0;
 			g_music_data.data_time = 0;
@@ -563,15 +547,19 @@ int main(int argc, char **argv)
 			midi_write_measure(&g_music_data, sensorsData);
 			g_music_data.measures_writed++;
 			g_music_data.data_time += g_music_data.measure_value / 1000000;
-			// g_music_data.data_time = 
+
+			//DEBUG
 			if (!sensorsData->next)
 			{
 				printf("***Pas de data next\n");
 			}
 			else
 			{
-				printf("***Next time : %d\n", sensorsData->next->time);
-				printf("***Music time : %d\n", g_music_data.data_time);
+				// printf("***Next time : %d\n", sensorsData->next->time);
+				print_time("***Next time : ",sensorsData->next->time, "\n");
+
+				// printf("***Music time : %d\n", g_music_data.data_time);
+				print_time("***Music time : ",g_music_data.data_time, "\n");
 			}
 
 
@@ -587,16 +575,13 @@ int main(int argc, char **argv)
 				break;
 				// go aller rechercher des données (et pas passer au next)
 			}
-			// if (g_music_data.data_time > sensorsData->next->time)//while
 
-			while (sensorsData->next && g_music_data.data_time > sensorsData->next->time)//while
+			while (sensorsData->next && g_music_data.data_time > sensorsData->next->time)
 			{
 				t_sensors *sensors_tmp;
 				sensors_tmp = sensorsData->next;
 				free(sensorsData);
 				sensorsData = sensors_tmp;
-				// free(sensorsData);
-				// sensorsData = sensorsData->next;
 			}
 		}
 		printf("Fin de boucle \n");
@@ -605,15 +590,12 @@ int main(int argc, char **argv)
 	// Signaux ->
 	// Fini le midi, (lui donne un nom avec date debut/fin)
 	// Note dans les LOGS le temps d'arret midi et log
-	// Free
-	// exit
+
 	printf("MIDI prgrm EXIT\n");
-	// midi_write_measure(&server_data, &g_music_data, get_measures_to_write(g_music_data, tv_tmp));
 	if (g_music_data.midi_file)
 	{
 		midi_write_end(&g_music_data);
 	}
-	// for(;;);
 
 	return (0);
 }
