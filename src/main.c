@@ -470,8 +470,8 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 int main(int argc, char **argv)
 {
 
-	char *filesDirectory = "/home/pi/Documents/ISS/Space_MIDI/data_files";
-	char *outputDirectory = "/home/pi/Documents/ISS/Space_MIDI/midi_files";
+	char *filesDirectory = "data_files";
+	char *outputDirectory = "midi_files";
 
 //	char *filesDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/data_files";
 //	char *outputDirectory = "/Users/juthomas/Documents/ISS/midiWritingInC/midi_files";
@@ -507,7 +507,7 @@ int main(int argc, char **argv)
 
 
 	//Must be infinity
-	for (int index = 0; index < 200; index++)
+	for (;;)
 	{
 		if (!sensorsData || !sensorsData->next)
 		{
@@ -615,7 +615,7 @@ int main(int argc, char **argv)
 	// Note dans les LOGS le temps d'arret midi et log
 	// Free
 	// exit
-
+	printf("MIDI prgrm EXIT\n");
 	// midi_write_measure(&server_data, &g_music_data, get_measures_to_write(g_music_data, tv_tmp));
 	if (g_music_data.midi_file)
 	{
