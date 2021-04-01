@@ -1,8 +1,6 @@
 #include "../inc/midi.h"
 #include "../inc/json_parser.h"
 #include "../inc/midi_notes.h"
-//#include <time.h>
-//#include <signal.h>
 
 /**
   * @brief Create and open a new midi file
@@ -33,7 +31,6 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
 }
 
-
 /**
   * @brief Simply wait for a quarter of measure
   * @param [music_data] Midi struct
@@ -47,15 +44,12 @@ void midi_delay_quarter(t_music_data *music_data)
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 }
 
-
-// TODO : rm measures to write
 /**
   * @brief Function to write an 4 stroke measure
   * @param [music_data] Midi struct
   * @param [sensors_data] Struct that contain current sensors datas
 */
-void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data, 
-						uint32_t measures_to_write)
+void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	printf("In midi Sensors data : \n");
 	printf("date : %d Time : %d\n", sensors_data->date, sensors_data->time);
@@ -146,12 +140,11 @@ void midi_write_end(t_music_data *music_data)
 	music_data->midi_file = NULL;// new
 }
 
-// TODO : rm ptr
 /**
   * @brief Called when signal "SIGTERM" is sended
   * @param [signal] Signal Number (Probably 15)
 */
-void terminate_session(int signal, void *ptr)
+void terminate_session(int signal)
 {
 	if (g_music_data.midi_file)
 	{
@@ -174,7 +167,6 @@ uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
 	uint32_t HH = 0;
 	uint32_t MM = 0;
 	uint32_t SS = 0;
-	uint32_t ret = 0;
 
 	if (sscanf(date_time, "%d/%d/%d %d:%d:%d", &YY, &mm, &DD, &HH, &MM, &SS) != 6)
 	{
@@ -374,8 +366,6 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 */
 int get_first_data_file_in_directory(char *directory, char *file_path)
 {
-	DIR *rep = NULL;
-	struct dirent *currentFile = NULL;
 	struct dirent **namelist;
 	int numberOfFiles;
 
@@ -400,7 +390,6 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 				}
 				free(namelist);
 				return (1);
-				
 				break;
 			}
 			else
@@ -462,9 +451,7 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 	// midi_setup_file("Test2.midi", music_data);
 	sprintf(filePath, "%s/%s", output_directory, fileName);;
 	printf("File Path : %s\n", filePath);
-
 	midi_setup_file(filePath, music_data);
-
 }
 
 uint32_t reformat_time(uint32_t time)
@@ -500,10 +487,6 @@ int main(int argc, char **argv)
 	create_dated_midi_file(&g_music_data, outputDirectory);
 	// midi_setup_file("Test.midi", &music_data);
 
-	FILE *file_ptr;
-	DIR *rep = NULL;
-	struct dirent *currentFile = NULL;
-	struct dirent *tmpFile = NULL;
 
 	char *currentDataFileName;
 	t_sensors *sensorsData;
@@ -577,7 +560,7 @@ int main(int argc, char **argv)
 				g_music_data.data_time = sensorsData->time;// * 1000000;
 				g_music_data.entry_data_time = sensorsData->time;
 			}
-			midi_write_measure(&g_music_data, sensorsData, 0);
+			midi_write_measure(&g_music_data, sensorsData);
 			g_music_data.measures_writed++;
 			g_music_data.data_time += g_music_data.measure_value / 1000000;
 			// g_music_data.data_time = 
