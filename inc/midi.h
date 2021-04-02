@@ -4,6 +4,8 @@
 # include <stdlib.h>
 # include <stdbool.h>
 # include <sys/time.h>
+# include <string.h> 
+# include <unistd.h>
 # include <errno.h>
 # include <sys/stat.h> 
 
@@ -14,13 +16,11 @@
 # include <dirent.h> 
 
 // TCP ??
-# include <netdb.h> 
-# include <netinet/in.h> 
-# include <string.h> 
-# include <sys/socket.h> 
-# include <sys/types.h> 
-# include <unistd.h>
-# define PORT 3001 
+// # include <netdb.h> 
+// # include <netinet/in.h> 
+// # include <sys/socket.h> 
+// # include <sys/types.h> 
+// # define PORT 3001 
 
 
 // JSON
@@ -113,9 +113,8 @@ void	MIDI_only_one_note_with_duration(FILE *fichier, unsigned char canal, unsign
 void	MIDI_Control_Change(FILE *fichier, unsigned char canal, unsigned char type, unsigned char valeur);
 void	MIDI_write_file_header(FILE *fichier, unsigned char SMF, unsigned short pistes, unsigned short nbdiv);
 uint32_t MIDI_write_track_header(FILE *fichier);
-void MIDI_write_end_of_track(FILE *fichier);
-void MIDI_write_track_lengh(FILE *fichier, uint32_t marque);
-void ecrire_piste2(FILE *fichier);
+void 	MIDI_write_end_of_track(FILE *fichier);
+void 	MIDI_write_track_lengh(FILE *fichier, uint32_t marque);
 
 
 
