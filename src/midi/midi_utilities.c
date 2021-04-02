@@ -95,7 +95,6 @@ void MIDI_Instrument_Change(FILE *fichier, unsigned char channel, unsigned char 
 	fwrite(&bytes, 2, 1, fichier);
 }
 
-
 /**
   * @brief One note pressed with duration
   * @param [file] Midi file pointer
@@ -206,8 +205,6 @@ void MIDI_tempo(FILE *file, uint32_t tempo)
 	bytes[5] = tempo;
 	fwrite(&bytes, 6, 1, file);
 }
-
-
 
 /**
   * @brief Write variable lenght quantity
