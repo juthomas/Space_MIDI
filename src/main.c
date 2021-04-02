@@ -495,9 +495,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	}
 	printf("main addr : %p\n", sensors_data);
 	printf("Number of measures : %d\n", nu_of_measures);
-	// print_sensors_data(sensors_data);
 	return (sensors_data);
-	// clear_sensors_data(sensors_data);
 }
 
 
@@ -564,7 +562,6 @@ char *load_file(uint32_t *file_length, char *fileName)
 		return (NULL);
 	}
 	char *file_content;
-	// uint32_t file_length;
 	fseek(file_ptr, 0, SEEK_END);
 	*file_length = ftell(file_ptr);
 	fseek(file_ptr, 0, SEEK_SET);
@@ -759,6 +756,5 @@ int main(int argc, char **argv)
 	{
 		midi_write_end(&g_music_data);
 	}
-
-	return (0);
+s	return (0);
 }
