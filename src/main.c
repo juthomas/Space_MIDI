@@ -300,7 +300,6 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 		return (NULL);
 	}
 	uint32_t nu_of_measures = 0;// Usefull?
-	uint32_t obj_size;
 
 	t_sensors *sensors_data;
 	t_sensors *current_sensors;
@@ -315,7 +314,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 		{
 			// printf("\n");
 			// printf("addr :%p\n", current_sensors);
-			obj_size = t[i].size;
+			//obj_size = t[i].size;
 			i++;
 			if (JSON_cmp(file_content, &t[i], "Time") == 0)
 			{
@@ -756,5 +755,5 @@ int main(int argc, char **argv)
 	{
 		midi_write_end(&g_music_data);
 	}
-s	return (0);
+	return (0);
 }

@@ -8,7 +8,7 @@
 # include <unistd.h>
 # include <errno.h>
 # include <sys/stat.h> 
-
+# include <stdint.h>
 # include <time.h> //ADD raspbian
 # include <signal.h> //ADD raspbian
 
@@ -17,9 +17,10 @@
 
 // TCP ??
 // # include <netdb.h> 
-// # include <netinet/in.h> 
+//# include <netinet/in.h> 
 // # include <sys/socket.h> 
 // # include <sys/types.h> 
+
 // # define PORT 3001 
 
 
@@ -92,7 +93,8 @@ typedef struct		s_music_data
 	struct timeval	entry_time;//
 	
 }					t_music_data;
-								//durée d'une partition 40 000 000us
+
+//New header + static?							//durée d'une partition 40 000 000us
 static t_music_data g_music_data = {.partition_duration = 40000000,
 								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
 							   .measure_value = 500000 * 4,
