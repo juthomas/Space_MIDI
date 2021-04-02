@@ -4,6 +4,8 @@
 # include <stdlib.h>
 # include <stdbool.h>
 # include <sys/time.h>
+# include <errno.h>
+# include <sys/stat.h> 
 
 # include <time.h> //ADD raspbian
 # include <signal.h> //ADD raspbian
@@ -11,7 +13,7 @@
 // Folder, (ls)
 # include <dirent.h> 
 
-// TCP
+// TCP ??
 # include <netdb.h> 
 # include <netinet/in.h> 
 # include <string.h> 
@@ -35,6 +37,8 @@
 # define reverb 0x5B
 # define chorus 0x5D
 # define phaser 0x5F
+
+int errno;
 
 typedef struct		s_sensors
 {	

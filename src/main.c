@@ -141,6 +141,7 @@ void midi_write_end(t_music_data *music_data)
 */
 void terminate_session(int signal)
 {
+	(void)signal;
 	if (g_music_data.midi_file)
 	{
 		midi_write_end(&g_music_data);
@@ -179,7 +180,7 @@ uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
   * @param [file] file to check
   * @return 6 if filename seems correct else 0
 */
-int8_t cmp_filename(struct dirent *file1, struct dirent *file2)
+int8_t cmp_filename(struct dirent *file1)
 {
 	char *name1tmp = file1->d_name;
 
@@ -521,7 +522,7 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 		for (int currentIndex = 0; currentIndex < numberOfFiles; currentIndex++)
 		{
 			printf("Le fichier lu s'appelle '%s'\n", namelist[currentIndex]->d_name);
-			if (cmp_filename(namelist[currentIndex], NULL))
+			if (cmp_filename(namelist[currentIndex]))
 			{
 				printf("--This is a data file\n");
 				file_path = strcat(strcat(strcpy(file_path, directory), "/"), namelist[currentIndex]->d_name);
@@ -573,6 +574,24 @@ char *load_file(uint32_t *file_length, char *fileName)
 	return (file_content);
 }
 
+/**
+  * @brief Create file path if doesnt exists
+  * @param [file_path] File path, /!\ cant be const /!\
+  * @param [mode] Permission bit masks for mode
+*/
+int make_path(char* file_path, mode_t mode) {
+	for (char* p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
+		*p = '\0';
+		if (mkdir(file_path, mode) == -1) {
+			if (errno != EEXIST) {
+				*p = '/';
+				return -1;
+			}
+		}
+		*p = '/';
+	}
+	return 0;
+}
 
 // TODO : change filename to current date in music data, not current time
 /**
@@ -593,6 +612,7 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 	// midi_setup_file("Test2.midi", music_data);
 	sprintf(filePath, "%s/%s", output_directory, fileName);;
 	printf("File Path : %s\n", filePath);
+	make_path(filePath, 0755);
 	midi_setup_file(filePath, music_data);
 }
 
@@ -600,6 +620,7 @@ void print_time(char *beg,uint32_t time, char *end)
 {
 	printf("%s%02dh%02dm%02ds%s", beg, time/60/60, time/60%60, time%60, end);
 }
+
 
 
 int main(int argc, char **argv)
