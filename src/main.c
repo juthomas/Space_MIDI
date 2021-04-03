@@ -559,6 +559,7 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 */
 char *load_file(uint32_t *file_length, char *fileName)
 {
+	usleep(50000);
 	FILE *file_ptr;
 	if (!(file_ptr = fopen(fileName, "r")))
 	{
