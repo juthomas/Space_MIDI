@@ -604,18 +604,29 @@ int make_path(char* file_path, mode_t mode) {
   * @param [music_data] Midi struct of midi file
   * @param [output_directory] location of this midi file
 */
-void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
+void	create_dated_midi_file(t_music_data *music_data, char *output_directory, t_sensors *sensors_data)
 {
 	time_t now;
 	struct tm tm_now;
 	char fileName[sizeof("AAAA_mm_JJ__HH_MM_SS.mid")];
 	char filePath[sizeof(fileName) + strlen(output_directory) + 1];
-	now = time(NULL);
-	tm_now = *localtime(&now);
-	strftime(fileName, sizeof(fileName), "%Y_%m_%d__%H_%M_%S.mid", &tm_now);
+	
+	if (sensors_data)
+	{
+		sprintf(fileName, "%04d_%02d_%02d__%02d_%02d_%02d.mid", \
+			sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,\
+			sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
+	}
+	else //Ne passe normalement jamais ICI
+	{
+		now = time(NULL);
+		tm_now = *localtime(&now);
+		strftime(fileName, sizeof(fileName), "%Y_%m_%d__%H_%M_%S.mid", &tm_now);
+	}
+	
 	printf("File Name : %s\n", fileName);
 	// midi_setup_file("Test2.midi", music_data);
-	sprintf(filePath, "%s/%s", output_directory, fileName);;
+	sprintf(filePath, "%s/%s", output_directory, fileName);
 	printf("File Path : %s\n", filePath);
 	make_path(filePath, 0755);
 	midi_setup_file(filePath, music_data);
@@ -637,12 +648,12 @@ int main(int argc, char **argv)
 	
 
 	signal(SIGTERM, (void (*)(int))terminate_session);
-	create_dated_midi_file(&g_music_data, outputDirectory);
 
 	char *currentDataFileName;
 	t_sensors *sensorsData;
 	sensorsData = NULL;
-	currentDataFileName = (char *)malloc(sizeof(char) * 200);
+	// create_dated_midi_file(&g_music_data, outputDirectory, NULL);
+	currentDataFileName = (char*)malloc(sizeof(char) * 200);
 
 	//Main loop
 	for (;;)
@@ -690,9 +701,9 @@ int main(int argc, char **argv)
 			}
 		}
 		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
-		if (!g_music_data.midi_file)
+		if (!g_music_data.midi_file && sensorsData)
 		{
-			create_dated_midi_file(&g_music_data, outputDirectory);
+			create_dated_midi_file(&g_music_data, outputDirectory, sensorsData);
 			g_music_data.measures_writed = 0;
 			g_music_data.data_time = 0;
 		}
