@@ -206,6 +206,12 @@ int8_t cmp_filename(struct dirent *file1)
 	return (ret == 6);
 }
 
+void print_time(char *beg,uint32_t time, char *end)
+{
+	printf("%s%02dh%02dm%02ds(%d)%s", beg, time/60/60, time/60%60, time%60, time, end);
+}
+
+
 /**
   * @brief Debug function, print current sensors datas
   * @param [sensors_data] Struct that contain current sensors datas
@@ -215,42 +221,45 @@ void print_sensors_data(t_sensors *sensors_data)
 	t_sensors *sensors_tmp;
 
 	sensors_tmp = sensors_data;
-
+	int current_data = 0;
 	printf("Struct print :\n");
 	while (sensors_tmp)
 	{
-		printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
-		printf("Photodiodes\n");
-		printf("          1 : %f\n", sensors_tmp->photodiode_1);
-		printf("          2 : %f\n", sensors_tmp->photodiode_2);
-		printf("          3 : %f\n", sensors_tmp->photodiode_3);
-		printf("          4 : %f\n", sensors_tmp->photodiode_4);
-		printf("          5 : %f\n", sensors_tmp->photodiode_5);
-		printf("          6 : %f\n", sensors_tmp->photodiode_6);
-		printf("Temperatures\n");
-		printf("vin current : %f\n", sensors_tmp->vin_current);
-		printf("          1 : %f\n", sensors_tmp->temperature_1);
-		printf("          2 : %f\n", sensors_tmp->temperature_2);
-		printf("          3 : %f\n", sensors_tmp->temperature_3);
-		printf("          4 : %f\n", sensors_tmp->temperature_4);
-		printf("          5 : %f\n", sensors_tmp->temperature_5);
-		printf("          6 : %f\n", sensors_tmp->temperature_6);
-		printf("          7 : %f\n", sensors_tmp->temperature_7);
-		printf("          8 : %f\n", sensors_tmp->temperature_8);
-		printf("          9 : %f\n", sensors_tmp->temperature_9);
-		printf("          10 : %f\n", sensors_tmp->temperature_10);
-		printf("lid state : %d\n", sensors_tmp->lid_state);
-		printf("first sample : %s\n", sensors_tmp->first_sample ? "true" : "false");
-		printf("spectro current : %f\n", sensors_tmp->spectro_current);
-		printf("electro current : %f\n", sensors_tmp->electro_current);
-		printf("organ current : %f\n", sensors_tmp->organ_current);
-		printf("q7 current : %f\n", sensors_tmp->q7_current);
-		printf("5v current : %f\n", sensors_tmp->t5v_current);
-		printf("3.3v current : %f\n", sensors_tmp->t3_3v_current);
-		printf("motor current : %f\n", sensors_tmp->motor_current);
-		printf("position 360 : %d\n", sensors_tmp->position_360);
-		printf("spectrum : %d\n", sensors_tmp->spectrum);
-		printf("organ : %f\n", sensors_tmp->organ);
+		// printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
+		printf("%scurrent data : %d\n","\033[1;35m", current_data);
+		print_time("> Time : ", sensors_tmp->time, "\n\033[1;37m");
+		current_data++;
+		// printf("Photodiodes\n");
+		// printf("          1 : %f\n", sensors_tmp->photodiode_1);
+		// printf("          2 : %f\n", sensors_tmp->photodiode_2);
+		// printf("          3 : %f\n", sensors_tmp->photodiode_3);
+		// printf("          4 : %f\n", sensors_tmp->photodiode_4);
+		// printf("          5 : %f\n", sensors_tmp->photodiode_5);
+		// printf("          6 : %f\n", sensors_tmp->photodiode_6);
+		// printf("Temperatures\n");
+		// printf("vin current : %f\n", sensors_tmp->vin_current);
+		// printf("          1 : %f\n", sensors_tmp->temperature_1);
+		// printf("          2 : %f\n", sensors_tmp->temperature_2);
+		// printf("          3 : %f\n", sensors_tmp->temperature_3);
+		// printf("          4 : %f\n", sensors_tmp->temperature_4);
+		// printf("          5 : %f\n", sensors_tmp->temperature_5);
+		// printf("          6 : %f\n", sensors_tmp->temperature_6);
+		// printf("          7 : %f\n", sensors_tmp->temperature_7);
+		// printf("          8 : %f\n", sensors_tmp->temperature_8);
+		// printf("          9 : %f\n", sensors_tmp->temperature_9);
+		// printf("          10 : %f\n", sensors_tmp->temperature_10);
+		// printf("lid state : %d\n", sensors_tmp->lid_state);
+		// printf("first sample : %s\n", sensors_tmp->first_sample ? "true" : "false");
+		// printf("spectro current : %f\n", sensors_tmp->spectro_current);
+		// printf("electro current : %f\n", sensors_tmp->electro_current);
+		// printf("organ current : %f\n", sensors_tmp->organ_current);
+		// printf("q7 current : %f\n", sensors_tmp->q7_current);
+		// printf("5v current : %f\n", sensors_tmp->t5v_current);
+		// printf("3.3v current : %f\n", sensors_tmp->t3_3v_current);
+		// printf("motor current : %f\n", sensors_tmp->motor_current);
+		// printf("position 360 : %d\n", sensors_tmp->position_360);
+		// printf("spectrum : %d\n", sensors_tmp->spectrum);
+		// printf("organ : %f\n", sensors_tmp->organ);
 		sensors_tmp = sensors_tmp->next;
 	}
 }
@@ -612,16 +621,10 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory)
 	midi_setup_file(filePath, music_data);
 }
 
-void print_time(char *beg,uint32_t time, char *end)
-{
-	printf("%s%02dh%02dm%02ds%s", beg, time/60/60, time/60%60, time%60, end);
-}
-
 
 
 int main(int argc, char **argv)
 {
-
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 
@@ -702,6 +705,8 @@ int main(int argc, char **argv)
 			{
 				g_music_data.data_time = sensorsData->time;// * 1000000;
 				g_music_data.entry_data_time = sensorsData->time;
+				print_time("-_- new time : ",sensorsData->time, "\n");
+
 			}
 			midi_write_measure(&g_music_data, sensorsData);
 			g_music_data.measures_writed++;
@@ -720,7 +725,7 @@ int main(int argc, char **argv)
 				// printf("***Music time : %d\n", g_music_data.data_time);
 				print_time("***Music time : ",g_music_data.data_time, "\n");
 			}
-
+			print_sensors_data(sensorsData);
 
 			if (g_music_data.measure_value * g_music_data.measures_writed
 				>= g_music_data.partition_duration)
@@ -735,7 +740,8 @@ int main(int argc, char **argv)
 				// go aller rechercher des données (et pas passer au next)
 			}
 
-			while (sensorsData->next && g_music_data.data_time > sensorsData->next->time)
+			// while (sensorsData->next && g_music_data.data_time > sensorsData->next->time)
+			while (sensorsData->next && g_music_data.data_time > sensorsData->time)
 			{
 				t_sensors *sensors_tmp;
 				sensors_tmp = sensorsData->next;
@@ -743,7 +749,6 @@ int main(int argc, char **argv)
 				sensorsData = sensors_tmp;
 			}
 		}
-		printf("Fin de boucle \n");
 	}
 
 	// Signaux ->
