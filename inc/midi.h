@@ -94,13 +94,7 @@ typedef struct		s_music_data
 	
 }					t_music_data;
 
-//New header + static?							//durée d'une partition 40 000 000us
-static t_music_data g_music_data = {.partition_duration = 40000000,
-								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
-							   .measure_value = 500000 * 4,
-							   .measures_writed = 0,
-							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 500000 };;
+
 
 // t_server_data		g_server_data;
 
