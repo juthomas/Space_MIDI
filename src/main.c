@@ -423,9 +423,6 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 				i += 2;
 			}
 
-
-
-
 			if (JSON_cmp(file_content, &t[i], "Lid_state") == 0)
 			{
 				current_sensors->lid_state = atoi(file_content + t[i + 1].start);
@@ -436,9 +433,6 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 				current_sensors->first_sample = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
-
-
-
 
 			if (JSON_cmp(file_content, &t[i], "Spectro_current") == 0)
 			{
@@ -606,7 +600,7 @@ int make_path(char* file_path, mode_t mode) {
 	return 0;
 }
 
-// TODO : change filename to current date in music data, not current time
+// TODO : Supress else
 /**
   * @brief Create midi file, name it with the date of current music data and open it 
   * @param [music_data] Midi struct of midi file
