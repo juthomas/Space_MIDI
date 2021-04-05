@@ -2,6 +2,14 @@
 #include "../inc/json_parser.h"
 #include "../inc/midi_notes.h"
 
+							//durée d'une partition 40 000 000us
+static t_music_data g_music_data = {.partition_duration = 40000000,
+								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
+							   .measure_value = 500000 * 4,
+							   .measures_writed = 0,
+							   // valeur d'une noire en us (pour le tempo)
+							   .quarter_value = 500000 };;
+
 /**
   * @brief Create and open a new midi file
   * @param [filename] futur name of midi file
@@ -51,11 +59,6 @@ void midi_delay_quarter(t_music_data *music_data)
 */
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
-	printf("In midi Sensors data : \n");
-	printf("date : %d Time : %d\n", sensors_data->date, sensors_data->time);
-	printf("Music Time : %d\n", music_data->data_time);
-
-	printf("\n\n");
 
 //    ====================================================
 //  ||                                                    ||
@@ -184,7 +187,6 @@ int8_t cmp_filename(struct dirent *file1)
 {
 	char *name1tmp = file1->d_name;
 
-	printf("Name = %s\n", name1tmp);
 	uint32_t DD = 0;
 
 	uint32_t mm = 0;
@@ -201,8 +203,8 @@ int8_t cmp_filename(struct dirent *file1)
 
 	ret = sscanf(name1tmp, "%d_%d_%d__%d_%d_%d.json", &YY, &mm, &DD, &HH, &MM, &SS);
 
-	printf("ret : %d\n", ret);
-	printf("Time : %d/%d/%d %d:%d:%d\n", DD, mm, YY, HH, MM, SS);
+	// printf("ret : %d\n", ret);
+	// printf("Time : %d/%d/%d %d:%d:%d\n", DD, mm, YY, HH, MM, SS);
 	return (ret == 6);
 }
 
@@ -495,8 +497,8 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 			nu_of_measures++;
 		}
 	}
-	printf("main addr : %p\n", sensors_data);
-	printf("Number of measures : %d\n", nu_of_measures);
+	// printf("main addr : %p\n", sensors_data);
+	// printf("Number of measures : %d\n", nu_of_measures);
 	return (sensors_data);
 }
 
@@ -521,12 +523,12 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 	{
 		for (int currentIndex = 0; currentIndex < numberOfFiles; currentIndex++)
 		{
-			printf("Le fichier lu s'appelle '%s'\n", namelist[currentIndex]->d_name);
+			// printf("Le fichier lu s'appelle '%s'\n", namelist[currentIndex]->d_name);
 			if (cmp_filename(namelist[currentIndex]))
 			{
-				printf("--This is a data file\n");
+				// printf("--This is a data file\n");
 				file_path = strcat(strcat(strcpy(file_path, directory), "/"), namelist[currentIndex]->d_name);
-				printf("--This is the Path : %s\n", file_path);
+				// printf("--This is the Path : %s\n", file_path);
 				for (int rmIndex = 0; rmIndex < numberOfFiles; rmIndex++)
 				{
 					free(namelist[rmIndex]);
@@ -537,7 +539,7 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 			}
 			else
 			{
-				printf("--This is not a data file\n");
+				// printf("--This is not a data file\n");
 			}
 		}
 	}
@@ -557,6 +559,7 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 */
 char *load_file(uint32_t *file_length, char *fileName)
 {
+	usleep(50000);
 	FILE *file_ptr;
 	if (!(file_ptr = fopen(fileName, "r")))
 	{
@@ -618,10 +621,9 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, t_
 		strftime(fileName, sizeof(fileName), "%Y_%m_%d__%H_%M_%S.mid", &tm_now);
 	}
 	
-	printf("File Name : %s\n", fileName);
-	// midi_setup_file("Test2.midi", music_data);
+	// printf("File Name : %s\n", fileName);
 	sprintf(filePath, "%s/%s", output_directory, fileName);
-	printf("File Path : %s\n", filePath);
+	// printf("File Path : %s\n", filePath);
 	make_path(filePath, 0755);
 	midi_setup_file(filePath, music_data);
 }
@@ -633,7 +635,6 @@ int main(int argc, char **argv)
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 
-	printf("In MIDI prgm\n");	
 	if (argc == 3)
 	{
 		filesDirectory = argv[1];
@@ -656,7 +657,7 @@ int main(int argc, char **argv)
 		{
 			if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
 			{
-				printf("__Fichier trouvé : %s\n", currentDataFileName);
+				// printf("__Fichier trouvé : %s\n", currentDataFileName);
 				char *file_content;
 				uint32_t file_length;
 
@@ -676,7 +677,7 @@ int main(int argc, char **argv)
 					sensorsData->next = json_deserialize(file_length, file_content);
 				}
 				free(file_content);
-				print_sensors_data(sensorsData);
+				// print_sensors_data(sensorsData);
 
 				//Remove? reouvrir le precedent si SIGTERM? LOGS?
 				if (remove(currentDataFileName))
@@ -685,12 +686,12 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					printf("File succefully deleted\n");
+					// printf("File succefully deleted\n");
 				}
 			}
 			else
 			{
-				printf("Pas de fichiers trouvés\n");
+				// printf("Pas de fichiers trouvés\n");
 				sleep(5);
 			}
 		}
@@ -710,7 +711,7 @@ int main(int argc, char **argv)
 			{
 				g_music_data.data_time = sensorsData->time;// * 1000000;
 				g_music_data.entry_data_time = sensorsData->time;
-				print_time("-_- new time : ",sensorsData->time, "\n");
+				// print_time("-_- new time : ",sensorsData->time, "\n");
 
 			}
 			midi_write_measure(&g_music_data, sensorsData);
@@ -718,24 +719,24 @@ int main(int argc, char **argv)
 			g_music_data.data_time += g_music_data.measure_value / 1000000;
 
 			//DEBUG
-			if (!sensorsData->next)
-			{
-				printf("***Pas de data next\n");
-			}
-			else
-			{
-				// printf("***Next time : %d\n", sensorsData->next->time);
-				print_time("***Next time : ",sensorsData->next->time, "\n");
+			// if (!sensorsData->next)
+			// {
+			// 	printf("***Pas de data next\n");
+			// }
+			// else
+			// {
+			// 	// printf("***Next time : %d\n", sensorsData->next->time);
+			// 	print_time("***Next time : ",sensorsData->next->time, "\n");
 
-				// printf("***Music time : %d\n", g_music_data.data_time);
-				print_time("***Music time : ",g_music_data.data_time, "\n");
-			}
-			print_sensors_data(sensorsData);
+			// 	// printf("***Music time : %d\n", g_music_data.data_time);
+			// 	print_time("***Music time : ",g_music_data.data_time, "\n");
+			// }
+			// print_sensors_data(sensorsData);
 
 			if (g_music_data.measure_value * g_music_data.measures_writed
 				>= g_music_data.partition_duration)
 			{
-				printf("Midi write end\n");
+				// printf("Midi write end\n");
 				midi_write_end(&g_music_data);
 			}
 			
@@ -760,7 +761,7 @@ int main(int argc, char **argv)
 	// Fini le midi, (lui donne un nom avec date debut/fin)
 	// Note dans les LOGS le temps d'arret midi et log
 
-	printf("MIDI prgrm EXIT\n");
+	// printf("MIDI prgrm EXIT\n");
 	if (g_music_data.midi_file)
 	{
 		midi_write_end(&g_music_data);
