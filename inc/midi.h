@@ -100,7 +100,7 @@ static t_music_data g_music_data = {.partition_duration = 40000000,
 							   .measure_value = 500000 * 4,
 							   .measures_writed = 0,
 							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 500000 };;
+							   .quarter_value = 500000 };
 
 // t_server_data		g_server_data;
 
