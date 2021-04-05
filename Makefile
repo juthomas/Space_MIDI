@@ -19,17 +19,16 @@ SRC_DIR = src
 # Add dirs here
 JSON_DIR = json
 MIDI_DIR = midi
-TCP_DIR = tcp
 
 ## Compilating Utilities
 # FAST = -Ofast
 DEBUG = -g #3 -fsanitize=address
-WARNINGS = -Wall# -Wextra -Werror
+WARNINGS = -Wall -Wextra #-Werror
 FLAGS = $(WARNINGS) $(FAST) $(DEBUG)# -D_REENTRANT
 
 INC = $(INC_DIR:%=-I./%)
 
-#CC = clang $(FLAGS) $(INC)
+# CC = clang $(FLAGS) $(INC)
 CC = gcc $(FLAGS) $(INC)
 
 
@@ -41,8 +40,6 @@ JSON_FT = json_utilities
 
 MIDI_FT = midi_utilities
 
-TCP_FT = tcp_sockets
-
 SRC_FT = main
 
 
@@ -50,15 +47,13 @@ SRC_FT = main
 
 SRC = $(SRC_FT:%=$(SRC_DIR)/%.c) \
 	$(JSON_FT:%=$(SRC_DIR)/$(JSON_DIR)/%.c) \
-	$(MIDI_FT:%=$(SRC_DIR)/$(MIDI_DIR)/%.c) \
-	$(TCP_FT:%=$(SRC_DIR)/$(TCP_DIR)/%.c)
+	$(MIDI_FT:%=$(SRC_DIR)/$(MIDI_DIR)/%.c)
 
 OBJ = $(SRC:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 OBJ_DIRS = $(OBJ_DIR) \
 	$(JSON_DIR:%=$(OBJ_DIR)/%) \
-	$(MIDI_DIR:%=$(OBJ_DIR)/%) \
-	$(TCP_DIR:%=$(OBJ_DIR)/%)
+	$(MIDI_DIR:%=$(OBJ_DIR)/%)
 
 INCLUDES = $(INCLUDE_H:%=./$(INC_DIR)/%.h)
 

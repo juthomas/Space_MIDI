@@ -647,7 +647,6 @@ int main(int argc, char **argv)
 	char *currentDataFileName;
 	t_sensors *sensorsData;
 	sensorsData = NULL;
-	// create_dated_midi_file(&g_music_data, outputDirectory, NULL);
 	currentDataFileName = (char*)malloc(sizeof(char) * 200);
 
 	//Main loop
@@ -743,7 +742,7 @@ int main(int argc, char **argv)
 			if (!sensorsData->next)
 			{
 				break;
-				// go aller rechercher des données (et pas passer au next)
+				// Aller rechercher des données (et pas passer au next)
 			}
 
 			// while (sensorsData->next && g_music_data.data_time > sensorsData->next->time)
