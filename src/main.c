@@ -2,13 +2,15 @@
 #include "../inc/json_parser.h"
 #include "../inc/midi_notes.h"
 
-							//durée d'une partition 40 000 000us
-static t_music_data g_music_data = {.partition_duration = 40000000,
-								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
-							   .measure_value = 500000 * 4,
-							   .measures_writed = 0,
-							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 500000 };;
+// 							//durée d'une partition 40 000 000us
+// static t_music_data music_data = {.partition_duration = 40000000,
+// 								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
+// 							   .measure_value = 500000 * 4,
+// 							   .measures_writed = 0,
+// 							   // valeur d'une noire en us (pour le tempo)
+// 							   .quarter_value = 500000 };
+
+static bool g_exit_requested = false;
 
 /**
   * @brief Create and open a new midi file
@@ -138,6 +140,7 @@ void midi_write_end(t_music_data *music_data)
 	music_data->midi_file = NULL;// new
 }
 
+// TODO : Create new data file with sensors data
 /**
   * @brief Called when signal "SIGTERM" is sended
   * @param [signal] Signal Number (Probably 15)
@@ -145,11 +148,7 @@ void midi_write_end(t_music_data *music_data)
 void terminate_session(int signal)
 {
 	(void)signal;
-	if (g_music_data.midi_file)
-	{
-		midi_write_end(&g_music_data);
-	}
-	exit(0);
+	g_exit_requested = true;
 }
 
 /**
@@ -177,15 +176,14 @@ uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
 	return (1);
 }
 
-// TODO : rm file2, rename file1 to file
 /**
   * @brief Check if filename syntax is "YYYY_MM_DD__HH_mm_SS.json"
   * @param [file] file to check
   * @return 6 if filename seems correct else 0
 */
-int8_t cmp_filename(struct dirent *file1)
+int8_t cmp_filename(struct dirent *file)
 {
-	char *name1tmp = file1->d_name;
+	char *name1tmp = file->d_name;
 
 	uint32_t DD = 0;
 
@@ -559,6 +557,7 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 */
 char *load_file(uint32_t *file_length, char *fileName)
 {
+	//Delay to wait write file end
 	usleep(50000);
 	FILE *file_ptr;
 	if (!(file_ptr = fopen(fileName, "r")))
@@ -632,6 +631,13 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, t_
 
 int main(int argc, char **argv)
 {
+								//durée d'une partition 40 000 000us
+	 t_music_data music_data = {.partition_duration = 40000000,
+								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
+							   .measure_value = 500000 * 4,
+							   .measures_writed = 0,
+							   // valeur d'une noire en us (pour le tempo)
+							   .quarter_value = 500000 };
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 
@@ -650,7 +656,7 @@ int main(int argc, char **argv)
 	currentDataFileName = (char*)malloc(sizeof(char) * 200);
 
 	//Main loop
-	for (;;)
+	while (!g_exit_requested)
 	{
 		if (!sensorsData || !sensorsData->next)
 		{
@@ -695,27 +701,27 @@ int main(int argc, char **argv)
 			}
 		}
 		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
-		if (!g_music_data.midi_file && sensorsData)
+		if (!music_data.midi_file && sensorsData)
 		{
-			create_dated_midi_file(&g_music_data, outputDirectory, sensorsData);
-			g_music_data.measures_writed = 0;
-			g_music_data.data_time = 0;
+			create_dated_midi_file(&music_data, outputDirectory, sensorsData);
+			music_data.measures_writed = 0;
+			music_data.data_time = 0;
 		}
 		// Tant que les datas ne sont pas finies et qu'il reste 
 		// des mesures á ecrire dans le fichier midi, on ecrit les
 		// datas dans le fichier midi
-		while (g_music_data.midi_file && sensorsData)
+		while (music_data.midi_file && sensorsData)
 		{
-			if (g_music_data.data_time == 0)
+			if (music_data.data_time == 0)
 			{
-				g_music_data.data_time = sensorsData->time;// * 1000000;
-				g_music_data.entry_data_time = sensorsData->time;
+				music_data.data_time = sensorsData->time;// * 1000000;
+				music_data.entry_data_time = sensorsData->time;
 				// print_time("-_- new time : ",sensorsData->time, "\n");
 
 			}
-			midi_write_measure(&g_music_data, sensorsData);
-			g_music_data.measures_writed++;
-			g_music_data.data_time += g_music_data.measure_value / 1000000;
+			midi_write_measure(&music_data, sensorsData);
+			music_data.measures_writed++;
+			music_data.data_time += music_data.measure_value / 1000000;
 
 			//DEBUG
 			// if (!sensorsData->next)
@@ -727,16 +733,16 @@ int main(int argc, char **argv)
 			// 	// printf("***Next time : %d\n", sensorsData->next->time);
 			// 	print_time("***Next time : ",sensorsData->next->time, "\n");
 
-			// 	// printf("***Music time : %d\n", g_music_data.data_time);
-			// 	print_time("***Music time : ",g_music_data.data_time, "\n");
+			// 	// printf("***Music time : %d\n", music_data.data_time);
+			// 	print_time("***Music time : ",music_data.data_time, "\n");
 			// }
 			// print_sensors_data(sensorsData);
 
-			if (g_music_data.measure_value * g_music_data.measures_writed
-				>= g_music_data.partition_duration)
+			if (music_data.measure_value * music_data.measures_writed
+				>= music_data.partition_duration)
 			{
 				// printf("Midi write end\n");
-				midi_write_end(&g_music_data);
+				midi_write_end(&music_data);
 			}
 			
 			if (!sensorsData->next)
@@ -745,8 +751,8 @@ int main(int argc, char **argv)
 				// Aller rechercher des données (et pas passer au next)
 			}
 
-			// while (sensorsData->next && g_music_data.data_time > sensorsData->next->time)
-			while (sensorsData->next && g_music_data.data_time > sensorsData->time)
+			// while (sensorsData->next && music_data.data_time > sensorsData->next->time)
+			while (sensorsData->next && music_data.data_time > sensorsData->time)
 			{
 				t_sensors *sensors_tmp;
 				sensors_tmp = sensorsData->next;
@@ -761,9 +767,9 @@ int main(int argc, char **argv)
 	// Note dans les LOGS le temps d'arret midi et log
 
 	// printf("MIDI prgrm EXIT\n");
-	if (g_music_data.midi_file)
+	if (music_data.midi_file)
 	{
-		midi_write_end(&g_music_data);
+		midi_write_end(&music_data);
 	}
 	return (0);
 }
