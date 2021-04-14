@@ -1,6 +1,7 @@
 #include "../inc/midi.h"
 #include "../inc/json_parser.h"
 #include "../inc/midi_notes.h"
+#include "../inc/midi_modes.h"
 
 // 							//durée d'une partition 40 000 000us
 // static t_music_data music_data = {.partition_duration = 40000000,
@@ -61,6 +62,13 @@ void midi_delay_quarter(t_music_data *music_data)
 */
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
+	uint8_t *mode_phrygien = g_midi_mode[M_MODE_PHRYGIEN].mode_sequence;
+	for (int i = 0; i < 7; i++)
+	{
+		mode_phrygien[i] += g_midi_mode[M_MODE_PHRYGIEN].starting_note;
+		printf("Mode value : %d\n", mode_phrygien[i]);
+	}
+	
 
 //    ====================================================
 //  ||                                                    ||
