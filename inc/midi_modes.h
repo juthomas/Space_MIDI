@@ -11,6 +11,7 @@ enum	e_midi_modes{
 	M_MODE_MIXOLYDIEN,
 	M_MODE_EOLIEN,
 	M_MODE_LOCRIEN,
+	M_MODE_DORIEN_DIEZ4,
 	M_MODE_ALL,
 };
 
@@ -36,6 +37,12 @@ static const t_midi_modes 	g_midi_mode[] = {
 	.mode_sequence = {2, 1, 2, 2, 1, 2, 2}},
 	(t_midi_modes){.mode_name = M_MODE_LOCRIEN, .starting_note = B4,
 	.mode_sequence = {1, 2, 2, 1, 2, 2, 2}},
+
+	(t_midi_modes){.mode_name = M_MODE_DORIEN_DIEZ4, .starting_note = D4,
+	.mode_sequence = {2, 1, 3, 1, 2, 1, 2}},
+
+
+
 };
 
 

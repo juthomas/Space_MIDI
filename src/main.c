@@ -62,10 +62,10 @@ void midi_delay_quarter(t_music_data *music_data)
 */
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
-	uint8_t *mode_phrygien = g_midi_mode[M_MODE_PHRYGIEN].mode_sequence;
+	uint8_t *mode_phrygien = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
 	for (int i = 0; i < 7; i++)
 	{
-		mode_phrygien[i] += g_midi_mode[M_MODE_PHRYGIEN].starting_note;
+		mode_phrygien[i] += g_midi_mode[M_MODE_DORIEN_DIEZ4].starting_note;
 		printf("Mode value : %d\n", mode_phrygien[i]);
 	}
 	
