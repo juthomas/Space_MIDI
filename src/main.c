@@ -55,6 +55,19 @@ void midi_delay_quarter(t_music_data *music_data)
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 }
 
+
+void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
+{
+	// uint8_t *mode_phrygien = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
+	uint8_t tone_gap = 0;
+	
+	for (int i = 0; i < 7; i++)
+	{
+		gamme[i] = g_midi_mode[music_mode].starting_note + tone_gap;
+		tone_gap += g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence[i];
+	}
+}
+
 /**
   * @brief Function to write an 4 stroke measure
   * @param [music_data] Midi struct
@@ -62,11 +75,13 @@ void midi_delay_quarter(t_music_data *music_data)
 */
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
-	uint8_t *mode_phrygien = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
+	uint8_t gamme[7];
+	get_music_mode(gamme, M_MODE_DORIEN_DIEZ4);
+	//  = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
 	for (int i = 0; i < 7; i++)
 	{
-		mode_phrygien[i] += g_midi_mode[M_MODE_DORIEN_DIEZ4].starting_note;
-		printf("Mode value : %d\n", mode_phrygien[i]);
+		// mode_phrygien[i] += g_midi_mode[M_MODE_DORIEN_DIEZ4].starting_note;
+		printf("Mode value : %d\n", gamme[i]);
 	}
 	
 
@@ -74,7 +89,7 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = 1/4                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, ON, 1, A3, 64);
+	midi_write_measure_note(music_data, ON, 1, gamme[0], 64);
 //  ||                                                    ||
 //  ||                      T = 1/4                       ||
 //  ||                                                    ||
@@ -86,10 +101,10 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = 2/4                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, A3, 0);
+	midi_write_measure_note(music_data, OFF, 1, gamme[0], 0);
 
 	midi_write_measure_note(music_data, ON, 1,
-							(sensors_data->photodiode_1) * 3 + 50 , 64);
+							gamme[(uint32_t)sensors_data->photodiode_1], 64);
 //  ||                                                    ||
 //  ||                      T = 2/4                       ||
 //  ||                                                    ||
@@ -101,9 +116,10 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = 3/4                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, (sensors_data->photodiode_1) * 3 + 50, 0);
+	midi_write_measure_note(music_data, OFF, 1,
+							gamme[(uint32_t)sensors_data->photodiode_1], 0);
 	midi_write_measure_note(music_data, ON, 1,
-							(sensors_data->temperature_1) / 10 + 50, 64);
+							gamme[(uint32_t)sensors_data->temperature_1], 64);
 //  ||                                                    ||
 //  ||                      T = 3/4                       ||
 //  ||                                                    ||
@@ -115,9 +131,10 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = 4/4                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, (sensors_data->temperature_1) / 10 + 50, 0);
+	midi_write_measure_note(music_data, OFF, 1,
+							gamme[(uint32_t)sensors_data->temperature_1], 0);
 	midi_write_measure_note(music_data, ON, 1,
-							(sensors_data->vin_current) * 3 + 50, 64);
+							gamme[(uint32_t)sensors_data->vin_current], 64);
 //  ||                                                    ||
 //  ||                      T = 4/4                       ||
 //  ||                                                    ||
@@ -129,7 +146,8 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 //  ||                      T = END                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, (sensors_data->vin_current) * 3 + 50, 0);
+	midi_write_measure_note(music_data, OFF, 1,
+							gamme[(uint32_t)sensors_data->vin_current], 0);
 //  ||                                                    ||
 //  ||                      T = END                       ||
 //  ||                                                    ||
