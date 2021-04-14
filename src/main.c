@@ -64,7 +64,7 @@ void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 	for (int i = 0; i < 7; i++)
 	{
 		gamme[i] = g_midi_mode[music_mode].starting_note + tone_gap;
-		tone_gap += g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence[i];
+		tone_gap += g_midi_mode[music_mode].mode_sequence[i];
 	}
 }
 
