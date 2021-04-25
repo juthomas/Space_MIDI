@@ -80,13 +80,15 @@ typedef struct		s_sensors
 
 typedef struct		s_music_data
 {
-	uint32_t		quarter_value;
+	uint32_t		quarter_value;// valeur d'une noire pour les metadatas
 	FILE			*midi_file;
 	uint32_t		midi_mark;
 	uint32_t		partition_duration;
-	uint32_t		measure_value;
-	uint32_t		measures_writed;
+	uint32_t		measure_value;//
+	uint32_t		measures_writed;//
 	uint32_t		data_time;
+	uint32_t		delta_time; //TODO : replace all measures writed by this
+	uint32_t		current_quarter_value;
 
 	uint32_t		entry_data_time;
 	struct timeval	last_measure;//

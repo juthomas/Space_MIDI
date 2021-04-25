@@ -50,8 +50,9 @@ void midi_delay_quarter(t_music_data *music_data)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
-
-	MIDI_delta_time(music_data->midi_file, QUARTER);
+	// music_data->current_quarter_value / (music_data->quarter_value / 128)
+	// MIDI_delta_time(music_data->midi_file, QUARTER);
+	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / 128));
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 }
 
@@ -76,13 +77,13 @@ void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	uint8_t gamme[7];
-	get_music_mode(gamme, M_MODE_DORIEN_DIEZ4);
-	//  = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
-	for (int i = 0; i < 7; i++)
-	{
-		// mode_phrygien[i] += g_midi_mode[M_MODE_DORIEN_DIEZ4].starting_note;
-		printf("Mode value : %d\n", gamme[i]);
-	}
+	get_music_mode(gamme, M_MODE_PHRYGIEN);
+	// //  = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
+	// for (int i = 0; i < 7; i++)
+	// {
+	// 	// mode_phrygien[i] += g_midi_mode[M_MODE_DORIEN_DIEZ4].starting_note;
+	// 	printf("Mode value : %d\n", gamme[i]);
+	// }
 	
 
 //    ====================================================
@@ -661,9 +662,11 @@ int main(int argc, char **argv)
 	 t_music_data music_data = {.partition_duration = 40000000,
 								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
 							   .measure_value = 500000 * 4,
-							   .measures_writed = 0,
+							   .measures_writed = 0,//
+							   .delta_time = 0,
 							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 500000 };
+							   .quarter_value = 500000,
+							   .current_quarter_value = 500000};
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 
@@ -702,7 +705,7 @@ int main(int argc, char **argv)
 				{
 					sensorsData = json_deserialize(file_length, file_content);
 				}
-				else
+				else// Normalement ne sert plus a R
 				{
 					//verifier si ca c'est legit
 					sensorsData->next = json_deserialize(file_length, file_content);
@@ -730,8 +733,9 @@ int main(int argc, char **argv)
 		if (!music_data.midi_file && sensorsData)
 		{
 			create_dated_midi_file(&music_data, outputDirectory, sensorsData);
-			music_data.measures_writed = 0;
-			music_data.data_time = 0;
+			music_data.measures_writed = 0;//
+			music_data.data_time = 0;//
+			music_data.delta_time = 0;
 		}
 		// Tant que les datas ne sont pas finies et qu'il reste 
 		// des mesures á ecrire dans le fichier midi, on ecrit les
@@ -743,12 +747,24 @@ int main(int argc, char **argv)
 				music_data.data_time = sensorsData->time;// * 1000000;
 				music_data.entry_data_time = sensorsData->time;
 				// print_time("-_- new time : ",sensorsData->time, "\n");
-
+				
+				
+				// t_sensors *sensors_tmp;
+				// sensors_tmp = sensorsData->next;
+				// free(sensorsData);
+				// sensorsData = sensors_tmp;
 			}
-			midi_write_measure(&music_data, sensorsData);
-			music_data.measures_writed++;
-			music_data.data_time += music_data.measure_value / 1000000;
-
+			if (music_data.data_time <= sensorsData->time)
+			{
+				if (music_data.current_quarter_value >= 50000)
+				{
+					music_data.current_quarter_value -= 5000;
+				}
+				midi_write_measure(&music_data, sensorsData);
+				music_data.measures_writed++;//
+				music_data.delta_time += (music_data.current_quarter_value * 4);
+				music_data.data_time = music_data.entry_data_time + ((music_data.delta_time) / 1000000);
+			}
 			//DEBUG
 			// if (!sensorsData->next)
 			// {
@@ -764,10 +780,10 @@ int main(int argc, char **argv)
 			// }
 			// print_sensors_data(sensorsData);
 
-			if (music_data.measure_value * music_data.measures_writed
+			if (music_data.delta_time
 				>= music_data.partition_duration)
 			{
-				// printf("Midi write end\n");
+				printf("Midi write end\n");
 				midi_write_end(&music_data);
 			}
 			
@@ -777,14 +793,23 @@ int main(int argc, char **argv)
 				// Aller rechercher des données (et pas passer au next)
 			}
 
+			// printf("datatime : %d, sensor time : %d\n",  music_data.data_time,  sensorsData->time);
 			// while (sensorsData->next && music_data.data_time > sensorsData->next->time)
-			while (sensorsData->next && music_data.data_time > sensorsData->time)
+			while (sensorsData && music_data.data_time >= sensorsData->time)// >= ???
 			{
-				t_sensors *sensors_tmp;
-				sensors_tmp = sensorsData->next;
-				free(sensorsData);
-				sensorsData = sensors_tmp;
+				if (sensorsData->next)
+				{
+					t_sensors *sensors_tmp;
+					sensors_tmp = sensorsData->next;
+					free(sensorsData);
+					sensorsData = sensors_tmp;
+				}
+				else
+				{
+					sensorsData = NULL;
+				}
 			}
+			// printf("left : datatime : %d, sensor time : %d\n",  music_data.data_time,  sensorsData->time);
 		}
 	}
 
