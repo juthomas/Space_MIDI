@@ -163,7 +163,7 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	int8_t	octave_offset = 0;
 	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIEN : M_MODE_DORIEN_DIEZ4);
 
-	octave_offset = (int8_t)map_number(sensors_data->position_360, 0, 360, -3, 3);
+	octave_offset = (int8_t)map_number(sensors_data->position_360, 0, 360, -3, 3) * 12;
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 5, 500000, 50000);
 	update_quarter_value(music_data);
 
@@ -828,7 +828,7 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, t_
 int main(int argc, char **argv)
 {
 								//durée d'une partition 40 000 000us
-	 t_music_data music_data = {.partition_duration = 40000000,
+	 t_music_data music_data = {.partition_duration = 60000000 * 10,
 								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
 							   .measure_value = 500000 * 4,
 							   .measures_writed = 0,//
