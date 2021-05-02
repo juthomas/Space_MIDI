@@ -100,10 +100,11 @@ typedef struct		s_music_data
 typedef struct		s_note
 {
 	uint8_t			beg_eighth;
-	uint8_t			end_eighth;
+	uint8_t			eighth_duration;
 	uint8_t			velocity;
 	uint8_t			channel;
 	uint8_t			note;
+	uint8_t			active;
 }					t_note;
 
 // t_server_data		g_server_data;

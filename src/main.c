@@ -81,7 +81,7 @@ void midi_delay_heighth(t_music_data *music_data)
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
 	// music_data->current_quarter_value / (music_data->quarter_value / 128)
 	// MIDI_delta_time(music_data->midi_file, QUARTER);
-	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / 256));
+	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / 64));
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 }
 
@@ -135,6 +135,24 @@ void update_quarter_value(t_music_data *music_data)
 
 
 /**
+  * @brief Try to play/stop selected note at correct timing
+  * @param [music_data] Midi struct
+  * @param [note] note to play/stop
+*/
+void	midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, uint8_t current_heighth)
+{
+	if (note.active && note.beg_eighth == current_heighth)
+	{
+		midi_write_measure_note(music_data, ON, note.channel, note.note, note.velocity);
+	}
+	if (note.active && note.beg_eighth + note.eighth_duration == current_heighth)
+	{
+		midi_write_measure_note(music_data, OFF, note.channel, note.note, 0);
+	}
+}
+
+
+/**
   * @brief Function to write an 4 stroke measure
   * @param [music_data] Midi struct
   * @param [sensors_data] Struct that contain current sensors datas
@@ -142,81 +160,164 @@ void update_quarter_value(t_music_data *music_data)
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	uint8_t gamme[7];
-	get_music_mode(gamme, M_MODE_PHRYGIEN);
-	// 0 - 5 => 500000 -> 50000
+	int8_t	octave_offset = 0;
+	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIEN : M_MODE_DORIEN_DIEZ4);
+
+	octave_offset = (int8_t)map_number(sensors_data->position_360, 0, 360, -3, 3);
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 5, 500000, 50000);
 	update_quarter_value(music_data);
-	// //  = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
-	// for (int i = 0; i < 7; i++)
-	// {
-	// 	// mode_phrygien[i] += g_midi_mode[M_MODE_DORIEN_DIEZ4].starting_note;
-	// 	printf("Mode value : %d\n", gamme[i]);
-	// }
+
+	t_note first_note = {.active = 1,
+						.beg_eighth = 1, 
+						.eighth_duration = (rand() % 6) + 1, 
+						.velocity = (rand() % 64) + 64, 
+						.channel = 1, 
+						.note = gamme[(uint8_t)sensors_data->temperature_1 % 7] + octave_offset};
+	t_note second_note = { .active = sensors_data->vin_current > 1 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 96) + 32,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 1/8                       ||
+//  ||                                                    ||
+	// midi_write_measure_note(music_data, ON, 1, gamme[0], 64);
+
+
+	midi_write_measure_heighth_updater(music_data, first_note, 1);
+	midi_write_measure_heighth_updater(music_data, second_note, 1);
+
+
+//  ||                                                    ||
+//  ||                      T = 1/8                       ||
+//  ||                                                    ||
+//    ====================================================
+
+	midi_delay_heighth(music_data);
 	
-
 //    ====================================================
 //  ||                                                    ||
-//  ||                      T = 1/4                       ||
+//  ||                      T = 2/8                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, ON, 1, gamme[0], 64);
-//  ||                                                    ||
-//  ||                      T = 1/4                       ||
-//  ||                                                    ||
-//    ====================================================
 
-	midi_delay_quarter(music_data);
-	
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 2/4                       ||
-//  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1, gamme[0], 0);
+	midi_write_measure_heighth_updater(music_data, first_note, 2);
+	midi_write_measure_heighth_updater(music_data, second_note, 2);
 
-	midi_write_measure_note(music_data, ON, 1,
-							gamme[(uint32_t)sensors_data->photodiode_1 % 7], 64);
+	// midi_write_measure_note(music_data, OFF, 1, gamme[0], 0);
+
+	// midi_write_measure_note(music_data, ON, 1,
+	// 						gamme[(uint32_t)sensors_data->photodiode_1 % 7], 64);
 //  ||                                                    ||
-//  ||                      T = 2/4                       ||
+//  ||                      T = 2/8                       ||
 //  ||                                                    ||
 //    ====================================================
 
-	midi_delay_quarter(music_data);
+	midi_delay_heighth(music_data);
 
 //    ====================================================
 //  ||                                                    ||
-//  ||                      T = 3/4                       ||
+//  ||                      T = 3/8                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1,
-							gamme[(uint32_t)sensors_data->photodiode_1 % 7], 0);
-	midi_write_measure_note(music_data, ON, 1,
-							gamme[(uint32_t)sensors_data->temperature_1 % 7], 64);
+	midi_write_measure_heighth_updater(music_data, first_note, 3);
+	midi_write_measure_heighth_updater(music_data, second_note, 3);
+
+	// midi_write_measure_note(music_data, OFF, 1,
+	// 						gamme[(uint32_t)sensors_data->photodiode_1 % 7], 0);
+
 //  ||                                                    ||
-//  ||                      T = 3/4                       ||
+//  ||                      T = 3/8                       ||
 //  ||                                                    ||
 //    ====================================================
 
-	midi_delay_quarter(music_data);
+	midi_delay_heighth(music_data);
 
 //    ====================================================
 //  ||                                                    ||
-//  ||                      T = 4/4                       ||
+//  ||                      T = 4/8                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1,
-							gamme[(uint32_t)sensors_data->temperature_1 % 7], 0);
-	midi_write_measure_note(music_data, ON, 1,
-							gamme[(uint32_t)sensors_data->vin_current % 7], 64);
+
+	midi_write_measure_heighth_updater(music_data, first_note, 4);
+	midi_write_measure_heighth_updater(music_data, second_note, 4);
+
 //  ||                                                    ||
-//  ||                      T = 4/4                       ||
+//  ||                      T = 4/8                       ||
 //  ||                                                    ||
 //    ====================================================
 
-	midi_delay_quarter(music_data);
+	midi_delay_heighth(music_data);
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 5/8                       ||
+//  ||                                                    ||
+
+	midi_write_measure_heighth_updater(music_data, first_note, 5);
+	midi_write_measure_heighth_updater(music_data, second_note, 5);
+
+//  ||                                                    ||
+//  ||                      T = 5/8                       ||
+//  ||                                                    ||
+//    ====================================================
+
+	midi_delay_heighth(music_data);
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 6/8                       ||
+//  ||                                                    ||
+
+	midi_write_measure_heighth_updater(music_data, first_note, 6);
+	midi_write_measure_heighth_updater(music_data, second_note, 6);
+
+//  ||                                                    ||
+//  ||                      T = 6/8                       ||
+//  ||                                                    ||
+//    ====================================================
+
+	midi_delay_heighth(music_data);
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 7/8                       ||
+//  ||                                                    ||
+
+	midi_write_measure_heighth_updater(music_data, first_note, 7);
+	midi_write_measure_heighth_updater(music_data, second_note, 7);
+
+//  ||                                                    ||
+//  ||                      T = 7/8                       ||
+//  ||                                                    ||
+//    ====================================================
+
+	midi_delay_heighth(music_data);
+
+//    ====================================================
+//  ||                                                    ||
+//  ||                      T = 8/8                       ||
+//  ||                                                    ||
+	midi_write_measure_heighth_updater(music_data, first_note, 8);
+	midi_write_measure_heighth_updater(music_data, second_note, 8);
+
+
+//  ||                                                    ||
+//  ||                      T = 8/8                       ||
+//  ||                                                    ||
+//    ====================================================
+
+	midi_delay_heighth(music_data);
 
 //    ====================================================
 //  ||                                                    ||
 //  ||                      T = END                       ||
 //  ||                                                    ||
-	midi_write_measure_note(music_data, OFF, 1,
-							gamme[(uint32_t)sensors_data->vin_current % 7], 0);
+
+	midi_write_measure_heighth_updater(music_data, first_note, 9);
+	midi_write_measure_heighth_updater(music_data, second_note, 9);
+
 //  ||                                                    ||
 //  ||                      T = END                       ||
 //  ||                                                    ||
