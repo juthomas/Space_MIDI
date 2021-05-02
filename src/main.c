@@ -14,6 +14,20 @@
 static bool g_exit_requested = false;
 
 /**
+  * @brief Map number from [in_min]-[in_max] to [out_min]-[out_max]
+  * @param [x] Number to map
+  * @param [in_min] Minimum of input number
+  * @param [in_max] Maximum of input number
+  * @param [out_min] Minimum of output number
+  * @param [out_max] Maximum of ouput number
+  * @return New number well mapped
+*/
+int32_t map_number(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
+{
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+/**
   * @brief Create and open a new midi file
   * @param [filename] futur name of midi file
   * @param [music_data] Midi struct
@@ -57,6 +71,21 @@ void midi_delay_quarter(t_music_data *music_data)
 }
 
 
+/**
+  * @brief Simply wait for a heighth of measure
+  * @param [music_data] Midi struct
+*/
+void midi_delay_heighth(t_music_data *music_data)
+{
+	MIDI_delta_time(music_data->midi_file, 0);
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
+	// music_data->current_quarter_value / (music_data->quarter_value / 128)
+	// MIDI_delta_time(music_data->midi_file, QUARTER);
+	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / 256));
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
+}
+
+
 void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 {
 	// uint8_t *mode_phrygien = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
@@ -69,6 +98,42 @@ void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 	}
 }
 
+
+/**
+  * @brief Update quarter value to match with quarter value goal 
+  * (may take several calls)
+  * @param [music_data] Midi struct
+*/
+void update_quarter_value(t_music_data *music_data)
+{
+	if (music_data->current_quarter_value != music_data->quarter_value_goal)
+	{
+		if (music_data->current_quarter_value < music_data->quarter_value_goal)
+		{
+			if (music_data->quarter_value_goal - music_data->current_quarter_value < music_data->quarter_value_step)
+			{
+				music_data->current_quarter_value = music_data->quarter_value_goal;
+			}
+			else
+			{
+				music_data->current_quarter_value += music_data->quarter_value_step;
+			}
+		}
+		else
+		{
+			if (music_data->current_quarter_value - music_data->quarter_value_goal< music_data->quarter_value_step)
+			{
+				music_data->current_quarter_value = music_data->quarter_value_goal;
+			}
+			else
+			{
+				music_data->current_quarter_value -= music_data->quarter_value_step;
+			}
+		}
+	}
+}
+
+
 /**
   * @brief Function to write an 4 stroke measure
   * @param [music_data] Midi struct
@@ -78,6 +143,9 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	uint8_t gamme[7];
 	get_music_mode(gamme, M_MODE_PHRYGIEN);
+	// 0 - 5 => 500000 -> 50000
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 5, 500000, 50000);
+	update_quarter_value(music_data);
 	// //  = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
 	// for (int i = 0; i < 7; i++)
 	// {
@@ -664,6 +732,8 @@ int main(int argc, char **argv)
 							   .measure_value = 500000 * 4,
 							   .measures_writed = 0,//
 							   .delta_time = 0,
+							   .quarter_value_step = 10000,// 
+							   .quarter_value_goal = 500000,//equal to value
 							   // valeur d'une noire en us (pour le tempo)
 							   .quarter_value = 500000,
 							   .current_quarter_value = 500000};
@@ -756,10 +826,10 @@ int main(int argc, char **argv)
 			}
 			if (music_data.data_time <= sensorsData->time)
 			{
-				if (music_data.current_quarter_value >= 50000)
-				{
-					music_data.current_quarter_value -= 5000;
-				}
+				// if (music_data.current_quarter_value >= 50000)
+				// {
+				// 	music_data.current_quarter_value -= 5000;
+				// }
 				midi_write_measure(&music_data, sensorsData);
 				music_data.measures_writed++;//
 				music_data.delta_time += (music_data.current_quarter_value * 4);
