@@ -87,7 +87,9 @@ typedef struct		s_music_data
 {
 	uint32_t		quarter_value;// valeur d'une noire pour les metadatas
 	FILE			*midi_file;
+	FILE			*midi_file_redundancy;
 	uint32_t		midi_mark;
+	uint32_t		midi_mark_redundancy;
 	uint32_t		partition_duration;
 	uint32_t		measure_value;//
 	uint32_t		measures_writed;//

@@ -30,16 +30,23 @@ int32_t map_number(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, i
 /**
   * @brief Create and open a new midi file
   * @param [filename] futur name of midi file
+  * @param [filename_redundancy] futur name of midi file redundancy
   * @param [music_data] Midi struct
 */
-void midi_setup_file(char *filename, t_music_data *music_data)
+void midi_setup_file(char *filename, char *filename_redundancy, \
+	t_music_data *music_data)
 {
 	music_data->midi_file = fopen(filename, "wb");
+	music_data->midi_file_redundancy = fopen(filename_redundancy, "wb");
 	MIDI_write_file_header(music_data->midi_file, 1, 2, QUARTER);
+	MIDI_write_file_header(music_data->midi_file_redundancy, 1, 2, QUARTER);
 	//metadatas
 	MIDI_write_metadata(music_data->midi_file, music_data->quarter_value);
+	MIDI_write_metadata(music_data->midi_file_redundancy, music_data->quarter_value);
 	music_data->midi_mark = MIDI_write_track_header(music_data->midi_file);
+	music_data->midi_mark_redundancy = MIDI_write_track_header(music_data->midi_file_redundancy);
 	MIDI_Instrument_Change(music_data->midi_file, 0, 90);
+	MIDI_Instrument_Change(music_data->midi_file_redundancy, 0, 90);
 }
 
 /**
@@ -53,7 +60,9 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 							 unsigned char channel, unsigned char note, unsigned char velocity)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
+	MIDI_delta_time(music_data->midi_file_redundancy, 0);
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
+	MIDI_Note(music_data->midi_file_redundancy, state, channel, note, velocity);
 }
 
 /**
@@ -63,11 +72,15 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 void midi_delay_quarter(t_music_data *music_data)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
+	MIDI_delta_time(music_data->midi_file_redundancy, 0);
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
+	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 64);
 	// music_data->current_quarter_value / (music_data->quarter_value / 128)
 	// MIDI_delta_time(music_data->midi_file, QUARTER);
 	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / 128));
+	MIDI_delta_time(music_data->midi_file_redundancy, music_data->current_quarter_value / (music_data->quarter_value / 128));
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
+	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 0);
 }
 
 
@@ -78,11 +91,15 @@ void midi_delay_quarter(t_music_data *music_data)
 void midi_delay_heighth(t_music_data *music_data)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
+	MIDI_delta_time(music_data->midi_file_redundancy, 0);
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
+	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 64);
 	// music_data->current_quarter_value / (music_data->quarter_value / 128)
 	// MIDI_delta_time(music_data->midi_file, QUARTER);
 	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / 64));
+	MIDI_delta_time(music_data->midi_file_redundancy, music_data->current_quarter_value / (music_data->quarter_value / 64));
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
+	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 0);
 }
 
 
@@ -409,9 +426,13 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 void midi_write_end(t_music_data *music_data)
 {
 	MIDI_write_end_of_track(music_data->midi_file);
+	MIDI_write_end_of_track(music_data->midi_file_redundancy);
 	MIDI_write_track_lengh(music_data->midi_file, music_data->midi_mark);
+	MIDI_write_track_lengh(music_data->midi_file_redundancy, music_data->midi_mark_redundancy);
 	fclose(music_data->midi_file);
+	fclose(music_data->midi_file_redundancy);
 	music_data->midi_file = NULL;// new
+	music_data->midi_file_redundancy = NULL;// new
 }
 
 // TODO : Create new data file with sensors data
@@ -903,17 +924,26 @@ int make_path(char* file_path, mode_t mode) {
   * @brief Create midi file, name it with the date of current music data and open it 
   * @param [music_data] Midi struct of midi file
   * @param [output_directory] location of this midi file
+  * @param [output_directory_redundancy] location of redundancy midi file
+  * @param [sensors_data] Struct that contain current sensors datas
 */
-void	create_dated_midi_file(t_music_data *music_data, char *output_directory, t_sensors *sensors_data)
+void	create_dated_midi_file(t_music_data *music_data, char *output_directory, \
+		char *output_directory_redundancy, t_sensors *sensors_data)
 {
 	time_t now;
 	struct tm tm_now;
 	char fileName[sizeof("AAAA_mm_JJ__HH_MM_SS.mid")];
 	char filePath[sizeof(fileName) + strlen(output_directory) + 1];
 	
+	char fileNameRedundancy[sizeof("AAAA_mm_JJ__HH_MM_SS_.mid")];
+	char filePathRedundancy[sizeof(fileNameRedundancy) + strlen(output_directory_redundancy) + 1];
+
 	if (sensors_data)
 	{
 		sprintf(fileName, "%04d_%02d_%02d__%02d_%02d_%02d.mid", \
+			sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,\
+			sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
+		sprintf(fileNameRedundancy, "%04d_%02d_%02d__%02d_%02d_%02d_.mid", \
 			sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,\
 			sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
 	}
@@ -922,13 +952,17 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, t_
 		now = time(NULL);
 		tm_now = *localtime(&now);
 		strftime(fileName, sizeof(fileName), "%Y_%m_%d__%H_%M_%S.mid", &tm_now);
+		strftime(fileNameRedundancy, sizeof(fileNameRedundancy), "%Y_%m_%d__%H_%M_%S_.mid", &tm_now);
 	}
 	
 	// printf("File Name : %s\n", fileName);
 	sprintf(filePath, "%s/%s", output_directory, fileName);
+	sprintf(filePathRedundancy, "%s/%s", output_directory_redundancy, fileNameRedundancy);
 	// printf("File Path : %s\n", filePath);
 	make_path(filePath, 0755);
-	midi_setup_file(filePath, music_data);
+	make_path(filePathRedundancy, 0755);
+	printf("file 1 : \"%s\", file 2 : \"%s\"\n", filePath, filePathRedundancy);
+	midi_setup_file(filePath, filePathRedundancy, music_data);
 }
 
 
@@ -948,11 +982,19 @@ int main(int argc, char **argv)
 							   .current_quarter_value = 1000000};
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
+	char *outputDirectoryRedundancy = "midi_files";
 
 	if (argc == 3)
 	{
 		filesDirectory = argv[1];
 		outputDirectory = argv[2];
+		outputDirectoryRedundancy = argv[2];
+	}
+	else if (argc == 4)
+	{
+		filesDirectory = argv[1];
+		outputDirectory = argv[2];
+		outputDirectoryRedundancy = argv[3];
 	}
 	
 
@@ -1009,9 +1051,10 @@ int main(int argc, char **argv)
 			}
 		}
 		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
-		if (!music_data.midi_file && sensorsData)
+		if (!music_data.midi_file && sensorsData)// && !music_data.midi_file_redundancy?
 		{
-			create_dated_midi_file(&music_data, outputDirectory, sensorsData);
+			create_dated_midi_file(&music_data, outputDirectory, \
+				outputDirectoryRedundancy, sensorsData);
 			music_data.measures_writed = 0;//
 			music_data.data_time = 0;//
 			music_data.delta_time = 0;
@@ -1019,7 +1062,7 @@ int main(int argc, char **argv)
 		// Tant que les datas ne sont pas finies et qu'il reste 
 		// des mesures á ecrire dans le fichier midi, on ecrit les
 		// datas dans le fichier midi
-		while (music_data.midi_file && sensorsData)
+		while (music_data.midi_file && sensorsData) // && music_data.midi_file_redundancy?
 		{
 			if (music_data.data_time == 0)
 			{
@@ -1097,7 +1140,7 @@ int main(int argc, char **argv)
 	// Note dans les LOGS le temps d'arret midi et log
 
 	// printf("MIDI prgrm EXIT\n");
-	if (music_data.midi_file)
+	if (music_data.midi_file) //&& music_data.midi_file_redundancy?
 	{
 		midi_write_end(&music_data);
 	}
