@@ -73,7 +73,12 @@ typedef struct		s_sensors
 	float				motor_current;
 	int32_t				position_360;
 	int32_t				spectrum;
-	float				organ;
+	float				organ_1;
+	float				organ_2;
+	float				organ_3;
+	float				organ_4;
+	float				organ_5;
+	float				organ_6;
 	struct s_sensors	*next;
 }					t_sensors;
 

@@ -164,22 +164,56 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIEN : M_MODE_DORIEN_DIEZ4);
 
 	octave_offset = (int8_t)map_number(sensors_data->position_360, 0, 360, -3, 3) * 12;
-	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 5, 500000, 50000);
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 5, 1000000, 100000);
 	update_quarter_value(music_data);
-
+	// printf("Quarter current value :", );
 	t_note first_note = {.active = 1,
 						.beg_eighth = 1, 
 						.eighth_duration = (rand() % 6) + 1, 
 						.velocity = (rand() % 64) + 64, 
 						.channel = 1, 
 						.note = gamme[(uint8_t)sensors_data->temperature_1 % 7] + octave_offset};
-	t_note second_note = { .active = sensors_data->vin_current > 1 ? 1 : 0,
+	t_note second_note = { .active = sensors_data->organ_2 > 2 ? 1 : 0,
 							.beg_eighth = rand() % 6,
 							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 96) + 32,
+							.velocity = (rand() % 64) + 64,
 							.channel = 1,
 							.note = gamme[rand()%7] + octave_offset
 						};
+	t_note third_note = { .active = sensors_data->organ_3 > 2.3 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+	t_note fourth_note = { .active = sensors_data->organ_4 > 2.6 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+	t_note sixth_note = { .active = sensors_data->organ_4 > 3 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+	t_note seventh_note = { .active = sensors_data->organ_4 > 3.3 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+	printf("Organ value : %f; %f; %f; %f; %f\n", \
+		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
+		 sensors_data->organ_5, sensors_data->organ_6);
 
 //    ====================================================
 //  ||                                                    ||
@@ -190,6 +224,12 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 1);
 	midi_write_measure_heighth_updater(music_data, second_note, 1);
+	midi_write_measure_heighth_updater(music_data, third_note, 1);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 1);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 1);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 1);
+
+
 
 
 //  ||                                                    ||
@@ -206,6 +246,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 2);
 	midi_write_measure_heighth_updater(music_data, second_note, 2);
+	midi_write_measure_heighth_updater(music_data, third_note, 2);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 2);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 2);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 2);
+
 
 	// midi_write_measure_note(music_data, OFF, 1, gamme[0], 0);
 
@@ -224,6 +269,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 	midi_write_measure_heighth_updater(music_data, first_note, 3);
 	midi_write_measure_heighth_updater(music_data, second_note, 3);
+	midi_write_measure_heighth_updater(music_data, third_note, 3);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 3);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 3);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 3);
+
 
 	// midi_write_measure_note(music_data, OFF, 1,
 	// 						gamme[(uint32_t)sensors_data->photodiode_1 % 7], 0);
@@ -242,6 +292,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 4);
 	midi_write_measure_heighth_updater(music_data, second_note, 4);
+	midi_write_measure_heighth_updater(music_data, third_note, 4);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 4);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 4);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 4);
+
 
 //  ||                                                    ||
 //  ||                      T = 4/8                       ||
@@ -257,6 +312,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 5);
 	midi_write_measure_heighth_updater(music_data, second_note, 5);
+	midi_write_measure_heighth_updater(music_data, third_note, 5);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 5);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 5);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 5);
+
 
 //  ||                                                    ||
 //  ||                      T = 5/8                       ||
@@ -272,6 +332,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 6);
 	midi_write_measure_heighth_updater(music_data, second_note, 6);
+	midi_write_measure_heighth_updater(music_data, third_note, 6);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 6);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 6);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 6);
+
 
 //  ||                                                    ||
 //  ||                      T = 6/8                       ||
@@ -287,6 +352,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 7);
 	midi_write_measure_heighth_updater(music_data, second_note, 7);
+	midi_write_measure_heighth_updater(music_data, third_note, 7);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 7);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 7);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 7);
+
 
 //  ||                                                    ||
 //  ||                      T = 7/8                       ||
@@ -301,7 +371,10 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //  ||                                                    ||
 	midi_write_measure_heighth_updater(music_data, first_note, 8);
 	midi_write_measure_heighth_updater(music_data, second_note, 8);
-
+	midi_write_measure_heighth_updater(music_data, third_note, 8);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 8);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 8);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 8);
 
 //  ||                                                    ||
 //  ||                      T = 8/8                       ||
@@ -317,6 +390,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 
 	midi_write_measure_heighth_updater(music_data, first_note, 9);
 	midi_write_measure_heighth_updater(music_data, second_note, 9);
+	midi_write_measure_heighth_updater(music_data, third_note, 9);
+	midi_write_measure_heighth_updater(music_data, fourth_note, 9);
+	midi_write_measure_heighth_updater(music_data, sixth_note, 9);
+	midi_write_measure_heighth_updater(music_data, seventh_note, 9);
+
 
 //  ||                                                    ||
 //  ||                      T = END                       ||
@@ -515,7 +593,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	// printf("main addr : %p\n", sensors_data);
 	for (i = 3; i < r; i++)
 	{
-		if (t[i].type == JSMN_OBJECT && t[i].size == (29 + 1))
+		if (t[i].type == JSMN_OBJECT && t[i].size == (34 + 1))
 		{
 			// printf("\n");
 			// printf("addr :%p\n", current_sensors);
@@ -674,12 +752,42 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 				i += 2;
 			}
 
-			if (JSON_cmp(file_content, &t[i], "Organ") == 0)
+			if (JSON_cmp(file_content, &t[i], "Organ_1") == 0)
 			{
-				current_sensors->organ = atof(file_content + t[i + 1].start);
+				current_sensors->organ_1 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Organ_2") == 0)
+			{
+				current_sensors->organ_2 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Organ_3") == 0)
+			{
+				current_sensors->organ_3 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Organ_4") == 0)
+			{
+				current_sensors->organ_4 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Organ_5") == 0)
+			{
+				current_sensors->organ_5 = atof(file_content + t[i + 1].start);
+				i += 2;
+			}
+			if (JSON_cmp(file_content, &t[i], "Organ_6") == 0)
+			{
+				current_sensors->organ_6 = atof(file_content + t[i + 1].start);
 				i += 1;
 			}
-			if (i + (29 * 2 + 2) < r)
+
+
+
+
+
+			if (i + (34 * 2 + 2) < r)
 			{
 				(current_sensors->next) = (t_sensors *)malloc(sizeof(t_sensors));
 				current_sensors = current_sensors->next;
@@ -830,14 +938,14 @@ int main(int argc, char **argv)
 								//durée d'une partition 40 000 000us
 	 t_music_data music_data = {.partition_duration = 60000000 * 10,
 								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
-							   .measure_value = 500000 * 4,
+							   .measure_value = 1000000 * 4,
 							   .measures_writed = 0,//
 							   .delta_time = 0,
-							   .quarter_value_step = 10000,// 
-							   .quarter_value_goal = 500000,//equal to value
+							   .quarter_value_step = 40000,// 
+							   .quarter_value_goal = 1000000,//equal to value
 							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 500000,
-							   .current_quarter_value = 500000};
+							   .quarter_value = 1000000,
+							   .current_quarter_value = 1000000};
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 
