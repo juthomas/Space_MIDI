@@ -106,12 +106,11 @@ void midi_delay_heighth(t_music_data *music_data)
 void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 {
 	// uint8_t *mode_phrygien = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
-	uint8_t tone_gap = 0;
 	
 	for (int i = 0; i < 7; i++)
 	{
-		gamme[i] = g_midi_mode[music_mode].starting_note + tone_gap;
-		tone_gap += g_midi_mode[music_mode].mode_sequence[i];
+		gamme[i] = g_midi_mode[music_mode].starting_note \
+		+ g_midi_mode[music_mode].mode_sequence[i];
 	}
 }
 
@@ -168,6 +167,15 @@ void	midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, u
 	}
 }
 
+// TODO: get notes by quarter, eighth, more?
+// chord method? + 2, + 4?
+void euclidean_(int8_t steps, uint8_t pulses)
+{
+	uint8_t cycle_tab[steps];
+	uint8_t notes_spacing = steps/pulses;
+
+
+}
 
 /**
   * @brief Function to write an 4 stroke measure
@@ -178,10 +186,10 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	uint8_t gamme[7];
 	int8_t	octave_offset = 0;
-	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIEN : M_MODE_DORIEN_DIEZ4);
+	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIAN : M_MODE_HARMONIC_MINOR);
 
-	octave_offset = (int8_t)map_number(sensors_data->position_360, 0, 360, -3, 3) * 12;
-	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 5, 1000000, 100000);
+	octave_offset = (int8_t)map_number(sensors_data->carousel_state, 0, 160, -3, 3) * 12;
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
 	update_quarter_value(music_data);
 	// printf("Quarter current value :", );
 	t_note first_note = {.active = 1,
@@ -228,7 +236,7 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 							.note = gamme[rand()%7] + octave_offset
 						};
 
-	printf("Organ value : %f; %f; %f; %f; %f\n", \
+	printf("Organ value : %d; %d; %d; %d; %d\n", \
 		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
 		 sensors_data->organ_5, sensors_data->organ_6);
 
@@ -614,7 +622,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	// printf("main addr : %p\n", sensors_data);
 	for (i = 3; i < r; i++)
 	{
-		if (t[i].type == JSMN_OBJECT && t[i].size == (34 + 1))
+		if (t[i].type == JSMN_OBJECT && t[i].size == (33 + 1))
 		{
 			// printf("\n");
 			// printf("addr :%p\n", current_sensors);
@@ -630,91 +638,86 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode_1") == 0)
 			{
-				current_sensors->photodiode_1 = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_1 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode_2") == 0)
 			{
-				current_sensors->photodiode_2 = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_2 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode_3") == 0)
 			{
-				current_sensors->photodiode_3 = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_3 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode_4") == 0)
 			{
-				current_sensors->photodiode_4 = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_4 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode_5") == 0)
 			{
-				current_sensors->photodiode_5 = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_5 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Photodiode_6") == 0)
 			{
-				current_sensors->photodiode_6 = atof(file_content + t[i + 1].start);
+				current_sensors->photodiode_6 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 
 			if (JSON_cmp(file_content, &t[i], "Temperature_1") == 0)
 			{
-				current_sensors->temperature_1 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_1 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_2") == 0)
 			{
-				current_sensors->temperature_2 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_2 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_3") == 0)
 			{
-				current_sensors->temperature_3 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_3 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_4") == 0)
 			{
-				current_sensors->temperature_4 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_4 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_5") == 0)
 			{
-				current_sensors->temperature_5 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_5 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_6") == 0)
 			{
-				current_sensors->temperature_6 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_6 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_7") == 0)
 			{
-				current_sensors->temperature_7 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_7 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_8") == 0)
 			{
-				current_sensors->temperature_8 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_8 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_9") == 0)
 			{
-				current_sensors->temperature_9 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_9 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Temperature_10") == 0)
 			{
-				current_sensors->temperature_10 = atof(file_content + t[i + 1].start);
+				current_sensors->temperature_10 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 
-			if (JSON_cmp(file_content, &t[i], "Lid_state") == 0)
-			{
-				current_sensors->lid_state = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
 			if (JSON_cmp(file_content, &t[i], "First_sample") == 0)
 			{
 				current_sensors->first_sample = atoi(file_content + t[i + 1].start);
@@ -726,11 +729,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 				current_sensors->spectro_current = atof(file_content + t[i + 1].start);
 				i += 2;
 			}
-			if (JSON_cmp(file_content, &t[i], "Electro_current") == 0)
-			{
-				current_sensors->electro_current = atof(file_content + t[i + 1].start);
-				i += 2;
-			}
+
 			if (JSON_cmp(file_content, &t[i], "Organ_current") == 0)
 			{
 				current_sensors->organ_current = atof(file_content + t[i + 1].start);
@@ -762,11 +761,17 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 				i += 2;
 			}
 
-			if (JSON_cmp(file_content, &t[i], "Position_360") == 0)
+			if (JSON_cmp(file_content, &t[i], "Carousel_state") == 0)
 			{
-				current_sensors->position_360 = atoi(file_content + t[i + 1].start);
+				current_sensors->carousel_state = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
+			if (JSON_cmp(file_content, &t[i], "Lid_state") == 0)
+			{
+				current_sensors->lid_state = atoi(file_content + t[i + 1].start);
+				i += 2;
+			}
+
 			if (JSON_cmp(file_content, &t[i], "Spectrum") == 0)
 			{
 				current_sensors->spectrum = atoi(file_content + t[i + 1].start);
@@ -775,32 +780,32 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 
 			if (JSON_cmp(file_content, &t[i], "Organ_1") == 0)
 			{
-				current_sensors->organ_1 = atof(file_content + t[i + 1].start);
+				current_sensors->organ_1 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Organ_2") == 0)
 			{
-				current_sensors->organ_2 = atof(file_content + t[i + 1].start);
+				current_sensors->organ_2 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Organ_3") == 0)
 			{
-				current_sensors->organ_3 = atof(file_content + t[i + 1].start);
+				current_sensors->organ_3 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Organ_4") == 0)
 			{
-				current_sensors->organ_4 = atof(file_content + t[i + 1].start);
+				current_sensors->organ_4 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Organ_5") == 0)
 			{
-				current_sensors->organ_5 = atof(file_content + t[i + 1].start);
+				current_sensors->organ_5 = atoi(file_content + t[i + 1].start);
 				i += 2;
 			}
 			if (JSON_cmp(file_content, &t[i], "Organ_6") == 0)
 			{
-				current_sensors->organ_6 = atof(file_content + t[i + 1].start);
+				current_sensors->organ_6 = atoi(file_content + t[i + 1].start);
 				i += 1;
 			}
 
