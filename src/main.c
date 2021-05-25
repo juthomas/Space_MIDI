@@ -187,31 +187,22 @@ void	midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, u
 	}
 }
 
-// TODO: get notes by quarter, eighth, more?
-// chord method? + 2, + 4?
-void euclidean_(int8_t steps, uint8_t pulses)
-{
-	uint8_t cycle_tab[steps];
-	uint8_t notes_spacing = steps/pulses;
-
-
-}
-
 /**
   * @brief Function to get a chords list
+  * @param [chords_list] chords list returned
   * @param [mode] Midi mode (e_midi_modes)
   * @param [chords_size] Number of chords desired
   * @param [starting_note] Offset for starting chord
 */
-uint8_t *get_chords_list(uint8_t mode, uint8_t chords_size, uint8_t starting_note)
+void get_chords_list(uint8_t *chords_list, uint8_t mode, uint8_t chords_size, uint8_t starting_note)
 {
-	uint8_t chords_list[chords_size];
+	// uint8_t chords_list[chords_size];
 
 	for (uint8_t i = 0; i < chords_size; i++)
 	{
 		chords_list[i] = starting_note + g_midi_mode[mode].mode_sequence[(i * 2) % 7];
 	}
-	return (chords_list);
+	// return (chords_list);
 }
 
 /**
@@ -233,7 +224,7 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 {
 	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
 	{
-		for (uint8_t playing_notes_i; playing_notes_i < playing_notes_length; playing_notes_i++)
+		for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
 		{
 			if (!playing_notes_duration[playing_notes_i])
 			{
@@ -258,7 +249,7 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
 	uint8_t *playing_notes, uint8_t playing_notes_length)
 {
-	for (uint8_t playing_notes_i; playing_notes_i < playing_notes_length; playing_notes_i++)
+	for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
 	{
 		if (playing_notes_duration[playing_notes_i])
 		{
@@ -288,49 +279,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
 	update_quarter_value(music_data);
 	// printf("Quarter current value :", );
-	t_note first_note = {.active = 1,
-						.beg_eighth = 1, 
-						.eighth_duration = (rand() % 6) + 1, 
-						.velocity = (rand() % 64) + 64, 
-						.channel = 1, 
-						.note = gamme[(uint8_t)sensors_data->temperature_1 % 7] + octave_offset};
-	t_note second_note = { .active = sensors_data->organ_2 > 2 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
-	t_note third_note = { .active = sensors_data->organ_3 > 2.3 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
-	t_note fourth_note = { .active = sensors_data->organ_4 > 2.6 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
-
-	t_note sixth_note = { .active = sensors_data->organ_4 > 3 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
-
-	t_note seventh_note = { .active = sensors_data->organ_4 > 3.3 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
 
 	printf("Organ value : %d; %d; %d; %d; %d\n", \
 		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
@@ -341,9 +289,9 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	uint8_t euclidean_steps[euclidean_steps_length];
 
 	uint8_t chord_list_length = 3;
-	uint8_t *chords_list;
+	uint8_t chords_list[chord_list_length];
 
-	chords_list = get_chords_list(M_MODE_HARMONIC_MINOR, chord_list_length, A5);
+	get_chords_list(chords_list, M_MODE_HARMONIC_MINOR, chord_list_length, A5);
 
 	uint8_t notes_per_cycle = 2;
 	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
@@ -360,7 +308,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		}
 	}
 
-	uint8_t note_index = rand() % chord_list_length;
+	// uint8_t note_index = rand() % chord_list_length;
 	static uint8_t playing_notes_length = 3;
 	static uint8_t playing_notes[3];
 	static uint8_t playing_notes_duration[3];
