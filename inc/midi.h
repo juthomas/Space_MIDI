@@ -127,7 +127,7 @@ void	MIDI_Control_Change(FILE *fichier, unsigned char canal, unsigned char type,
 void	MIDI_write_file_header(FILE *fichier, unsigned char SMF, unsigned short pistes, unsigned short nbdiv);
 uint32_t MIDI_write_track_header(FILE *fichier);
 void 	MIDI_write_end_of_track(FILE *fichier);
-void 	MIDI_write_track_lengh(FILE *fichier, uint32_t marque);
+void 	MIDI_write_track_length(FILE *fichier, uint32_t marque);
 
 
 

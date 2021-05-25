@@ -62,7 +62,7 @@ void MIDI_write_metadata(FILE *file, uint32_t tempo)
 	header_index = MIDI_write_track_header(file);
 	MIDI_tempo(file, tempo);
 	MIDI_write_end_of_track(file);
-	MIDI_write_track_lengh(file, header_index);
+	MIDI_write_track_length(file, header_index);
 }
 
 /**
@@ -174,7 +174,7 @@ void MIDI_write_end_of_track(FILE *file)
   * @param [file] Midi file pointer
   * @param [mark] Track header position
 */
-void MIDI_write_track_lengh(FILE *file, uint32_t mark)
+void MIDI_write_track_length(FILE *file, uint32_t mark)
 {
 	unsigned char bytes[4] ;
 	uint32_t size;

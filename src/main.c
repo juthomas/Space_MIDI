@@ -102,6 +102,26 @@ void midi_delay_heighth(t_music_data *music_data)
 	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 0);
 }
 
+/**
+  * @brief Simply wait for a fraction of measure 
+  * @param [music_data] Midi struct
+  * @param [fraction] Fraction delay 
+*/
+void midi_delay_divs(t_music_data *music_data, uint16_t divs)
+{
+	MIDI_delta_time(music_data->midi_file, 0);
+	MIDI_delta_time(music_data->midi_file_redundancy, 0);
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 64);
+	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 64);
+	// music_data->current_quarter_value / (music_data->quarter_value / 128)
+	// MIDI_delta_time(music_data->midi_file, QUARTER);
+	//  / 512 => base
+	MIDI_delta_time(music_data->midi_file, music_data->current_quarter_value / (music_data->quarter_value / divs));
+	MIDI_delta_time(music_data->midi_file_redundancy, music_data->current_quarter_value / (music_data->quarter_value / divs));
+	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
+	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 0);
+}
+
 
 void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 {
@@ -175,6 +195,194 @@ void euclidean_(int8_t steps, uint8_t pulses)
 	uint8_t notes_spacing = steps/pulses;
 
 
+}
+
+/**
+  * @brief Function to get a chords list
+  * @param [mode] Midi mode (e_midi_modes)
+  * @param [chords_size] Number of chords desired
+  * @param [starting_note] Offset for starting chord
+*/
+uint8_t *get_chords_list(uint8_t mode, uint8_t chords_size, uint8_t starting_note)
+{
+	uint8_t chords_list[chords_size];
+
+	for (uint8_t i = 0; i < chords_size; i++)
+	{
+		chords_list[i] = starting_note + g_midi_mode[mode].mode_sequence[(i * 2) % 7];
+	}
+	return (chords_list);
+}
+
+/**
+  * @brief Function to create chord for euclidean composing
+  * @param [music_data] Midi struct
+  * @param [playing_notes_duration] Tab of current playing notes durations
+  * @param [playing_notes] Tab of current playing notes
+  * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
+  * @param [chords_list] Tab of selected mode notes
+  * @param [note_i] Index of note in selected mode notes
+  * @param [note_offset] Offset of note (starting note of mode)
+  * @param [chord_size] Size of chord (simultaneous played notes)
+  * @param [velocity] Velocity of chord/note
+  * @param [steps_duration] Duration of note converted in euclidean steps
+*/
+void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uint8_t *playing_notes, \
+	uint8_t playing_notes_length, uint8_t *chords_list, uint8_t note_i, \
+	uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
+{
+	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
+	{
+		for (uint8_t playing_notes_i; playing_notes_i < playing_notes_length; playing_notes_i++)
+		{
+			if (!playing_notes_duration[playing_notes_i])
+			{
+				playing_notes_duration[playing_notes_i] = steps_duration;
+				playing_notes[playing_notes_i] = note_offset \
+					+ chords_list[(note_i + 2 * current_note)% 7] \
+					+ 12 * ((note_i + 2 * current_note) / 7);
+				// beg note
+				midi_write_measure_note(music_data, ON, 1, playing_notes[playing_notes_i], velocity);
+			}
+		}
+	}
+}
+
+/**
+  * @brief Function to remove chord for euclidean composing
+  * @param [music_data] Midi struct
+  * @param [playing_notes_duration] Tab of current playing notes durations
+  * @param [playing_notes] Tab of current playing notes
+  * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
+*/
+void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
+	uint8_t *playing_notes, uint8_t playing_notes_length)
+{
+	for (uint8_t playing_notes_i; playing_notes_i < playing_notes_length; playing_notes_i++)
+	{
+		if (playing_notes_duration[playing_notes_i])
+		{
+			if (playing_notes_duration[playing_notes_i] == 1)
+			{
+				// end note
+				midi_write_measure_note(music_data, OFF, 1, playing_notes[playing_notes_i], 0);
+			}
+			playing_notes_duration[playing_notes_i]--;
+		}
+	}
+}
+
+
+/**
+  * @brief Function to write an 4 stroke measure
+  * @param [music_data] Midi struct
+  * @param [sensors_data] Struct that contain current sensors datas
+*/
+void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_data)
+{
+	uint8_t gamme[7];
+	int8_t	octave_offset = 0;
+	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIAN : M_MODE_HARMONIC_MINOR);
+
+	octave_offset = (int8_t)map_number(sensors_data->carousel_state, 0, 160, -3, 3) * 12;
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
+	update_quarter_value(music_data);
+	// printf("Quarter current value :", );
+	t_note first_note = {.active = 1,
+						.beg_eighth = 1, 
+						.eighth_duration = (rand() % 6) + 1, 
+						.velocity = (rand() % 64) + 64, 
+						.channel = 1, 
+						.note = gamme[(uint8_t)sensors_data->temperature_1 % 7] + octave_offset};
+	t_note second_note = { .active = sensors_data->organ_2 > 2 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+	t_note third_note = { .active = sensors_data->organ_3 > 2.3 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+	t_note fourth_note = { .active = sensors_data->organ_4 > 2.6 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+	t_note sixth_note = { .active = sensors_data->organ_4 > 3 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+	t_note seventh_note = { .active = sensors_data->organ_4 > 3.3 ? 1 : 0,
+							.beg_eighth = rand() % 6,
+							.eighth_duration = (rand() % 2) + 1,
+							.velocity = (rand() % 64) + 64,
+							.channel = 1,
+							.note = gamme[rand()%7] + octave_offset
+						};
+
+	printf("Organ value : %d; %d; %d; %d; %d\n", \
+		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
+		 sensors_data->organ_5, sensors_data->organ_6);
+
+	uint8_t euclidean_steps_length = 4;
+	// uint8_t euclidean_steps[] = {0, A2, 2, 3};
+	uint8_t euclidean_steps[euclidean_steps_length];
+
+	uint8_t chord_list_length = 3;
+	uint8_t *chords_list;
+
+	chords_list = get_chords_list(M_MODE_HARMONIC_MINOR, chord_list_length, A5);
+
+	uint8_t notes_per_cycle = 2;
+	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
+
+	for (uint8_t steps = 0; steps < euclidean_steps_length; steps++)
+	{
+		if (steps % step_gap == 0)
+		{
+			euclidean_steps[steps] = chords_list[rand() % chord_list_length];
+		}
+		else
+		{
+			euclidean_steps[steps] = 0;
+		}
+	}
+
+	uint8_t note_index = rand() % chord_list_length;
+	static uint8_t playing_notes_length = 3;
+	static uint8_t playing_notes[3];
+	static uint8_t playing_notes_duration[3];
+
+
+	uint16_t measure_length_divs = 512;
+	uint16_t current_measure_length_divs = 0;
+
+
+	for (int current_step = 0; current_step < euclidean_steps_length; current_step++)
+	{
+
+		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
+
+		create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
+				chords_list, rand() % chord_list_length,A5, 2, 128, 2);
+		uint16_t tmp_divs;
+		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / current_step)) \
+					- current_measure_length_divs;
+		midi_delay_divs(music_data,tmp_divs);
+		current_measure_length_divs += tmp_divs;
+	}
 }
 
 /**
@@ -427,6 +635,8 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 //    ====================================================
 }
 
+
+
 /**
   * @brief Write end of midi file (and close it)
   * @param [music_data] Midi struct of an opened midi file
@@ -435,8 +645,8 @@ void midi_write_end(t_music_data *music_data)
 {
 	MIDI_write_end_of_track(music_data->midi_file);
 	MIDI_write_end_of_track(music_data->midi_file_redundancy);
-	MIDI_write_track_lengh(music_data->midi_file, music_data->midi_mark);
-	MIDI_write_track_lengh(music_data->midi_file_redundancy, music_data->midi_mark_redundancy);
+	MIDI_write_track_length(music_data->midi_file, music_data->midi_mark);
+	MIDI_write_track_length(music_data->midi_file_redundancy, music_data->midi_mark_redundancy);
 	fclose(music_data->midi_file);
 	fclose(music_data->midi_file_redundancy);
 	music_data->midi_file = NULL;// new
