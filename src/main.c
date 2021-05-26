@@ -59,6 +59,8 @@ void midi_setup_file(char *filename, char *filename_redundancy, \
 void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 							 unsigned char channel, unsigned char note, unsigned char velocity)
 {
+	printf("write measure note : state=%d channel=%d note=%d velocity=%d\n", \
+		state, channel, note, velocity);
 	MIDI_delta_time(music_data->midi_file, 0);
 	MIDI_delta_time(music_data->midi_file_redundancy, 0);
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
@@ -200,7 +202,7 @@ void get_chords_list(uint8_t *chords_list, uint8_t mode, uint8_t chords_size, ui
 
 	for (uint8_t i = 0; i < chords_size; i++)
 	{
-		chords_list[i] = starting_note + g_midi_mode[mode].mode_sequence[(i * 2) % 7];
+		chords_list[i] = /* starting_note + */ g_midi_mode[mode].mode_sequence[(i * 2) % 7];
 	}
 	// return (chords_list);
 }
@@ -234,6 +236,7 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 					+ 12 * ((note_i + 2 * current_note) / 7);
 				// beg note
 				midi_write_measure_note(music_data, ON, 1, playing_notes[playing_notes_i], velocity);
+				break;
 			}
 		}
 	}
@@ -271,11 +274,11 @@ void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
 */
 void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
-	uint8_t gamme[7];
-	int8_t	octave_offset = 0;
-	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIAN : M_MODE_HARMONIC_MINOR);
+	// uint8_t gamme[7];
+	// int8_t	octave_offset = 0;
+	// get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIAN : M_MODE_HARMONIC_MINOR);
 
-	octave_offset = (int8_t)map_number(sensors_data->carousel_state, 0, 160, -3, 3) * 12;
+	// octave_offset = (int8_t)map_number(sensors_data->carousel_state, 0, 160, -3, 3) * 12;
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
 	update_quarter_value(music_data);
 	// printf("Quarter current value :", );
@@ -309,22 +312,22 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	}
 
 	// uint8_t note_index = rand() % chord_list_length;
-	static uint8_t playing_notes_length = 3;
-	static uint8_t playing_notes[3];
-	static uint8_t playing_notes_duration[3];
+	static uint8_t playing_notes_length = 12;
+	static uint8_t playing_notes[12];
+	static uint8_t playing_notes_duration[12];
 
 
 	uint16_t measure_length_divs = 512;
 	uint16_t current_measure_length_divs = 0;
 
 
-	for (int current_step = 0; current_step < euclidean_steps_length; current_step++)
+	for (int current_step = 1; current_step <= euclidean_steps_length; current_step++)
 	{
 
 		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
 
 		create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
-				chords_list, rand() % chord_list_length,A5, 2, 128, 2);
+				chords_list, rand() % chord_list_length,A5, 1, 105, 2);
 		uint16_t tmp_divs;
 		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / current_step)) \
 					- current_measure_length_divs;
@@ -1245,7 +1248,8 @@ int main(int argc, char **argv)
 				// {
 				// 	music_data.current_quarter_value -= 5000;
 				// }
-				midi_write_measure(&music_data, sensorsData);
+				// midi_write_measure(&music_data, sensorsData);
+				midi_write_euclidean_measure(&music_data, sensorsData);
 				music_data.measures_writed++;//
 				music_data.delta_time += (music_data.current_quarter_value * 4);
 				music_data.data_time = music_data.entry_data_time + ((music_data.delta_time) / 1000000);
