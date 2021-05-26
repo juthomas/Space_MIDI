@@ -201,8 +201,9 @@ void get_chords_list(uint8_t *chords_list, uint8_t mode, uint8_t chords_size, ui
 	// uint8_t chords_list[chords_size];
 
 	for (uint8_t i = 0; i < chords_size; i++)
-	{
-		chords_list[i] = /* starting_note + */ g_midi_mode[mode].mode_sequence[(i * 2) % 7];
+	{																			//i * 2
+		// chords_list[i] = /* starting_note + */ g_midi_mode[mode].mode_sequence[(i * 2) % 7];
+		chords_list[i] = /* starting_note + */ (i * 2) % 7;
 	}
 	// return (chords_list);
 }
@@ -221,7 +222,7 @@ void get_chords_list(uint8_t *chords_list, uint8_t mode, uint8_t chords_size, ui
   * @param [steps_duration] Duration of note converted in euclidean steps
 */
 void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uint8_t *playing_notes, \
-	uint8_t playing_notes_length, uint8_t *chords_list, uint8_t note_i, \
+	uint8_t playing_notes_length, uint8_t mode, uint8_t note_i, \
 	uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
 {
 	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
@@ -230,9 +231,13 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 		{
 			if (!playing_notes_duration[playing_notes_i])
 			{
+				printf("Note_i : %d, current_note : %d, calcul : %d, calcul_tab : %d\n", note_i, current_note,(note_i + 2 * current_note)% 7, 
+				g_midi_mode[mode].mode_sequence[(note_i + 2 * current_note)% 7] );
+
+
 				playing_notes_duration[playing_notes_i] = steps_duration;
 				playing_notes[playing_notes_i] = note_offset \
-					+ chords_list[(note_i + 2 * current_note)% 7] \
+					+ g_midi_mode[mode].mode_sequence[(note_i + 2 * current_note)% 7] \
 					+ 12 * ((note_i + 2 * current_note) / 7);
 				// beg note
 				midi_write_measure_note(music_data, ON, 1, playing_notes[playing_notes_i], velocity);
@@ -277,6 +282,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	// uint8_t gamme[7];
 	// int8_t	octave_offset = 0;
 	// get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIAN : M_MODE_HARMONIC_MINOR);
+	printf("New measure\n");
 
 	// octave_offset = (int8_t)map_number(sensors_data->carousel_state, 0, 160, -3, 3) * 12;
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
@@ -289,12 +295,14 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 
 	uint8_t euclidean_steps_length = 4;
 	// uint8_t euclidean_steps[] = {0, A2, 2, 3};
-	uint8_t euclidean_steps[euclidean_steps_length];
+	int16_t euclidean_steps[euclidean_steps_length];
 
 	uint8_t chord_list_length = 3;
 	uint8_t chords_list[chord_list_length];
 
-	get_chords_list(chords_list, M_MODE_HARMONIC_MINOR, chord_list_length, A5);
+	uint8_t mode = M_MODE_HARMONIC_MINOR;
+
+	get_chords_list(chords_list, mode, chord_list_length, A5);
 
 	uint8_t notes_per_cycle = 2;
 	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
@@ -304,12 +312,31 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		if (steps % step_gap == 0)
 		{
 			euclidean_steps[steps] = chords_list[rand() % chord_list_length];
+			// euclidean_steps[steps] = rand() % chord_list_length;
 		}
 		else
 		{
-			euclidean_steps[steps] = 0;
+			euclidean_steps[steps] = -1;
 		}
 	}
+
+	// Print euclidean steps
+	{
+		for (uint8_t steps = 0; steps < euclidean_steps_length; steps++)
+		{
+
+			printf("Step value : %d\n", euclidean_steps[steps]);
+
+		}
+		printf("Chord list : ");
+		for (uint8_t chord_list_i = 0; chord_list_i < chord_list_length; chord_list_i++)
+		{
+			printf("%d,", chords_list[chord_list_i]);
+		}
+		printf("\n");
+	}
+
+
 
 	// uint8_t note_index = rand() % chord_list_length;
 	static uint8_t playing_notes_length = 12;
@@ -321,15 +348,19 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	uint16_t current_measure_length_divs = 0;
 
 
-	for (int current_step = 1; current_step <= euclidean_steps_length; current_step++)
+	for (int current_step = 0; current_step < euclidean_steps_length; current_step++)
 	{
-
+		printf("New step\n");
 		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
 
-		create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
-				chords_list, rand() % chord_list_length,A5, 1, 105, 2);
+		if (euclidean_steps[current_step] != -1)
+		{
+
+			create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
+				mode, euclidean_steps[current_step],A4, 2, 105, 2);
+		}
 		uint16_t tmp_divs;
-		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / current_step)) \
+		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / (current_step + 1))) \
 					- current_measure_length_divs;
 		midi_delay_divs(music_data,tmp_divs);
 		current_measure_length_divs += tmp_divs;
