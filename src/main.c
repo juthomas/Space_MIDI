@@ -336,18 +336,18 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
 		 sensors_data->organ_5, sensors_data->organ_6);
 
-	uint8_t euclidean_steps_length = 4;
+	uint8_t euclidean_steps_length = 8;
 	// uint8_t euclidean_steps[] = {0, A2, 2, 3};
 	int16_t euclidean_steps[euclidean_steps_length];
 
-	uint8_t chord_list_length = 3;
+	uint8_t chord_list_length = 5;
 	uint8_t chords_list[chord_list_length];
 
 	uint8_t mode = M_MODE_HARMONIC_MINOR;
 
 	get_chords_list(chords_list, mode, chord_list_length, A5);
 
-	uint8_t notes_per_cycle = 2;
+	uint8_t notes_per_cycle = 4;
 	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
 
 	for (uint8_t steps = 0; steps < euclidean_steps_length; steps++)
@@ -409,7 +409,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		{
 
 			create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
-				mode, euclidean_steps[current_step],A4, 2, 105, 1);
+				mode, euclidean_steps[current_step],A4, 2, 105, 3);
 		}
 		uint16_t tmp_divs;
 		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / (current_step + 1))) \
