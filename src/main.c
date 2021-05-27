@@ -271,6 +271,49 @@ void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
 	}
 }
 
+// Create list of avaible chords
+// then random on it
+// if list is empty, just pick random chord
+int16_t	get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length, uint8_t current_step, int16_t *euclidean_steps)
+{
+		// euclidean_steps[current_step] = chords_list[rand() % chord_list_length];
+	
+	int16_t chord_to_test = 0;
+	uint8_t steps = 0;
+
+	int16_t available_chords_list[chord_list_length];
+	uint8_t available_chords_list_len = 0;
+
+	// for (uint8_t i = 0; i < chord_list_length; i++)
+	// {
+	// 	available_chords_list[i] = -1;
+	// }
+
+	for (uint8_t i = 0; i < chord_list_length; i++)
+	{
+
+		chord_to_test = chords_list[i];
+		steps = 0;
+		while (euclidean_steps[steps] != chord_to_test && steps < current_step)
+		{
+			steps++;
+		}
+		if (euclidean_steps[steps] != chord_to_test)
+		{
+			available_chords_list[available_chords_list_len] = chord_to_test;
+			available_chords_list_len++;
+		}
+	}
+
+	if (available_chords_list_len)
+	{
+		return (available_chords_list[rand() % available_chords_list_len]);
+	}
+	else
+	{
+		return(chords_list[rand() % chord_list_length]);
+	}
+}
 
 /**
   * @brief Function to write an 4 stroke measure
@@ -311,7 +354,16 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	{
 		if (steps % step_gap == 0)
 		{
-			euclidean_steps[steps] = chords_list[rand() % chord_list_length];
+			printf("Current euclidean steps : ");
+			for (int i = 0; i < steps; i++)
+			{
+				printf("%d, ", euclidean_steps[i]);
+			}
+			printf("\n");
+			euclidean_steps[steps] = get_new_chord_from_list(chords_list, chord_list_length, steps, euclidean_steps);
+			// euclidean_steps[steps] = chords_list[rand() % chord_list_length];
+			printf("New step : %d\n", euclidean_steps[steps]);
+			
 			// euclidean_steps[steps] = rand() % chord_list_length;
 		}
 		else
@@ -357,7 +409,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		{
 
 			create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
-				mode, euclidean_steps[current_step],A4, 2, 105, 2);
+				mode, euclidean_steps[current_step],A4, 2, 105, 1);
 		}
 		uint16_t tmp_divs;
 		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / (current_step + 1))) \
