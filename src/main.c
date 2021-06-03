@@ -11,6 +11,12 @@
 // 							   // valeur d'une noire en us (pour le tempo)
 // 							   .quarter_value = 500000 };
 
+
+static uint8_t playing_notes_length = 12;
+static uint8_t playing_notes[12];
+static uint8_t playing_notes_duration[12];
+
+
 static bool g_exit_requested = false;
 
 /**
@@ -59,8 +65,8 @@ void midi_setup_file(char *filename, char *filename_redundancy, \
 void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 							 unsigned char channel, unsigned char note, unsigned char velocity)
 {
-	printf("write measure note : state=%d channel=%d note=%d velocity=%d\n", \
-		state, channel, note, velocity);
+	printf("\033[1;35mwrite measure note : state=%s channel=%d note=%d velocity=%d\033[1;37m\n\n", \
+		(state == ON ? "ON" : "OFF"), channel, note, velocity);
 	MIDI_delta_time(music_data->midi_file, 0);
 	MIDI_delta_time(music_data->midi_file_redundancy, 0);
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
@@ -224,31 +230,49 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 	uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
 {
 	bool current_note_done = false;
+
+	printf("\033[1;32mChord to play\n");
+	for (int i = 0; i < chord_size; i++)
+	{
+		printf("Note Chord[%d] : %d\n", i, note_offset + ((note_i & 0b11110000) >> 4) * 12 \
+					+ g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * i)% 7] \
+					+ 12 * (((note_i & 0b1111) + 2 * i) / 7));
+	}
+	printf("\033[1;37m\n");
+
 	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
 	{
 		current_note_done = false;
+		//If the note is currently played
+		//Just add time to that note
 		for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
 		{
-				if (playing_notes[playing_notes_i] == note_offset \
-					+ g_midi_mode[mode].mode_sequence[(note_i + 2 * current_note)% 7] \
-					+ 12 * ((note_i + 2 * current_note) / 7))
+				if (playing_notes[playing_notes_i] == note_offset + ((note_i & 0b11110000) >> 4) * 12 \
+					+ g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * current_note)% 7] \
+					+ 12 * (((note_i & 0b1111) + 2 * current_note) / 7))
 					{
+				// printf("Note_i P1: %d, current_note : %d, calcul : %d, calcul_tab : %d\n", (note_i & 0b1111), current_note,((note_i & 0b1111) + 2 * current_note)% 7, 
+				// g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * current_note)% 7] );
+						
+						
 						playing_notes_duration[playing_notes_i] = steps_duration;
 						current_note_done = true;
 					}
 		}
+		//If the note isnt played
+		//Create that note !
 		for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length && !current_note_done; playing_notes_i++)
 		{
 			if (!playing_notes_duration[playing_notes_i])
 			{
-				printf("Note_i : %d, current_note : %d, calcul : %d, calcul_tab : %d\n", note_i, current_note,(note_i + 2 * current_note)% 7, 
-				g_midi_mode[mode].mode_sequence[(note_i + 2 * current_note)% 7] );
+				// printf("Note_i : %d, current_note : %d, calcul : %d, calcul_tab : %d\n", (note_i & 0b1111), current_note,((note_i & 0b1111) + 2 * current_note)% 7, 
+				// g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * current_note)% 7] );
 
 
 				playing_notes_duration[playing_notes_i] = steps_duration;
-				playing_notes[playing_notes_i] = note_offset \
-					+ g_midi_mode[mode].mode_sequence[(note_i + 2 * current_note)% 7] \
-					+ 12 * ((note_i + 2 * current_note) / 7);
+				playing_notes[playing_notes_i] = note_offset + ((note_i & 0b11110000) >> 4) * 12 \
+					+ g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * current_note)% 7] \
+					+ 12 * (((note_i & 0b1111) + 2 * current_note) / 7);
 				// beg note
 				midi_write_measure_note(music_data, ON, 1, playing_notes[playing_notes_i], velocity);
 				break;
@@ -267,6 +291,14 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
 	uint8_t *playing_notes, uint8_t playing_notes_length)
 {
+
+	printf("\033[1;96mRM func\n");
+	for (uint8_t i = 0; i < playing_notes_length; i++)
+	{
+		printf("Playing notes[%d] : N = %d, D = %d\n", i, playing_notes[i], playing_notes_duration[i]);
+	}
+	printf("\033[1;37m\n");
+
 	for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
 	{
 		if (playing_notes_duration[playing_notes_i])
@@ -353,6 +385,8 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 
 	static bool euclidean_reset = true;
 
+	uint8_t octaves_size = 4;
+
 	uint8_t chord_list_length = 5;
 	uint8_t chords_list[chord_list_length];
 
@@ -372,15 +406,16 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		{
 			if (steps % step_gap == 0)
 			{
-				printf("Current euclidean steps : ");
-				for (int i = 0; i < steps; i++)
-				{
-					printf("%d, ", euclidean_steps[i]);
-				}
-				printf("\n");
+				// printf("Current euclidean steps : ");
+				// for (int i = 0; i < steps; i++)
+				// {
+				// 	printf("%d, ", euclidean_steps[i]);
+				// }
+				// printf("\n");
 				//random func
 				euclidean_steps[steps] = get_new_chord_from_list(chords_list, chord_list_length, steps, euclidean_steps);
-				// euclidean_steps[steps] = chords_list[rand() % chord_list_length];
+				euclidean_steps[steps] |= (rand() % octaves_size) << 4;//add octave property
+				
 				printf("New step : %d\n", euclidean_steps[steps]);
 				
 				// euclidean_steps[steps] = rand() % chord_list_length;
@@ -412,9 +447,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 
 
 	// uint8_t note_index = rand() % chord_list_length;
-	static uint8_t playing_notes_length = 12;
-	static uint8_t playing_notes[12];
-	static uint8_t playing_notes_duration[12];
+
 
 
 	uint16_t measure_length_divs = 512;
@@ -423,12 +456,19 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 
 	for (int current_step = 0; current_step < euclidean_steps_length; current_step++)
 	{
-		printf("New step\n");
+		// printf("New step\n");
+		printf("\033[1;31mNew step\033[1;37m\n\n");
+
 
 		if (euclidean_steps[current_step] != -1)
 		{
 			create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
-				mode, euclidean_steps[current_step],A4 , 3, 105, 3);
+				mode, euclidean_steps[current_step],A3 , 2, 105, 6);
+				// printf("Create func\n");
+				// for (uint8_t i = 0; i < playing_notes_length; i++)
+				// {
+				// 	printf("Playing notes[%d] : N = %d, D = %d\n", i, playing_notes[i], playing_notes_duration[i]);
+				// }
 		}
 		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
 		uint16_t tmp_divs;
@@ -1235,6 +1275,30 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, \
 }
 
 
+/**
+  * @brief Terminate properly midi notes (for exiting file/program)
+  * @param [music_data] Midi struct of midi file
+*/
+void terminate_notes(t_music_data *music_data)
+{
+		// remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
+	printf("\033[1;96mTerminate func\n");
+	for (uint8_t i = 0; i < playing_notes_length; i++)
+	{
+		printf("Playing notes[%d] : N = %d, D = %d\n", i, playing_notes[i], playing_notes_duration[i]);
+	}
+	printf("\033[1;37m\n");
+
+	for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
+	{
+		if (playing_notes_duration[playing_notes_i])
+		{
+				// end note
+				midi_write_measure_note(music_data, OFF, 1, playing_notes[playing_notes_i], 0);
+				playing_notes[playing_notes_i] = 0;
+		}
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -1376,6 +1440,7 @@ int main(int argc, char **argv)
 				>= music_data.partition_duration)
 			{
 				printf("Midi write end\n");
+				terminate_notes(&music_data);
 				midi_write_end(&music_data);
 			}
 			
@@ -1412,6 +1477,9 @@ int main(int argc, char **argv)
 	// printf("MIDI prgrm EXIT\n");
 	if (music_data.midi_file) //&& music_data.midi_file_redundancy?
 	{
+		printf("Midi write end 2\n");
+		terminate_notes(&music_data);
+
 		midi_write_end(&music_data);
 	}
 	return (0);
