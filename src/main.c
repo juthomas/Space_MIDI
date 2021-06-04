@@ -12,9 +12,9 @@
 // 							   .quarter_value = 500000 };
 
 
-static uint8_t playing_notes_length = 12;
-static uint8_t playing_notes[12];
-static uint8_t playing_notes_duration[12];
+static uint8_t playing_notes_length = 24;
+static uint8_t playing_notes[24];
+static uint8_t playing_notes_duration[24];
 
 
 static bool g_exit_requested = false;
@@ -367,23 +367,26 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 {
 	printf("New measure\n");
 
-	//Change Rapidity
-	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 50000);
-	update_quarter_value(music_data);
-
+	//caroussel
+	//organ
+	
 	printf("Organ value : %d; %d; %d; %d; %d\n", \
 		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
 		 sensors_data->organ_5, sensors_data->organ_6);
 
+	//Change Rapidity
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 50000);
+	update_quarter_value(music_data);
+
 	// Number of steps in cycle
-	const uint8_t euclidean_steps_length = 8;
+	const uint8_t euclidean_steps_length = 16;
 	static int16_t euclidean_steps[euclidean_steps_length];
 
 	//Request a new pool of chords
 	static bool euclidean_reset = true;
 
 	//Number of octaves range to play
-	uint8_t octaves_size = 3;
+	uint8_t octaves_size = 2;
 
 	//Number of chords allowed
 	uint8_t chord_list_length = 5;
@@ -394,19 +397,19 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	uint8_t mode_beg_note = A3;
 
 	//Number of notes per cycle
-	uint8_t notes_per_cycle = 4;
+	uint8_t notes_per_cycle = 9;
 	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
 
 	//Skip chance (0-100)
-	uint8_t mess_chance = 30;
+	uint8_t mess_chance = (uint8_t)map_number(sensors_data->carousel_state, 0, 180, 60, 0);
 
 	//Chord size
 	uint8_t min_chord_size = 1;
 	uint8_t max_chord_size = 3;
 
 	//Velocity
-	uint8_t min_velocity = 80;
-	uint8_t max_velocity = 120;
+	uint8_t min_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 115);
+	uint8_t max_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 127);
 
 	//Note steps duration
 	uint8_t min_steps_duration = 2;
