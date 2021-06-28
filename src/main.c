@@ -2,6 +2,7 @@
 #include "../inc/json_parser.h"
 #include "../inc/midi_notes.h"
 #include "../inc/midi_modes.h"
+#include "../inc/midi_euclidean.h"
 
 // 							//durée d'une partition 40 000 000us
 // static t_music_data music_data = {.partition_duration = 40000000,
@@ -357,6 +358,43 @@ int16_t	get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length,
 		return(chords_list[rand() % chord_list_length]);
 	}
 }
+
+
+void	init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
+							uint8_t octave_size, uint8_t chord_list_length, \
+							uint8_t mode, uint8_t mode_beg_note, \
+							uint8_t notes_per_cycle, uint8_t step_gap, \
+							uint8_t mess_chance, uint8_t min_chord_size, \
+							uint8_t max_chord_size)
+{
+	euclidean->euclidean_step_length = steps_length;
+	euclidean->euclidean_step_length = (int16_t*)malloc(sizeof(int16_t) * steps_length);
+	euclidean->octave_size = octave_size;
+	euclidean->chord_list_length = chord_list_length;
+	euclidean->chord_list = (uint8_t*)malloc(sizeof(uint8_t) * chord_list_length);
+	euclidean->mode = mode;
+	euclidean->mode_beg_note = mode_beg_note;
+	euclidean->notes_per_cycle = notes_per_cycle;
+	euclidean->step_gap = step_gap;
+	euclidean->mess_chance = mess_chance;
+	euclidean->min_chord_size = min_chord_size;
+	euclidean->max_chord_size = max_chord_size;
+	get_chords_list(euclidean->chord_list, chord_list_length);
+
+}
+
+/**
+  * @brief Function to write an multiple Euclidean (4 tps / measure)
+  * @param [music_data] Midi struct
+  * @param [sensors_data] Struct that contain current sensors datas
+*/
+void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_data)
+{
+	/* static  */t_euclidean euclidean_1;
+
+
+}
+
 
 /**
   * @brief Function to write an Euclidean measure
