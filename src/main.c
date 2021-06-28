@@ -375,45 +375,45 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		 sensors_data->organ_5, sensors_data->organ_6);
 
 	//Change Rapidity
-	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 50000);
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 10000000, 50000);
 	update_quarter_value(music_data);
 
 	// Number of steps in cycle
-	const uint8_t euclidean_steps_length = 16;
+	const uint8_t euclidean_steps_length = 20;
 	static int16_t euclidean_steps[euclidean_steps_length];
 
 	//Request a new pool of chords
 	static bool euclidean_reset = true;
 
 	//Number of octaves range to play
-	uint8_t octaves_size = 2;
+	uint8_t octaves_size = 4;
 
 	//Number of chords allowed
-	uint8_t chord_list_length = 5;
+	uint8_t chord_list_length = 8;
 	uint8_t chords_list[chord_list_length];
 
 	//Music Mode
-	uint8_t mode = M_MODE_HARMONIC_MINOR;
-	uint8_t mode_beg_note = A3;
+	uint8_t mode = M_MODE_MELODIC_MINOR;
+	uint8_t mode_beg_note = A2;
 
 	//Number of notes per cycle
-	uint8_t notes_per_cycle = 9;
+	uint8_t notes_per_cycle = 13;
 	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
 
 	//Skip chance (0-100)
-	uint8_t mess_chance = (uint8_t)map_number(sensors_data->carousel_state, 0, 180, 60, 0);
+	uint8_t mess_chance = (uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0);
 
 	//Chord size
-	uint8_t min_chord_size = 1;
+	uint8_t min_chord_size = 2;
 	uint8_t max_chord_size = 3;
 
 	//Velocity
-	uint8_t min_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 115);
-	uint8_t max_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 127);
+	uint8_t min_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 105);
+	uint8_t max_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 114);
 
 	//Note steps duration
-	uint8_t min_steps_duration = 2;
-	uint8_t max_steps_duration = 6;
+	uint8_t min_steps_duration = 3;
+	uint8_t max_steps_duration = 13;
 
 	get_chords_list(chords_list, chord_list_length);
 	//static
@@ -1321,11 +1321,11 @@ int main(int argc, char **argv)
 							   .measure_value = 1000000 * 4,
 							   .measures_writed = 0,//
 							   .delta_time = 0,
-							   .quarter_value_step = 80000,// Acceleration value 
-							   .quarter_value_goal = 1000000,//equal to value
+							   .quarter_value_step = 1000000,// Acceleration value 
+							   .quarter_value_goal = 10000000,//equal to value
 							   // valeur d'une noire en us (pour le tempo)
 							   .quarter_value = 1000000,
-							   .current_quarter_value = 1000000};
+							   .current_quarter_value = 10000000};
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 	char *outputDirectoryRedundancy = "midi_files";
