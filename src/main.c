@@ -12,11 +12,9 @@
 // 							   // valeur d'une noire en us (pour le tempo)
 // 							   .quarter_value = 500000 };
 
-
 static uint8_t playing_notes_length = 24;
 static uint8_t playing_notes[24];
 static uint8_t playing_notes_duration[24];
-
 
 static bool g_exit_requested = false;
 
@@ -40,8 +38,8 @@ int32_t map_number(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, i
   * @param [filename_redundancy] futur name of midi file redundancy
   * @param [music_data] Midi struct
 */
-void midi_setup_file(char *filename, char *filename_redundancy, \
-	t_music_data *music_data)
+void midi_setup_file(char *filename, char *filename_redundancy,
+					 t_music_data *music_data)
 {
 	music_data->midi_file = fopen(filename, "wb");
 	music_data->midi_file_redundancy = fopen(filename_redundancy, "wb");
@@ -66,8 +64,8 @@ void midi_setup_file(char *filename, char *filename_redundancy, \
 void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 							 unsigned char channel, unsigned char note, unsigned char velocity)
 {
-	printf("\033[1;35mwrite measure note : state=%s channel=%d note=%d velocity=%d\033[1;37m\n\n", \
-		(state == ON ? "ON" : "OFF"), channel, note, velocity);
+	printf("\033[1;35mwrite measure note : state=%s channel=%d note=%d velocity=%d\033[1;37m\n\n",
+		   (state == ON ? "ON" : "OFF"), channel, note, velocity);
 	MIDI_delta_time(music_data->midi_file, 0);
 	MIDI_delta_time(music_data->midi_file_redundancy, 0);
 	MIDI_Note(music_data->midi_file, state, channel, note, velocity);
@@ -91,7 +89,6 @@ void midi_delay_quarter(t_music_data *music_data)
 	MIDI_Note(music_data->midi_file, OFF, 1, 10, 0);
 	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 0);
 }
-
 
 /**
   * @brief Simply wait for a heighth of measure
@@ -131,18 +128,15 @@ void midi_delay_divs(t_music_data *music_data, uint16_t divs)
 	MIDI_Note(music_data->midi_file_redundancy, OFF, 1, 10, 0);
 }
 
-
 void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 {
 	// uint8_t *mode_phrygien = g_midi_mode[M_MODE_DORIEN_DIEZ4].mode_sequence;
-	
+
 	for (int i = 0; i < 7; i++)
 	{
-		gamme[i] = g_midi_mode[music_mode].starting_note \
-		+ g_midi_mode[music_mode].mode_sequence[i];
+		gamme[i] = g_midi_mode[music_mode].starting_note + g_midi_mode[music_mode].mode_sequence[i];
 	}
 }
-
 
 /**
   * @brief Update quarter value to match with quarter value goal 
@@ -166,7 +160,7 @@ void update_quarter_value(t_music_data *music_data)
 		}
 		else
 		{
-			if (music_data->current_quarter_value - music_data->quarter_value_goal< music_data->quarter_value_step)
+			if (music_data->current_quarter_value - music_data->quarter_value_goal < music_data->quarter_value_step)
 			{
 				music_data->current_quarter_value = music_data->quarter_value_goal;
 			}
@@ -178,13 +172,12 @@ void update_quarter_value(t_music_data *music_data)
 	}
 }
 
-
 /**
   * @brief Try to play/stop selected note at correct timing
   * @param [music_data] Midi struct
   * @param [note] note to play/stop
 */
-void	midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, uint8_t current_heighth)
+void midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, uint8_t current_heighth)
 {
 	if (note.active && note.beg_eighth == current_heighth)
 	{
@@ -206,7 +199,7 @@ void get_chords_list(uint8_t *chords_list, uint8_t chords_size)
 	// uint8_t chords_list[chords_size];
 
 	for (uint8_t i = 0; i < chords_size; i++)
-	{																			//i * 2
+	{ //i * 2
 		// chords_list[i] = /* starting_note + */ g_midi_mode[mode].mode_sequence[(i * 2) % 7];
 		chords_list[i] = /* starting_note + */ (i * 2) % 7;
 	}
@@ -226,18 +219,16 @@ void get_chords_list(uint8_t *chords_list, uint8_t chords_size)
   * @param [velocity] Velocity of chord/note
   * @param [steps_duration] Duration of note converted in euclidean steps
 */
-void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uint8_t *playing_notes, \
-	uint8_t playing_notes_length, uint8_t mode, int16_t note_i, \
-	uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
+void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uint8_t *playing_notes,
+				  uint8_t playing_notes_length, uint8_t mode, int16_t note_i,
+				  uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
 {
 	bool current_note_done = false;
 
 	printf("\033[1;32mChord to play\n");
 	for (int i = 0; i < chord_size; i++)
 	{
-		printf("Note Chord[%d] : %d\n", i, note_offset + ((note_i & 0xFF00) >> 8) * 12 \
-					+ g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * i)% 7] \
-					+ 12 * (((note_i & 0xFF) + 2 * i) / 7));
+		printf("Note Chord[%d] : %d\n", i, note_offset + ((note_i & 0xFF00) >> 8) * 12 + g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * i) % 7] + 12 * (((note_i & 0xFF) + 2 * i) / 7));
 	}
 	printf("\033[1;37m\n");
 
@@ -248,17 +239,14 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 		//Just add time to that note
 		for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
 		{
-				if (playing_notes[playing_notes_i] == note_offset + ((note_i & 0xFF00) >> 8) * 12 \
-					+ g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note)% 7] \
-					+ 12 * (((note_i & 0xFF) + 2 * current_note) / 7))
-					{
-				// printf("Note_i P1: %d, current_note : %d, calcul : %d, calcul_tab : %d\n", (note_i & 0b1111), current_note,((note_i & 0b1111) + 2 * current_note)% 7, 
+			if (playing_notes[playing_notes_i] == note_offset + ((note_i & 0xFF00) >> 8) * 12 + g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note) % 7] + 12 * (((note_i & 0xFF) + 2 * current_note) / 7))
+			{
+				// printf("Note_i P1: %d, current_note : %d, calcul : %d, calcul_tab : %d\n", (note_i & 0b1111), current_note,((note_i & 0b1111) + 2 * current_note)% 7,
 				// g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * current_note)% 7] );
-						
-						
-						playing_notes_duration[playing_notes_i] = steps_duration;
-						current_note_done = true;
-					}
+
+				playing_notes_duration[playing_notes_i] = steps_duration;
+				current_note_done = true;
+			}
 		}
 		//If the note isnt played
 		//Create that note !
@@ -266,14 +254,11 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 		{
 			if (!playing_notes_duration[playing_notes_i])
 			{
-				// printf("Note_i : %d, current_note : %d, calcul : %d, calcul_tab : %d\n", (note_i & 0b1111), current_note,((note_i & 0b1111) + 2 * current_note)% 7, 
+				// printf("Note_i : %d, current_note : %d, calcul : %d, calcul_tab : %d\n", (note_i & 0b1111), current_note,((note_i & 0b1111) + 2 * current_note)% 7,
 				// g_midi_mode[mode].mode_sequence[((note_i & 0b1111) + 2 * current_note)% 7] );
 
-
 				playing_notes_duration[playing_notes_i] = steps_duration;
-				playing_notes[playing_notes_i] = note_offset + ((note_i & 0xFF00) >> 8) * 12 \
-					+ g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note)% 7] \
-					+ 12 * (((note_i & 0xFF) + 2 * current_note) / 7);
+				playing_notes[playing_notes_i] = note_offset + ((note_i & 0xFF00) >> 8) * 12 + g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note) % 7] + 12 * (((note_i & 0xFF) + 2 * current_note) / 7);
 				// beg note
 				midi_write_measure_note(music_data, ON, 1, playing_notes[playing_notes_i], velocity);
 				break;
@@ -289,8 +274,8 @@ void	create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
   * @param [playing_notes] Tab of current playing notes
   * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
 */
-void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
-	uint8_t *playing_notes, uint8_t playing_notes_length)
+void remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration,
+				  uint8_t *playing_notes, uint8_t playing_notes_length)
 {
 
 	printf("\033[1;96mRM func\n");
@@ -318,10 +303,10 @@ void	remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration, \
 // Create list of avaible chords
 // then random on it
 // if list is empty, just pick random chord
-int16_t	get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length, uint8_t current_step, int16_t *euclidean_steps)
+int16_t get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length, uint8_t current_step, int16_t *euclidean_steps)
 {
-		// euclidean_steps[current_step] = chords_list[rand() % chord_list_length];
-	
+	// euclidean_steps[current_step] = chords_list[rand() % chord_list_length];
+
 	int16_t chord_to_test = 0;
 	uint8_t steps = 0;
 
@@ -355,33 +340,125 @@ int16_t	get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length,
 	}
 	else
 	{
-		return(chords_list[rand() % chord_list_length]);
+		return (chords_list[rand() % chord_list_length]);
 	}
 }
 
-
-void	init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
-							uint8_t octave_size, uint8_t chord_list_length, \
-							uint8_t mode, uint8_t mode_beg_note, \
-							uint8_t notes_per_cycle, uint8_t step_gap, \
-							uint8_t mess_chance, uint8_t min_chord_size, \
-							uint8_t max_chord_size)
+/**
+  * @brief Initializing euclidean struct
+  * @param [euclidean] Euclidean Circle struct
+  * @param [steps_length] Number of steps in euclidean circle
+  * @param [octave_size] Range of playable notes
+  * @param [chord_list_length] Number of different possible chords in mode
+  * @param [mode] Music mode (e_midi_modes)
+  * @param [mode_beg_note] Reference note for the mode (e_notes)
+  * @param [notes_per_cycle] Number of notes playables in euclidean circle
+  * @param [mess_chance] Chance to skip a note/chord in euclidean circle (0-100)%
+  * @param [min_chord_size] Minimum length of chord/note played in euclidean step 
+  * @param [max_chord_size] Maximum length of chord/note played in euclidean step 
+  * @param [min_velocity] Minimum velocity for chord/note played
+  * @param [max_velocity] Maximum velocity for chord/note played
+  * @param [min_steps_duration] Minimum duration for chord/note played in euclidean step 
+  * @param [max_steps_duration] Maximum duration for chord/note played in euclidean step 
+*/
+void init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
+						   uint8_t octave_size, uint8_t chord_list_length, \
+						   uint8_t mode, uint8_t mode_beg_note, \
+						   uint8_t notes_per_cycle, uint8_t mess_chance, \
+						   uint8_t min_chord_size, uint8_t max_chord_size, \
+						   uint8_t min_velocity, uint8_t max_velocity, \
+						   uint8_t min_steps_duration, uint8_t max_steps_duration)
 {
-	euclidean->euclidean_step_length = steps_length;
-	euclidean->euclidean_step_length = (int16_t*)malloc(sizeof(int16_t) * steps_length);
-	euclidean->octave_size = octave_size;
-	euclidean->chord_list_length = chord_list_length;
-	euclidean->chord_list = (uint8_t*)malloc(sizeof(uint8_t) * chord_list_length);
+	euclidean->euclidean_steps_length = steps_length;
+	euclidean->euclidean_steps = (int16_t *)malloc(sizeof(int16_t) * steps_length);
+	euclidean->octaves_size = octave_size;
+	euclidean->chords_list_length = chord_list_length;
+	euclidean->chords_list = (uint8_t *)malloc(sizeof(uint8_t) * chord_list_length);
 	euclidean->mode = mode;
 	euclidean->mode_beg_note = mode_beg_note;
 	euclidean->notes_per_cycle = notes_per_cycle;
-	euclidean->step_gap = step_gap;
+	euclidean->step_gap = steps_length / notes_per_cycle;
 	euclidean->mess_chance = mess_chance;
 	euclidean->min_chord_size = min_chord_size;
 	euclidean->max_chord_size = max_chord_size;
-	get_chords_list(euclidean->chord_list, chord_list_length);
+	get_chords_list(euclidean->chords_list, chord_list_length);
+	euclidean->min_velocity = min_velocity;
+	euclidean->max_velocity = max_velocity;
+	euclidean->min_steps_duration = min_steps_duration;
+	euclidean->max_steps_duration = max_steps_duration;
+	euclidean->current_step = 0;
+	euclidean->initialized = 1;
 
 }
+
+
+/**
+  * @brief Removing euclidean struct without leaks
+  * @param [euclidean] Euclidean Circle struct
+*/
+void	remove_euclidean_struct(t_euclidean *euclidean)
+{
+	free(euclidean->euclidean_steps);
+	free(euclidean->chords_list);
+}
+
+/**
+  * @brief Getting a new chord from chord list (Randomly)
+  *        and ajusting his pitch (Randomly)
+  *        this new chords are passing to the "euclidean_steps[]" variable
+  * @param [euclidean] Euclidean Circle struct
+*/
+void get_new_euclidean_chords(t_euclidean *euclidean)
+{
+	for (uint8_t steps = 0; steps < euclidean->euclidean_steps_length; steps++)
+	{
+		if (steps % euclidean->step_gap == 0)
+		{
+			euclidean->euclidean_steps[steps] = get_new_chord_from_list(euclidean->chords_list, \
+								 euclidean->chords_list_length, steps, euclidean->euclidean_steps);
+			euclidean->euclidean_steps[steps] |= (rand() % euclidean->octaves_size) << 8; //add octave property
+			printf("New step : %d\n", euclidean->euclidean_steps[steps]);
+		}
+		else
+		{
+			euclidean->euclidean_steps[steps] = -1;
+		}
+	}
+}
+
+/**
+  * @brief Print the content of euclidean Steps (Variable euclidean_steps[])
+  * @param [euclidean] Euclidean Circle struct
+*/
+void	print_euclidean_steps(t_euclidean *euclidean)
+{
+	for (uint8_t steps = 0; steps < euclidean->euclidean_steps_length; steps++)
+	{
+
+		printf("Step value : %d, octave : %d\n", euclidean->euclidean_steps[steps] & 0xFF, \
+										(euclidean->euclidean_steps[steps] & 0xFF00) >> 8);
+	}
+	printf("Chord list : ");
+	for (uint8_t chord_list_i = 0; chord_list_i < euclidean->chords_list_length; chord_list_i++)
+	{
+		printf("%d,", euclidean->chords_list[chord_list_i]);
+	}
+	printf("\n");
+}
+
+void	write_euclidean_step(t_music_data *music_data, t_euclidean *euclidean)
+{
+	if (euclidean->euclidean_steps[euclidean->current_step] != -1 && rand() % 100 >= euclidean->mess_chance)
+	{
+		create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length,
+						euclidean->mode, euclidean->euclidean_steps[euclidean->current_step], euclidean->mode_beg_note,
+						map_number(rand() % 100, 0, 100, euclidean->min_chord_size, euclidean->max_chord_size),			/*chord size*/
+						map_number(rand() % 100, 0, 100, euclidean->min_velocity, euclidean->max_velocity),				/*velocity*/
+						map_number(rand() % 100, 0, 100, euclidean->min_steps_duration, euclidean->max_steps_duration)); /*note duration in steps*/
+	}
+	euclidean->current_step = (euclidean->current_step + 1) % euclidean->euclidean_steps_length;
+}
+
 
 /**
   * @brief Function to write an multiple Euclidean (4 tps / measure)
@@ -390,11 +467,99 @@ void	init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
 */
 void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_data)
 {
-	/* static  */t_euclidean euclidean_1;
+	const uint8_t euclidean_datas_length = 3;
+	static t_euclidean euclidean_datas[euclidean_datas_length] = {0};
+	static uint8_t reset_needed = 1;
 
+	for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
+	{
+		if (!euclidean_datas[current_euclidean_data].initialized)
+		{
+			init_euclidean_struct(&euclidean_datas[current_euclidean_data],
+									20, /* steps_length */
+									1, /* octave_size */
+									8, /* chord_list_length */
+									M_MODE_MELODIC_MINOR, /* mode */
+									A1 + current_euclidean_data * 12 * 2, /* mode_beg_note */
+									13, /* notes_per_cycle */
+									(uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
+									2, /* min_chord_size */
+									3, /* max_chord_size */
+									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 105), /* min_velocity */
+									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 114), /* max_velocity */
+									2, /* min_steps_duration */
+									3 /* max_steps_duration */
+									);
+			if (current_euclidean_data == 0)
+			{
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 12;
+				euclidean_datas[current_euclidean_data].notes_per_cycle = 3;
+				euclidean_datas[current_euclidean_data].mess_chance = 0;
+			}
+			else if (current_euclidean_data == 1)
+			{
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 6;
+				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
+				euclidean_datas[current_euclidean_data].mess_chance = 0;
+
+			}
+			else if (current_euclidean_data == 2)
+			{
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 7;
+				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
+				euclidean_datas[current_euclidean_data].mess_chance = 0;
+
+			}
+
+
+
+		}
+	}
+
+	if (reset_needed)
+	{
+		for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
+		{
+			get_new_euclidean_chords(&euclidean_datas[current_euclidean_data]);
+		}
+		reset_needed = 0;
+	}
+
+	for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
+	{
+		printf("\nEuclidean Cirle %d :\n", current_euclidean_data);
+		print_euclidean_steps(&euclidean_datas[current_euclidean_data]);
+	}
+
+
+	uint16_t div_counter = 0;
+	uint16_t div_goal = 512; //Whole division (quarter * 4)
+	uint16_t looseness = 10; //Humanization in divisions delta, cannot be superior of divgoal / 8
+
+
+	for (uint8_t current_quarter = 0; current_quarter < 4; current_quarter++)
+	{
+		uint16_t current_div_duration;
+
+		for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
+		{
+			write_euclidean_step(music_data, &euclidean_datas[current_euclidean_data]);
+		}
+
+		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
+		if (current_quarter == 3)
+		{
+			current_div_duration = div_goal - div_counter;
+		}
+		else
+		{
+			current_div_duration = div_goal / 4 - looseness + rand() % (looseness * 2);
+		}
+		midi_delay_divs(music_data, current_div_duration);
+		div_counter += current_div_duration;
+	}
 
 }
-
 
 /**
   * @brief Function to write an Euclidean measure
@@ -407,10 +572,10 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 
 	//caroussel
 	//organ
-	
-	printf("Organ value : %d; %d; %d; %d; %d\n", \
-		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
-		 sensors_data->organ_5, sensors_data->organ_6);
+
+	printf("Organ value : %d; %d; %d; %d; %d\n",
+		   sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4,
+		   sensors_data->organ_5, sensors_data->organ_6);
 
 	//Change Rapidity
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 10000000, 50000);
@@ -463,10 +628,10 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 			if (steps % step_gap == 0)
 			{
 				euclidean_steps[steps] = get_new_chord_from_list(chords_list, chord_list_length, steps, euclidean_steps);
-				euclidean_steps[steps] |= (rand() % octaves_size) << 8;//add octave property
-				
+				euclidean_steps[steps] |= (rand() % octaves_size) << 8; //add octave property
+
 				printf("New step : %d\n", euclidean_steps[steps]);
-				
+
 				// euclidean_steps[steps] = rand() % chord_list_length;
 			}
 			else
@@ -483,7 +648,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		{
 
 			printf("Step value : %d, octave : %d\n", euclidean_steps[steps] & 0xFF, (euclidean_steps[steps] & 0xFF00) >> 8);
-
 		}
 		printf("Chord list : ");
 		for (uint8_t chord_list_i = 0; chord_list_i < chord_list_length; chord_list_i++)
@@ -493,39 +657,28 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		printf("\n");
 	}
 
-
-
 	// uint8_t note_index = rand() % chord_list_length;
-
-
 
 	uint16_t measure_length_divs = 512;
 	uint16_t current_measure_length_divs = 0;
-
 
 	for (int current_step = 0; current_step < euclidean_steps_length; current_step++)
 	{
 		// printf("New step\n");
 		printf("\033[1;31mNew step\033[1;37m\n\n");
 
-
 		if (euclidean_steps[current_step] != -1 && rand() % 100 >= mess_chance)
 		{
-			create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length, \
-				mode, euclidean_steps[current_step],mode_beg_note, \
-				map_number(rand() % 100, 0, 100, min_chord_size, max_chord_size), /*chord size*/ \
-				map_number(rand() % 100, 0, 100, min_velocity, max_velocity), /*velocity*/ \
-				map_number(rand() % 100, 0, 100, min_steps_duration, max_steps_duration)); /*note duration in steps*/
-
-
-
-
+			create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length,
+						 mode, euclidean_steps[current_step], mode_beg_note,
+						 map_number(rand() % 100, 0, 100, min_chord_size, max_chord_size),			/*chord size*/
+						 map_number(rand() % 100, 0, 100, min_velocity, max_velocity),				/*velocity*/
+						 map_number(rand() % 100, 0, 100, min_steps_duration, max_steps_duration)); /*note duration in steps*/
 		}
 		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
 		uint16_t tmp_divs;
-		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / (current_step + 1))) \
-					- current_measure_length_divs;
-		midi_delay_divs(music_data,tmp_divs);
+		tmp_divs = (int16_t)(measure_length_divs / ((float)euclidean_steps_length / (current_step + 1))) - current_measure_length_divs;
+		midi_delay_divs(music_data, tmp_divs);
 		current_measure_length_divs += tmp_divs;
 	}
 }
@@ -538,7 +691,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	uint8_t gamme[7];
-	int8_t	octave_offset = 0;
+	int8_t octave_offset = 0;
 	get_music_mode(gamme, sensors_data->spectrum > 10000 ? M_MODE_PHRYGIAN : M_MODE_HARMONIC_MINOR);
 
 	octave_offset = (int8_t)map_number(sensors_data->carousel_state, 0, 160, -3, 3) * 12;
@@ -546,59 +699,53 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	update_quarter_value(music_data);
 	// printf("Quarter current value :", );
 	t_note first_note = {.active = 1,
-						.beg_eighth = 1, 
-						.eighth_duration = (rand() % 6) + 1, 
-						.velocity = (rand() % 64) + 64, 
-						.channel = 1, 
-						.note = gamme[(uint8_t)sensors_data->temperature_1 % 7] + octave_offset};
-	t_note second_note = { .active = sensors_data->organ_2 > 2 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
-	t_note third_note = { .active = sensors_data->organ_3 > 2.3 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
-	t_note fourth_note = { .active = sensors_data->organ_4 > 2.6 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
+						 .beg_eighth = 1,
+						 .eighth_duration = (rand() % 6) + 1,
+						 .velocity = (rand() % 64) + 64,
+						 .channel = 1,
+						 .note = gamme[(uint8_t)sensors_data->temperature_1 % 7] + octave_offset};
+	t_note second_note = {.active = sensors_data->organ_2 > 2 ? 1 : 0,
+						  .beg_eighth = rand() % 6,
+						  .eighth_duration = (rand() % 2) + 1,
+						  .velocity = (rand() % 64) + 64,
+						  .channel = 1,
+						  .note = gamme[rand() % 7] + octave_offset};
+	t_note third_note = {.active = sensors_data->organ_3 > 2.3 ? 1 : 0,
+						 .beg_eighth = rand() % 6,
+						 .eighth_duration = (rand() % 2) + 1,
+						 .velocity = (rand() % 64) + 64,
+						 .channel = 1,
+						 .note = gamme[rand() % 7] + octave_offset};
+	t_note fourth_note = {.active = sensors_data->organ_4 > 2.6 ? 1 : 0,
+						  .beg_eighth = rand() % 6,
+						  .eighth_duration = (rand() % 2) + 1,
+						  .velocity = (rand() % 64) + 64,
+						  .channel = 1,
+						  .note = gamme[rand() % 7] + octave_offset};
 
-	t_note sixth_note = { .active = sensors_data->organ_4 > 3 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
+	t_note sixth_note = {.active = sensors_data->organ_4 > 3 ? 1 : 0,
+						 .beg_eighth = rand() % 6,
+						 .eighth_duration = (rand() % 2) + 1,
+						 .velocity = (rand() % 64) + 64,
+						 .channel = 1,
+						 .note = gamme[rand() % 7] + octave_offset};
 
-	t_note seventh_note = { .active = sensors_data->organ_4 > 3.3 ? 1 : 0,
-							.beg_eighth = rand() % 6,
-							.eighth_duration = (rand() % 2) + 1,
-							.velocity = (rand() % 64) + 64,
-							.channel = 1,
-							.note = gamme[rand()%7] + octave_offset
-						};
+	t_note seventh_note = {.active = sensors_data->organ_4 > 3.3 ? 1 : 0,
+						   .beg_eighth = rand() % 6,
+						   .eighth_duration = (rand() % 2) + 1,
+						   .velocity = (rand() % 64) + 64,
+						   .channel = 1,
+						   .note = gamme[rand() % 7] + octave_offset};
 
-	printf("Organ value : %d; %d; %d; %d; %d\n", \
-		 sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4, \
-		 sensors_data->organ_5, sensors_data->organ_6);
+	printf("Organ value : %d; %d; %d; %d; %d\n",
+		   sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4,
+		   sensors_data->organ_5, sensors_data->organ_6);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 1/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 1/8                       ||
+	//  ||                                                    ||
 	// midi_write_measure_note(music_data, ON, 1, gamme[0], 64);
-
 
 	midi_write_measure_heighth_updater(music_data, first_note, 1);
 	midi_write_measure_heighth_updater(music_data, second_note, 1);
@@ -607,20 +754,17 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 1);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 1);
 
-
-
-
-//  ||                                                    ||
-//  ||                      T = 1/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 1/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
-	
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 2/8                       ||
-//  ||                                                    ||
+
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 2/8                       ||
+	//  ||                                                    ||
 
 	midi_write_measure_heighth_updater(music_data, first_note, 2);
 	midi_write_measure_heighth_updater(music_data, second_note, 2);
@@ -629,22 +773,21 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 2);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 2);
 
-
 	// midi_write_measure_note(music_data, OFF, 1, gamme[0], 0);
 
 	// midi_write_measure_note(music_data, ON, 1,
 	// 						gamme[(uint32_t)sensors_data->photodiode_1 % 7], 64);
-//  ||                                                    ||
-//  ||                      T = 2/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 2/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 3/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 3/8                       ||
+	//  ||                                                    ||
 	midi_write_measure_heighth_updater(music_data, first_note, 3);
 	midi_write_measure_heighth_updater(music_data, second_note, 3);
 	midi_write_measure_heighth_updater(music_data, third_note, 3);
@@ -652,21 +795,20 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 3);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 3);
 
-
 	// midi_write_measure_note(music_data, OFF, 1,
 	// 						gamme[(uint32_t)sensors_data->photodiode_1 % 7], 0);
 
-//  ||                                                    ||
-//  ||                      T = 3/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 3/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 4/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 4/8                       ||
+	//  ||                                                    ||
 
 	midi_write_measure_heighth_updater(music_data, first_note, 4);
 	midi_write_measure_heighth_updater(music_data, second_note, 4);
@@ -675,18 +817,17 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 4);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 4);
 
-
-//  ||                                                    ||
-//  ||                      T = 4/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 4/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 5/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 5/8                       ||
+	//  ||                                                    ||
 
 	midi_write_measure_heighth_updater(music_data, first_note, 5);
 	midi_write_measure_heighth_updater(music_data, second_note, 5);
@@ -695,18 +836,17 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 5);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 5);
 
-
-//  ||                                                    ||
-//  ||                      T = 5/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 5/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 6/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 6/8                       ||
+	//  ||                                                    ||
 
 	midi_write_measure_heighth_updater(music_data, first_note, 6);
 	midi_write_measure_heighth_updater(music_data, second_note, 6);
@@ -715,18 +855,17 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 6);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 6);
 
-
-//  ||                                                    ||
-//  ||                      T = 6/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 6/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 7/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 7/8                       ||
+	//  ||                                                    ||
 
 	midi_write_measure_heighth_updater(music_data, first_note, 7);
 	midi_write_measure_heighth_updater(music_data, second_note, 7);
@@ -735,18 +874,17 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 7);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 7);
 
-
-//  ||                                                    ||
-//  ||                      T = 7/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 7/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = 8/8                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 8/8                       ||
+	//  ||                                                    ||
 	midi_write_measure_heighth_updater(music_data, first_note, 8);
 	midi_write_measure_heighth_updater(music_data, second_note, 8);
 	midi_write_measure_heighth_updater(music_data, third_note, 8);
@@ -754,17 +892,17 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 8);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 8);
 
-//  ||                                                    ||
-//  ||                      T = 8/8                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = 8/8                       ||
+	//  ||                                                    ||
+	//    ====================================================
 
 	midi_delay_heighth(music_data);
 
-//    ====================================================
-//  ||                                                    ||
-//  ||                      T = END                       ||
-//  ||                                                    ||
+	//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = END                       ||
+	//  ||                                                    ||
 
 	midi_write_measure_heighth_updater(music_data, first_note, 9);
 	midi_write_measure_heighth_updater(music_data, second_note, 9);
@@ -773,14 +911,11 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 	midi_write_measure_heighth_updater(music_data, sixth_note, 9);
 	midi_write_measure_heighth_updater(music_data, seventh_note, 9);
 
-
-//  ||                                                    ||
-//  ||                      T = END                       ||
-//  ||                                                    ||
-//    ====================================================
+	//  ||                                                    ||
+	//  ||                      T = END                       ||
+	//  ||                                                    ||
+	//    ====================================================
 }
-
-
 
 /**
   * @brief Write end of midi file (and close it)
@@ -794,8 +929,8 @@ void midi_write_end(t_music_data *music_data)
 	MIDI_write_track_length(music_data->midi_file_redundancy, music_data->midi_mark_redundancy);
 	fclose(music_data->midi_file);
 	fclose(music_data->midi_file_redundancy);
-	music_data->midi_file = NULL;// new
-	music_data->midi_file_redundancy = NULL;// new
+	music_data->midi_file = NULL;			 // new
+	music_data->midi_file_redundancy = NULL; // new
 }
 
 // TODO : Create new data file with sensors data
@@ -864,11 +999,10 @@ int8_t cmp_filename(struct dirent *file)
 	return (ret == 6);
 }
 
-void print_time(char *beg,uint32_t time, char *end)
+void print_time(char *beg, uint32_t time, char *end)
 {
-	printf("%s%02dh%02dm%02ds(%d)%s", beg, time/60/60, time/60%60, time%60, time, end);
+	printf("%s%02dh%02dm%02ds(%d)%s", beg, time / 60 / 60, time / 60 % 60, time % 60, time, end);
 }
-
 
 /**
   * @brief Debug function, print current sensors datas
@@ -884,7 +1018,7 @@ void print_sensors_data(t_sensors *sensors_data)
 	while (sensors_tmp)
 	{
 		// printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
-		printf("%scurrent data : %d\n","\033[1;35m", current_data);
+		printf("%scurrent data : %d\n", "\033[1;35m", current_data);
 		print_time("> Time : ", sensors_tmp->time, "\n\033[1;37m");
 		current_data++;
 		// printf("Photodiodes\n");
@@ -966,7 +1100,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 		printf("Object expected\n");
 		return (NULL);
 	}
-	uint32_t nu_of_measures = 0;// Usefull?
+	uint32_t nu_of_measures = 0; // Usefull?
 
 	t_sensors *sensors_data;
 	t_sensors *current_sensors;
@@ -986,7 +1120,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 			if (JSON_cmp(file_content, &t[i], "Time") == 0)
 			{
 				// printf("- Time: %.*s\n", t[i + 1].end - t[i + 1].start,
-					//    file_content + t[i + 1].start);
+				//    file_content + t[i + 1].start);
 				date_time_to_date_and_time(file_content + t[i + 1].start,
 										   &current_sensors->date, &current_sensors->time);
 				i += 2;
@@ -1164,10 +1298,6 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 				i += 1;
 			}
 
-
-
-
-
 			if (i + (34 * 2 + 2) < r)
 			{
 				(current_sensors->next) = (t_sensors *)malloc(sizeof(t_sensors));
@@ -1184,7 +1314,6 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	// printf("Number of measures : %d\n", nu_of_measures);
 	return (sensors_data);
 }
-
 
 /**
   * @brief Find the first file well formated alphabetically 
@@ -1265,11 +1394,15 @@ char *load_file(uint32_t *file_length, char *fileName)
   * @param [file_path] File path, /!\ cant be const /!\
   * @param [mode] Permission bit masks for mode
 */
-int make_path(char* file_path, mode_t mode) {
-	for (char* p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/')) {
+int make_path(char *file_path, mode_t mode)
+{
+	for (char *p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/'))
+	{
 		*p = '\0';
-		if (mkdir(file_path, mode) == -1) {
-			if (errno != EEXIST) {
+		if (mkdir(file_path, mode) == -1)
+		{
+			if (errno != EEXIST)
+			{
 				*p = '/';
 				return -1;
 			}
@@ -1287,25 +1420,25 @@ int make_path(char* file_path, mode_t mode) {
   * @param [output_directory_redundancy] location of redundancy midi file
   * @param [sensors_data] Struct that contain current sensors datas
 */
-void	create_dated_midi_file(t_music_data *music_data, char *output_directory, \
-		char *output_directory_redundancy, t_sensors *sensors_data)
+void create_dated_midi_file(t_music_data *music_data, char *output_directory,
+							char *output_directory_redundancy, t_sensors *sensors_data)
 {
 	time_t now;
 	struct tm tm_now;
 	char fileName[sizeof("AAAA_mm_JJ__HH_MM_SS.mid")];
 	char filePath[sizeof(fileName) + strlen(output_directory) + 1];
-	
+
 	char fileNameRedundancy[sizeof("AAAA_mm_JJ__HH_MM_SS_.mid")];
 	char filePathRedundancy[sizeof(fileNameRedundancy) + strlen(output_directory_redundancy) + 1];
 
 	if (sensors_data)
 	{
-		sprintf(fileName, "%04d_%02d_%02d__%02d_%02d_%02d.mid", \
-			sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,\
-			sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
-		sprintf(fileNameRedundancy, "%04d_%02d_%02d__%02d_%02d_%02d_.mid", \
-			sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,\
-			sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
+		sprintf(fileName, "%04d_%02d_%02d__%02d_%02d_%02d.mid",
+				sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,
+				sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
+		sprintf(fileNameRedundancy, "%04d_%02d_%02d__%02d_%02d_%02d_.mid",
+				sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,
+				sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
 	}
 	else //Ne passe normalement jamais ICI
 	{
@@ -1314,7 +1447,7 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, \
 		strftime(fileName, sizeof(fileName), "%Y_%m_%d__%H_%M_%S.mid", &tm_now);
 		strftime(fileNameRedundancy, sizeof(fileNameRedundancy), "%Y_%m_%d__%H_%M_%S_.mid", &tm_now);
 	}
-	
+
 	// printf("File Name : %s\n", fileName);
 	sprintf(filePath, "%s/%s", output_directory, fileName);
 	sprintf(filePathRedundancy, "%s/%s", output_directory_redundancy, fileNameRedundancy);
@@ -1325,14 +1458,13 @@ void	create_dated_midi_file(t_music_data *music_data, char *output_directory, \
 	midi_setup_file(filePath, filePathRedundancy, music_data);
 }
 
-
 /**
   * @brief Terminate properly midi notes (for exiting file/program)
   * @param [music_data] Midi struct of midi file
 */
 void terminate_notes(t_music_data *music_data)
 {
-		// remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
+	// remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
 	printf("\033[1;96mTerminate func\n");
 	for (uint8_t i = 0; i < playing_notes_length; i++)
 	{
@@ -1344,26 +1476,26 @@ void terminate_notes(t_music_data *music_data)
 	{
 		if (playing_notes_duration[playing_notes_i])
 		{
-				// end note
-				midi_write_measure_note(music_data, OFF, 1, playing_notes[playing_notes_i], 0);
-				playing_notes[playing_notes_i] = 0;
+			// end note
+			midi_write_measure_note(music_data, OFF, 1, playing_notes[playing_notes_i], 0);
+			playing_notes[playing_notes_i] = 0;
 		}
 	}
 }
 
 int main(int argc, char **argv)
 {
-								//durée d'une partition 40 000 000us
-	 t_music_data music_data = {.partition_duration = 60000000 * 10,
-								//Measure value = quarter value * 4 (4/4) (4 noires par mesure)
-							   .measure_value = 1000000 * 4,
-							   .measures_writed = 0,//
+	//durée d'une partition 40 000 000us
+	t_music_data music_data = {.partition_duration = 60000000 * 10,
+							   //Measure value = quarter value * 4 (4/4) (4 noires par mesure)
+							   .measure_value = 100000 * 4,
+							   .measures_writed = 0, //
 							   .delta_time = 0,
-							   .quarter_value_step = 1000000,// Acceleration value 
-							   .quarter_value_goal = 10000000,//equal to value
+							   .quarter_value_step = 100000,  // Acceleration value
+							   .quarter_value_goal = 500000, //equal to value
 							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 1000000,
-							   .current_quarter_value = 10000000};
+							   .quarter_value = 1000000,//define metadata 1000000=6 0bpm
+							   .current_quarter_value = 500000};
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 	char *outputDirectoryRedundancy = "midi_files";
@@ -1380,14 +1512,13 @@ int main(int argc, char **argv)
 		outputDirectory = argv[2];
 		outputDirectoryRedundancy = argv[3];
 	}
-	
 
 	signal(SIGTERM, (void (*)(int))terminate_session);
 
 	char *currentDataFileName;
 	t_sensors *sensorsData;
 	sensorsData = NULL;
-	currentDataFileName = (char*)malloc(sizeof(char) * 200);
+	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
 	//Main loop
 	while (!g_exit_requested)
@@ -1410,7 +1541,7 @@ int main(int argc, char **argv)
 				{
 					sensorsData = json_deserialize(file_length, file_content);
 				}
-				else// Normalement ne sert plus a R
+				else // Normalement ne sert plus a R
 				{
 					//verifier si ca c'est legit
 					sensorsData->next = json_deserialize(file_length, file_content);
@@ -1435,26 +1566,25 @@ int main(int argc, char **argv)
 			}
 		}
 		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
-		if (!music_data.midi_file && sensorsData)// && !music_data.midi_file_redundancy?
+		if (!music_data.midi_file && sensorsData) // && !music_data.midi_file_redundancy?
 		{
-			create_dated_midi_file(&music_data, outputDirectory, \
-				outputDirectoryRedundancy, sensorsData);
-			music_data.measures_writed = 0;//
-			music_data.data_time = 0;//
+			create_dated_midi_file(&music_data, outputDirectory,
+								   outputDirectoryRedundancy, sensorsData);
+			music_data.measures_writed = 0; //
+			music_data.data_time = 0;		//
 			music_data.delta_time = 0;
 		}
-		// Tant que les datas ne sont pas finies et qu'il reste 
+		// Tant que les datas ne sont pas finies et qu'il reste
 		// des mesures á ecrire dans le fichier midi, on ecrit les
 		// datas dans le fichier midi
 		while (music_data.midi_file && sensorsData) // && music_data.midi_file_redundancy?
 		{
 			if (music_data.data_time == 0)
 			{
-				music_data.data_time = sensorsData->time;// * 1000000;
+				music_data.data_time = sensorsData->time; // * 1000000;
 				music_data.entry_data_time = sensorsData->time;
 				// print_time("-_- new time : ",sensorsData->time, "\n");
-				
-				
+
 				// t_sensors *sensors_tmp;
 				// sensors_tmp = sensorsData->next;
 				// free(sensorsData);
@@ -1467,8 +1597,10 @@ int main(int argc, char **argv)
 				// 	music_data.current_quarter_value -= 5000;
 				// }
 				// midi_write_measure(&music_data, sensorsData);
-				midi_write_euclidean_measure(&music_data, sensorsData);
-				music_data.measures_writed++;//
+				midi_write_multiple_euclidean(&music_data, sensorsData);
+
+				// midi_write_euclidean_measure(&music_data, sensorsData);
+				music_data.measures_writed++; //
 				music_data.delta_time += (music_data.current_quarter_value * 4);
 				music_data.data_time = music_data.entry_data_time + ((music_data.delta_time) / 1000000);
 			}
@@ -1487,14 +1619,13 @@ int main(int argc, char **argv)
 			// }
 			// print_sensors_data(sensorsData);
 
-			if (music_data.delta_time
-				>= music_data.partition_duration)
+			if (music_data.delta_time >= music_data.partition_duration)
 			{
 				printf("Midi write end\n");
 				terminate_notes(&music_data);
 				midi_write_end(&music_data);
 			}
-			
+
 			if (!sensorsData->next)
 			{
 				break;
@@ -1503,7 +1634,7 @@ int main(int argc, char **argv)
 
 			// printf("datatime : %d, sensor time : %d\n",  music_data.data_time,  sensorsData->time);
 			// while (sensorsData->next && music_data.data_time > sensorsData->next->time)
-			while (sensorsData && music_data.data_time >= sensorsData->time)// >= ???
+			while (sensorsData && music_data.data_time >= sensorsData->time) // >= ???
 			{
 				if (sensorsData->next)
 				{
