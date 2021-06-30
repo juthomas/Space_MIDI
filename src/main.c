@@ -145,28 +145,45 @@ void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 */
 void update_quarter_value(t_music_data *music_data)
 {
+	// printf("\n\n\n\nIn update quarter value func\n\n\n\n\n\n\n");
+
 	if (music_data->current_quarter_value != music_data->quarter_value_goal)
 	{
 		if (music_data->current_quarter_value < music_data->quarter_value_goal)
 		{
-			if (music_data->quarter_value_goal - music_data->current_quarter_value < music_data->quarter_value_step)
+			// if (music_data->quarter_value_goal - music_data->current_quarter_value < music_data->quarter_value_step)
+			if (music_data->quarter_value_goal < music_data->current_quarter_value + (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating))
 			{
+				// printf("++Updated current quarter value :%d\n", music_data->current_quarter_value);
+				// printf("++Updated NOT added :%d\n", (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating));
+
+				// printf("--Updated add :", (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating));
 				music_data->current_quarter_value = music_data->quarter_value_goal;
 			}
 			else
 			{
-				music_data->current_quarter_value += music_data->quarter_value_step;
+				// printf("++Updated current quarter value :%d\n", music_data->current_quarter_value);
+				// printf("++Updated add :%d\n", (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating));
+				music_data->current_quarter_value += (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating);
 			}
 		}
 		else
 		{
-			if (music_data->current_quarter_value - music_data->quarter_value_goal < music_data->quarter_value_step)
+			// if (music_data->current_quarter_value - music_data->quarter_value_goal < music_data->quarter_value_step)
+			if (music_data->quarter_value_goal > music_data->current_quarter_value - (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating))
 			{
+				// printf("--Updated current quarter value :%d\n", music_data->current_quarter_value);
+				// printf("--Updated goal quarter value :%d\n", music_data->quarter_value_goal);
+				// printf("--Updated NOT add :%d\n", (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating));
 				music_data->current_quarter_value = music_data->quarter_value_goal;
+
+				// printf("fhew fhewiu fheiwuhf uiewhf iuewhf iewhifh ewiuf hiuewh fiuewhiuf ewiuh fhiufew");
 			}
 			else
 			{
-				music_data->current_quarter_value -= music_data->quarter_value_step;
+				// printf("--Updated current quarter value :%d\n", music_data->current_quarter_value);
+				// printf("--Updated add :%d\n", (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating));
+				music_data->current_quarter_value -= (uint32_t)((float)music_data->current_quarter_value * music_data->quarter_value_step_updating);
 			}
 		}
 	}
@@ -471,19 +488,20 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	static t_euclidean euclidean_datas[euclidean_datas_length] = {0};
 	static uint8_t reset_needed = 1;
 
+	update_quarter_value(music_data);
 	for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
 	{
 		if (!euclidean_datas[current_euclidean_data].initialized)
 		{
 			init_euclidean_struct(&euclidean_datas[current_euclidean_data],
 									20, /* steps_length */
-									1, /* octave_size */
-									8, /* chord_list_length */
+									2, /* octave_size */
+									4, /* chord_list_length */
 									M_MODE_MELODIC_MINOR, /* mode */
-									A1 + current_euclidean_data * 12 * 2, /* mode_beg_note */
+									A2, /* mode_beg_note */
 									13, /* notes_per_cycle */
 									(uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
-									2, /* min_chord_size */
+									1, /* min_chord_size */
 									3, /* max_chord_size */
 									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 105), /* min_velocity */
 									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 114), /* max_velocity */
@@ -494,25 +512,20 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 			{
 				euclidean_datas[current_euclidean_data].euclidean_steps_length = 12;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 3;
-				euclidean_datas[current_euclidean_data].mess_chance = 0;
+				euclidean_datas[current_euclidean_data].mess_chance = 10;
 			}
 			else if (current_euclidean_data == 1)
 			{
 				euclidean_datas[current_euclidean_data].euclidean_steps_length = 6;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
-				euclidean_datas[current_euclidean_data].mess_chance = 0;
-
+				euclidean_datas[current_euclidean_data].mess_chance = 10;
 			}
 			else if (current_euclidean_data == 2)
 			{
 				euclidean_datas[current_euclidean_data].euclidean_steps_length = 7;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
-				euclidean_datas[current_euclidean_data].mess_chance = 0;
-
+				euclidean_datas[current_euclidean_data].mess_chance = 30;
 			}
-
-
-
 		}
 	}
 
@@ -1483,19 +1496,42 @@ void terminate_notes(t_music_data *music_data)
 	}
 }
 
+/**
+  * @brief Initialize music_data 
+  * @param [music_data] Midi struct of midi file
+  * @param [partition_duration] Partition duration in minutes
+  * @param [quarter_value] Quarter value in micro-seconds
+  * @param [tempo_acceleration] Acceleration per measure in percentage (1.0=100%, 0.05=5%)
+  * 
+*/
+void init_music_data(t_music_data *music_data, uint32_t partition_duration, \
+					 uint32_t quarter_value, uint32_t quarter_value_goal, \
+					 float tempo_acceleration)
+{
+	music_data->partition_duration = 60000000 * partition_duration;//10 minutes
+	music_data->measure_value = 500000 * 4;//useless
+	music_data->measures_writed = 0;
+	music_data->delta_time = 0;
+	music_data->quarter_value_step = 100000;
+	//music_data->quarter_value_goal = quarter_value;
+	music_data->quarter_value_goal = quarter_value_goal;
+	//                          100000
+	music_data->quarter_value = 500000;//define metadata 500000=120bpm
+	music_data->current_quarter_value = quarter_value;
+	music_data->quarter_value_step_updating = tempo_acceleration;//Acceleration per measure in percentage (1.0=100%, 0.05=5%)
+
+}
+
 int main(int argc, char **argv)
 {
 	//durée d'une partition 40 000 000us
-	t_music_data music_data = {.partition_duration = 60000000 * 10,
-							   //Measure value = quarter value * 4 (4/4) (4 noires par mesure)
-							   .measure_value = 100000 * 4,
-							   .measures_writed = 0, //
-							   .delta_time = 0,
-							   .quarter_value_step = 100000,  // Acceleration value
-							   .quarter_value_goal = 500000, //equal to value
-							   // valeur d'une noire en us (pour le tempo)
-							   .quarter_value = 1000000,//define metadata 1000000=6 0bpm
-							   .current_quarter_value = 500000};
+	t_music_data music_data = {0};
+	init_music_data(&music_data, 10, 5000000, 500000, 0.06);
+
+
+
+
+
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 	char *outputDirectoryRedundancy = "midi_files";

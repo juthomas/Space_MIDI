@@ -97,6 +97,9 @@ typedef struct		s_music_data
 	uint32_t		current_quarter_value;
 	uint32_t		quarter_value_goal;
 	uint32_t		quarter_value_step;
+
+	float			quarter_value_step_updating;
+
 	uint32_t		entry_data_time;
 	struct timeval	last_measure;//
 	struct timeval	entry_time;//
