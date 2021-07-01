@@ -488,6 +488,12 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	static t_euclidean euclidean_datas[euclidean_datas_length] = {0};
 	static uint8_t reset_needed = 1;
 
+	static uint32_t last_time = 0;
+	if (last_time == 0)
+	{
+		last_time = time(NULL);
+	}
+
 	update_quarter_value(music_data);
 	for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
 	{
@@ -496,37 +502,94 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 			init_euclidean_struct(&euclidean_datas[current_euclidean_data],
 									20, /* steps_length */
 									2, /* octave_size */
-									4, /* chord_list_length */
+									7, /* chord_list_length */
 									M_MODE_MELODIC_MINOR, /* mode */
 									A2, /* mode_beg_note */
-									13, /* notes_per_cycle */
+									4, /* notes_per_cycle */
 									(uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
 									1, /* min_chord_size */
-									3, /* max_chord_size */
-									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 105), /* min_velocity */
-									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 114), /* max_velocity */
-									2, /* min_steps_duration */
-									3 /* max_steps_duration */
+									1, /* max_chord_size */
+									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 48, 35), /* min_velocity */
+									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 70, 74), /* max_velocity */
+									10, /* min_steps_duration */
+									14 /* max_steps_duration */
 									);
 			if (current_euclidean_data == 0)
 			{
-				euclidean_datas[current_euclidean_data].euclidean_steps_length = 12;
-				euclidean_datas[current_euclidean_data].notes_per_cycle = 3;
-				euclidean_datas[current_euclidean_data].mess_chance = 10;
+				euclidean_datas[current_euclidean_data].octaves_size = 3;
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 24;
+				euclidean_datas[current_euclidean_data].notes_per_cycle = 4;
+				euclidean_datas[current_euclidean_data].step_gap = \
+					euclidean_datas[current_euclidean_data].euclidean_steps_length \
+						/ euclidean_datas[current_euclidean_data].notes_per_cycle;
+
+				euclidean_datas[current_euclidean_data].mess_chance = 30;
 			}
 			else if (current_euclidean_data == 1)
 			{
-				euclidean_datas[current_euclidean_data].euclidean_steps_length = 6;
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 12;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
-				euclidean_datas[current_euclidean_data].mess_chance = 10;
+				euclidean_datas[current_euclidean_data].mess_chance = 100;
 			}
 			else if (current_euclidean_data == 2)
 			{
-				euclidean_datas[current_euclidean_data].euclidean_steps_length = 7;
-				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
-				euclidean_datas[current_euclidean_data].mess_chance = 30;
+				euclidean_datas[current_euclidean_data].octaves_size = 3;
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 14;
+				euclidean_datas[current_euclidean_data].notes_per_cycle = 4;
+				euclidean_datas[current_euclidean_data].step_gap = \
+					euclidean_datas[current_euclidean_data].euclidean_steps_length \
+						/ euclidean_datas[current_euclidean_data].notes_per_cycle;
+				euclidean_datas[current_euclidean_data].mess_chance = 100;
 			}
 		}
+	}
+
+	if ((uint32_t)sensors_data->photodiode_1 > 1024)
+	{
+		euclidean_datas[1].mess_chance = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 60, 20);
+		
+		if (euclidean_datas[1].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 5))
+		{
+			reset_needed = 1;
+		}
+		euclidean_datas[1].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 5);
+				euclidean_datas[1].step_gap = \
+					euclidean_datas[1].euclidean_steps_length \
+						/ euclidean_datas[1].notes_per_cycle;
+
+		if (euclidean_datas[0].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9))
+		{
+			reset_needed = 1;
+		}
+				euclidean_datas[0].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9);
+				euclidean_datas[0].step_gap = \
+					euclidean_datas[0].euclidean_steps_length \
+						/ euclidean_datas[0].notes_per_cycle;
+
+		euclidean_datas[0].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
+		euclidean_datas[1].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
+		euclidean_datas[2].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
+
+		euclidean_datas[0].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
+		euclidean_datas[1].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
+		euclidean_datas[2].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
+		// (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 60, 0);
+		
+	}
+
+	if ((uint32_t)sensors_data->photodiode_1 > 2048)
+	{
+		euclidean_datas[2].mess_chance = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 2048, 4096, 80, 20);
+
+	}
+
+	printf("Time : %d", time(NULL));
+	printf("Last Time : %d", last_time);
+	if (time(NULL) - last_time > 30 + rand() % 30)
+	{
+		reset_needed = 1;
+		last_time = time(NULL);
+		printf("\n\n\n\n\n! RESETING !\n\n\n\n\n\n");
 	}
 
 	if (reset_needed)
@@ -547,7 +610,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	uint16_t div_counter = 0;
 	uint16_t div_goal = 512; //Whole division (quarter * 4)
-	uint16_t looseness = 10; //Humanization in divisions delta, cannot be superior of divgoal / 8
+	uint16_t looseness = 40; //Humanization in divisions delta, cannot be superior of divgoal / 8
 
 
 	for (uint8_t current_quarter = 0; current_quarter < 4; current_quarter++)
@@ -1526,7 +1589,7 @@ int main(int argc, char **argv)
 {
 	//durée d'une partition 40 000 000us
 	t_music_data music_data = {0};
-	init_music_data(&music_data, 10, 5000000, 500000, 0.06);
+	init_music_data(&music_data, 10, 1000000, 250000, 0.03);
 
 
 
