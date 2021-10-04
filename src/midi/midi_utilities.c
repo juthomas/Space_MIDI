@@ -199,7 +199,6 @@ void MIDI_tempo(FILE *file, uint32_t tempo)
 	unsigned char bytes[6] = {0xFF, 0x51, 0x03};
 
 	MIDI_delta_time(file, 0);
-	// bytes[3] = tempo >> 16;
 	bytes[3] = tempo >> 16;
 	bytes[4] = tempo >> 8;
 	bytes[5] = tempo;
