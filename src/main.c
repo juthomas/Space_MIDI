@@ -317,44 +317,45 @@ void remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration,
 	}
 }
 
-// Create list of avaible chords
-// then random on it
-// if list is empty, just pick random chord
+/**
+  * @brief Function to get a new note in allowed ones
+  * @param [chords_list] List of allowed chords
+  * @param [chord_list_length] Size of allowed chords list
+  * @param [current_step] Current step in euclidean circle
+  * @param [euclidean_steps] Euclidean steps (contain notes)
+  * @return New Chord
+*/
 int16_t get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length, uint8_t current_step, int16_t *euclidean_steps)
 {
-	// euclidean_steps[current_step] = chords_list[rand() % chord_list_length];
-
 	int16_t chord_to_test = 0;
 	uint8_t steps = 0;
 
 	int16_t available_chords_list[chord_list_length];
 	uint8_t available_chords_list_len = 0;
 
-	// for (uint8_t i = 0; i < chord_list_length; i++)
-	// {
-	// 	available_chords_list[i] = -1;
-	// }
-
+	// Check for each chords indexes in mode
 	for (uint8_t i = 0; i < chord_list_length; i++)
 	{
-
 		chord_to_test = chords_list[i];
 		steps = 0;
+		// While chords indexes doesnt exist in euclidean steps and dont check for steps not yet attributed
 		while (euclidean_steps[steps] != chord_to_test && steps < current_step)
 		{
 			steps++;
 		}
+		// If chords indexes doesnt exist in euclidean steps, feed in a chord list 
 		if (euclidean_steps[steps] != chord_to_test)
 		{
 			available_chords_list[available_chords_list_len] = chord_to_test;
 			available_chords_list_len++;
 		}
 	}
-
+	// If all possible chords arent taken, take a random chord from the available chord list
 	if (available_chords_list_len)
 	{
 		return (available_chords_list[rand() % available_chords_list_len]);
 	}
+	// If all chords allready exist in the euclidean cirle, simply get a random chord in basic chord list
 	else
 	{
 		return (chords_list[rand() % chord_list_length]);
@@ -405,9 +406,7 @@ void init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
 	euclidean->max_steps_duration = max_steps_duration;
 	euclidean->current_step = 0;
 	euclidean->initialized = 1;
-
 }
-
 
 /**
   * @brief Removing euclidean struct without leaks
@@ -451,7 +450,6 @@ void	print_euclidean_steps(t_euclidean *euclidean)
 {
 	for (uint8_t steps = 0; steps < euclidean->euclidean_steps_length; steps++)
 	{
-
 		printf("Step value : %d, octave : %d\n", euclidean->euclidean_steps[steps] & 0xFF, \
 										(euclidean->euclidean_steps[steps] & 0xFF00) >> 8);
 	}
@@ -463,8 +461,15 @@ void	print_euclidean_steps(t_euclidean *euclidean)
 	printf("\n");
 }
 
+
+/**
+  * @brief Function to write an multiple Euclidean midi step
+  * @param [music_data] Midi struct
+  * @param [euclidean] Struct that contain current euclidean values
+*/
 void	write_euclidean_step(t_music_data *music_data, t_euclidean *euclidean)
 {
+	// Create chord if the current euclidean step contain note and the mess chance dont mess
 	if (euclidean->euclidean_steps[euclidean->current_step] != -1 && rand() % 100 >= euclidean->mess_chance)
 	{
 		create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length,
@@ -473,6 +478,7 @@ void	write_euclidean_step(t_music_data *music_data, t_euclidean *euclidean)
 						map_number(rand() % 100, 0, 100, euclidean->min_velocity, euclidean->max_velocity),				/*velocity*/
 						map_number(rand() % 100, 0, 100, euclidean->min_steps_duration, euclidean->max_steps_duration)); /*note duration in steps*/
 	}
+	// Update the current euclidean step
 	euclidean->current_step = (euclidean->current_step + 1) % euclidean->euclidean_steps_length;
 }
 
@@ -484,26 +490,33 @@ void	write_euclidean_step(t_music_data *music_data, t_euclidean *euclidean)
 */
 void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_data)
 {
+	// Number of euclidean "Circles"
 	const uint8_t euclidean_datas_length = 3;
+	// Initializing euclidean "Circles" datas with NULL
 	static t_euclidean euclidean_datas[euclidean_datas_length] = {0};
+	// Start with an reatribution of midi notes in euclidean Circle
 	static uint8_t reset_needed = 1;
-
+	// Variable to check last reset time (to reset notes in euclidan circle)
 	static uint32_t last_time = 0;
+	// Initializing ast reset time with the current timestamp
 	if (last_time == 0)
 	{
 		last_time = time(NULL);
 	}
 
+	// Update Midi quarter value to move towards the quarter goal value
 	update_quarter_value(music_data);
+	// Iterate for each euclidean circle
 	for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
 	{
+		// Initialize euclidean datas with sensors current values
 		if (!euclidean_datas[current_euclidean_data].initialized)
 		{
 			init_euclidean_struct(&euclidean_datas[current_euclidean_data],
 									20, /* steps_length */
 									2, /* octave_size */
 									7, /* chord_list_length */
-									M_MODE_MELODIC_MINOR, /* mode */
+									M_MODE_MAJOR, /* mode */
 									A2, /* mode_beg_note */
 									4, /* notes_per_cycle */
 									(uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
@@ -544,6 +557,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		}
 	}
 
+	// Change euclidean datas with sensors values
+	// \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
 	if ((uint32_t)sensors_data->photodiode_1 > 1024)
 	{
 		euclidean_datas[1].mess_chance = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 60, 20);
@@ -582,7 +597,10 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		euclidean_datas[2].mess_chance = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 2048, 4096, 80, 20);
 
 	}
+	// /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\.
 
+
+	// Each 30-60 seconds, request to get new notes in euclidean circles
 	printf("Time : %d", time(NULL));
 	printf("Last Time : %d", last_time);
 	if (time(NULL) - last_time > 30 + rand() % 30)
@@ -592,6 +610,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		printf("\n\n\n\n\n! RESETING !\n\n\n\n\n\n");
 	}
 
+	// If request to get new note, pick new random notes from allowed ones
 	if (reset_needed)
 	{
 		for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
@@ -601,6 +620,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		reset_needed = 0;
 	}
 
+	// Print the current euclidean circle values (Step value = index of note in chord list, octave = offset of note)
 	for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
 	{
 		printf("\nEuclidean Cirle %d :\n", current_euclidean_data);
@@ -609,19 +629,19 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 
 	uint16_t div_counter = 0;
-	uint16_t div_goal = 512; //Whole division (quarter * 4)
-	uint16_t looseness = 40; //Humanization in divisions delta, cannot be superior of divgoal / 8
+	uint16_t div_goal = 512; // Whole division (quarter * 4)
+	uint16_t looseness = 40; // Humanization in divisions delta, cannot be superior of divgoal / 8
 
-
+	// Write a midi measure (iterate on each quarter) 
 	for (uint8_t current_quarter = 0; current_quarter < 4; current_quarter++)
 	{
 		uint16_t current_div_duration;
-
+		// For each euclidean circle, create corresponding chord
 		for (uint8_t current_euclidean_data = 0; current_euclidean_data < euclidean_datas_length; current_euclidean_data++)
 		{
 			write_euclidean_step(music_data, &euclidean_datas[current_euclidean_data]);
 		}
-
+		// Remove chords that end this quarter division
 		remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
 		if (current_quarter == 3)
 		{
@@ -631,6 +651,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		{
 			current_div_duration = div_goal / 4 - looseness + rand() % (looseness * 2);
 		}
+		// Create a MIDI delay of one division quarter
 		midi_delay_divs(music_data, current_div_duration);
 		div_counter += current_div_duration;
 	}
@@ -653,7 +674,7 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		   sensors_data->organ_2, sensors_data->organ_3, sensors_data->organ_4,
 		   sensors_data->organ_5, sensors_data->organ_6);
 
-	//Change Rapidity
+	// Change Rapidity
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 10000000, 50000);
 	update_quarter_value(music_data);
 
@@ -661,36 +682,36 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	const uint8_t euclidean_steps_length = 20;
 	static int16_t euclidean_steps[euclidean_steps_length];
 
-	//Request a new pool of chords
+	// Request a new pool of chords
 	static bool euclidean_reset = true;
 
-	//Number of octaves range to play
+	// Number of octaves range to play
 	uint8_t octaves_size = 4;
 
-	//Number of chords allowed
+	// Number of chords allowed
 	uint8_t chord_list_length = 8;
 	uint8_t chords_list[chord_list_length];
 
-	//Music Mode
+	// Music Mode
 	uint8_t mode = M_MODE_MELODIC_MINOR;
 	uint8_t mode_beg_note = A2;
 
-	//Number of notes per cycle
+	// Number of notes per cycle
 	uint8_t notes_per_cycle = 13;
 	uint8_t step_gap = euclidean_steps_length / notes_per_cycle;
 
-	//Skip chance (0-100)
+	// Skip chance (0-100)
 	uint8_t mess_chance = (uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0);
 
-	//Chord size
+	// Chord size
 	uint8_t min_chord_size = 2;
 	uint8_t max_chord_size = 3;
 
-	//Velocity
+	// Velocity
 	uint8_t min_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 80, 105);
 	uint8_t max_velocity = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 85, 114);
 
-	//Note steps duration
+	// Note steps duration
 	uint8_t min_steps_duration = 3;
 	uint8_t max_steps_duration = 13;
 
@@ -1075,6 +1096,11 @@ int8_t cmp_filename(struct dirent *file)
 	return (ret == 6);
 }
 
+/**
+  * @brief Print Time from seconds to DDhMMmSSs(Time)
+  * @param [beg] String to print before the time
+  * @param [end] String to print after the time
+*/
 void print_time(char *beg, uint32_t time, char *end)
 {
 	printf("%s%02dh%02dm%02ds(%d)%s", beg, time / 60 / 60, time / 60 % 60, time % 60, time, end);
@@ -1590,10 +1616,6 @@ int main(int argc, char **argv)
 	//durée d'une partition 40 000 000us
 	t_music_data music_data = {0};
 	init_music_data(&music_data, 10, 1000000, 250000, 0.03);
-
-
-
-
 
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
