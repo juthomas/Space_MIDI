@@ -516,7 +516,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 									20, /* steps_length */
 									2, /* octave_size */
 									7, /* chord_list_length */
-									M_MODE_MAJOR, /* mode */
+									M_MODE_HARMONIC_MINOR, /* mode */
 									A2, /* mode_beg_note */
 									4, /* notes_per_cycle */
 									(uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
@@ -601,7 +601,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 
 	// Each 30-60 seconds, request to get new notes in euclidean circles
-	printf("Time : %d", time(NULL));
+	printf("Time : %ld", time(NULL));
 	printf("Last Time : %d", last_time);
 	if (time(NULL) - last_time > 30 + rand() % 30)
 	{
