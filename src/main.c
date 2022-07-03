@@ -504,6 +504,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		last_time = time(NULL);
 	}
 
+
+	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
 	// Update Midi quarter value to move towards the quarter goal value
 	update_quarter_value(music_data);
 	// Iterate for each euclidean circle
@@ -567,10 +569,17 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		{
 			reset_needed = 1;
 		}
-		euclidean_datas[1].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 5);
+		euclidean_datas[1].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 8);
 				euclidean_datas[1].step_gap = \
 					euclidean_datas[1].euclidean_steps_length \
 						/ euclidean_datas[1].notes_per_cycle;
+
+		euclidean_datas[2].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 8);
+			euclidean_datas[2].step_gap = \
+				euclidean_datas[2].euclidean_steps_length \
+					/ euclidean_datas[2].notes_per_cycle;
+
+
 
 		if (euclidean_datas[0].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9))
 		{
