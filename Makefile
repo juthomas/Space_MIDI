@@ -22,7 +22,7 @@ MIDI_DIR = midi
 
 ## Compilating Utilities
 # FAST = -Ofast
-DEBUG = -g #3 -fsanitize=address
+DEBUG = -g -fsanitize=address
 WARNINGS = -Wall -Wextra #-Werror
 FLAGS = $(WARNINGS) $(FAST) $(DEBUG)# -D_REENTRANT
 
