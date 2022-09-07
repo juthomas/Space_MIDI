@@ -22,25 +22,25 @@ static uint8_t playing_notes_duration[24];
 static bool g_exit_requested = false;
 
 /**
-  * @brief Map number from [in_min]-[in_max] to [out_min]-[out_max]
-  * @param [x] Number to map
-  * @param [in_min] Minimum of input number
-  * @param [in_max] Maximum of input number
-  * @param [out_min] Minimum of output number
-  * @param [out_max] Maximum of ouput number
-  * @return New number well mapped
-*/
+ * @brief Map number from [in_min]-[in_max] to [out_min]-[out_max]
+ * @param [x] Number to map
+ * @param [in_min] Minimum of input number
+ * @param [in_max] Maximum of input number
+ * @param [out_min] Minimum of output number
+ * @param [out_max] Maximum of ouput number
+ * @return New number well mapped
+ */
 int32_t map_number(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
 {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 /**
-  * @brief Create and open a new midi file
-  * @param [filename] futur name of midi file
-  * @param [filename_redundancy] futur name of midi file redundancy
-  * @param [music_data] Midi struct
-*/
+ * @brief Create and open a new midi file
+ * @param [filename] futur name of midi file
+ * @param [filename_redundancy] futur name of midi file redundancy
+ * @param [music_data] Midi struct
+ */
 void midi_setup_file(char *filename, char *filename_redundancy,
 					 t_music_data *music_data)
 {
@@ -48,7 +48,7 @@ void midi_setup_file(char *filename, char *filename_redundancy,
 	music_data->midi_file_redundancy = fopen(filename_redundancy, "wb");
 	MIDI_write_file_header(music_data->midi_file, 1, 2, QUARTER);
 	MIDI_write_file_header(music_data->midi_file_redundancy, 1, 2, QUARTER);
-	//metadatas
+	// metadatas
 	MIDI_write_metadata(music_data->midi_file, music_data->quarter_value);
 	MIDI_write_metadata(music_data->midi_file_redundancy, music_data->quarter_value);
 	music_data->midi_mark = MIDI_write_track_header(music_data->midi_file);
@@ -58,12 +58,12 @@ void midi_setup_file(char *filename, char *filename_redundancy,
 }
 
 /**
-  * @brief Write a note state into "midi_write_measure" function
-  * @param [state] Logic state of note (ON/OFF)
-  * @param [channel] Selection of midi channel (0-16)
-  * @param [note] Selection of midi note (1-127)
-  * @param [velocity] Selection of velocity (power) (1-127)
-*/
+ * @brief Write a note state into "midi_write_measure" function
+ * @param [state] Logic state of note (ON/OFF)
+ * @param [channel] Selection of midi channel (0-16)
+ * @param [note] Selection of midi note (1-127)
+ * @param [velocity] Selection of velocity (power) (1-127)
+ */
 void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 							 unsigned char channel, unsigned char note, unsigned char velocity)
 {
@@ -76,9 +76,9 @@ void midi_write_measure_note(t_music_data *music_data, unsigned char state,
 }
 
 /**
-  * @brief Simply wait for a quarter of measure
-  * @param [music_data] Midi struct
-*/
+ * @brief Simply wait for a quarter of measure
+ * @param [music_data] Midi struct
+ */
 void midi_delay_quarter(t_music_data *music_data)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
@@ -94,9 +94,9 @@ void midi_delay_quarter(t_music_data *music_data)
 }
 
 /**
-  * @brief Simply wait for a heighth of measure
-  * @param [music_data] Midi struct
-*/
+ * @brief Simply wait for a heighth of measure
+ * @param [music_data] Midi struct
+ */
 void midi_delay_heighth(t_music_data *music_data)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
@@ -112,10 +112,10 @@ void midi_delay_heighth(t_music_data *music_data)
 }
 
 /**
-  * @brief Simply wait for a fraction of measure 
-  * @param [music_data] Midi struct
-  * @param [fraction] Fraction delay 
-*/
+ * @brief Simply wait for a fraction of measure
+ * @param [music_data] Midi struct
+ * @param [fraction] Fraction delay
+ */
 void midi_delay_divs(t_music_data *music_data, uint16_t divs)
 {
 	MIDI_delta_time(music_data->midi_file, 0);
@@ -142,10 +142,10 @@ void get_music_mode(uint8_t gamme[7], uint8_t music_mode)
 }
 
 /**
-  * @brief Update quarter value to match with quarter value goal 
-  * (may take several calls)
-  * @param [music_data] Midi struct
-*/
+ * @brief Update quarter value to match with quarter value goal
+ * (may take several calls)
+ * @param [music_data] Midi struct
+ */
 void update_quarter_value(t_music_data *music_data)
 {
 	// printf("\n\n\n\nIn update quarter value func\n\n\n\n\n\n\n");
@@ -193,10 +193,10 @@ void update_quarter_value(t_music_data *music_data)
 }
 
 /**
-  * @brief Try to play/stop selected note at correct timing
-  * @param [music_data] Midi struct
-  * @param [note] note to play/stop
-*/
+ * @brief Try to play/stop selected note at correct timing
+ * @param [music_data] Midi struct
+ * @param [note] note to play/stop
+ */
 void midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, uint8_t current_heighth)
 {
 	if (note.active && note.beg_eighth == current_heighth)
@@ -210,16 +210,16 @@ void midi_write_measure_heighth_updater(t_music_data *music_data, t_note note, u
 }
 
 /**
-  * @brief Function to get a chords list indexes
-  * @param [chords_list] chords list returned
-  * @param [chords_size] Number of chords desired
-*/
+ * @brief Function to get a chords list indexes
+ * @param [chords_list] chords list returned
+ * @param [chords_size] Number of chords desired
+ */
 void get_chords_list(uint8_t *chords_list, uint8_t chords_size)
 {
 	// uint8_t chords_list[chords_size];
 
 	for (uint8_t i = 0; i < chords_size; i++)
-	{ //i * 2
+	{ // i * 2
 		// chords_list[i] = /* starting_note + */ g_midi_mode[mode].mode_sequence[(i * 2) % 7];
 		chords_list[i] = /* starting_note + */ (i * 2) % 7;
 	}
@@ -227,18 +227,18 @@ void get_chords_list(uint8_t *chords_list, uint8_t chords_size)
 }
 
 /**
-  * @brief Function to create chord for euclidean composing
-  * @param [music_data] Midi struct
-  * @param [playing_notes_duration] Tab of current playing notes durations
-  * @param [playing_notes] Tab of current playing notes
-  * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
-  * @param [chords_list] Tab of selected mode notes
-  * @param [note_i] Index of note in selected mode notes
-  * @param [note_offset] Offset of note (starting note of mode)
-  * @param [chord_size] Size of chord (simultaneous played notes)
-  * @param [velocity] Velocity of chord/note
-  * @param [steps_duration] Duration of note converted in euclidean steps
-*/
+ * @brief Function to create chord for euclidean composing
+ * @param [music_data] Midi struct
+ * @param [playing_notes_duration] Tab of current playing notes durations
+ * @param [playing_notes] Tab of current playing notes
+ * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
+ * @param [chords_list] Tab of selected mode notes
+ * @param [note_i] Index of note in selected mode notes
+ * @param [note_offset] Offset of note (starting note of mode)
+ * @param [chord_size] Size of chord (simultaneous played notes)
+ * @param [velocity] Velocity of chord/note
+ * @param [steps_duration] Duration of note converted in euclidean steps
+ */
 void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uint8_t *playing_notes,
 				  uint8_t playing_notes_length, uint8_t mode, int16_t note_i,
 				  uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
@@ -255,8 +255,8 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
 	{
 		current_note_done = false;
-		//If the note is currently played
-		//Just add time to that note
+		// If the note is currently played
+		// Just add time to that note
 		for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length; playing_notes_i++)
 		{
 			if (playing_notes[playing_notes_i] == note_offset + ((note_i & 0xFF00) >> 8) * 12 + g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note) % 7] + 12 * (((note_i & 0xFF) + 2 * current_note) / 7))
@@ -268,8 +268,8 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 				current_note_done = true;
 			}
 		}
-		//If the note isnt played
-		//Create that note !
+		// If the note isnt played
+		// Create that note !
 		for (uint8_t playing_notes_i = 0; playing_notes_i < playing_notes_length && !current_note_done; playing_notes_i++)
 		{
 			if (!playing_notes_duration[playing_notes_i])
@@ -288,12 +288,12 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 }
 
 /**
-  * @brief Function to remove chord for euclidean composing
-  * @param [music_data] Midi struct
-  * @param [playing_notes_duration] Tab of current playing notes durations
-  * @param [playing_notes] Tab of current playing notes
-  * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
-*/
+ * @brief Function to remove chord for euclidean composing
+ * @param [music_data] Midi struct
+ * @param [playing_notes_duration] Tab of current playing notes durations
+ * @param [playing_notes] Tab of current playing notes
+ * @param [playing_notes_length] Size of 'playing_note_duration' & 'playing_notes'
+ */
 void remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration,
 				  uint8_t *playing_notes, uint8_t playing_notes_length)
 {
@@ -321,13 +321,13 @@ void remove_chord(t_music_data *music_data, uint8_t *playing_notes_duration,
 }
 
 /**
-  * @brief Function to get a new note in allowed ones
-  * @param [chords_list] List of allowed chords
-  * @param [chord_list_length] Size of allowed chords list
-  * @param [current_step] Current step in euclidean circle
-  * @param [euclidean_steps] Euclidean steps (contain notes)
-  * @return New Chord
-*/
+ * @brief Function to get a new note in allowed ones
+ * @param [chords_list] List of allowed chords
+ * @param [chord_list_length] Size of allowed chords list
+ * @param [current_step] Current step in euclidean circle
+ * @param [euclidean_steps] Euclidean steps (contain notes)
+ * @return New Chord
+ */
 int16_t get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length, uint8_t current_step, int16_t *euclidean_steps)
 {
 	int16_t chord_to_test = 0;
@@ -346,7 +346,7 @@ int16_t get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length,
 		{
 			steps++;
 		}
-		// If chords indexes doesnt exist in euclidean steps, feed in a chord list 
+		// If chords indexes doesnt exist in euclidean steps, feed in a chord list
 		if (euclidean_steps[steps] != chord_to_test)
 		{
 			available_chords_list[available_chords_list_len] = chord_to_test;
@@ -366,28 +366,28 @@ int16_t get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length,
 }
 
 /**
-  * @brief Initializing euclidean struct
-  * @param [euclidean] Euclidean Circle struct
-  * @param [steps_length] Number of steps in euclidean circle
-  * @param [octave_size] Range of playable notes
-  * @param [chord_list_length] Number of different possible chords in mode
-  * @param [mode] Music mode (e_midi_modes)
-  * @param [mode_beg_note] Reference note for the mode (e_notes)
-  * @param [notes_per_cycle] Number of notes playables in euclidean circle
-  * @param [mess_chance] Chance to skip a note/chord in euclidean circle (0-100)%
-  * @param [min_chord_size] Minimum length of chord/note played in euclidean step 
-  * @param [max_chord_size] Maximum length of chord/note played in euclidean step 
-  * @param [min_velocity] Minimum velocity for chord/note played
-  * @param [max_velocity] Maximum velocity for chord/note played
-  * @param [min_steps_duration] Minimum duration for chord/note played in euclidean step 
-  * @param [max_steps_duration] Maximum duration for chord/note played in euclidean step 
-*/
-void init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
-						   uint8_t octave_size, uint8_t chord_list_length, \
-						   uint8_t mode, uint8_t mode_beg_note, \
-						   uint8_t notes_per_cycle, uint8_t mess_chance, \
-						   uint8_t min_chord_size, uint8_t max_chord_size, \
-						   uint8_t min_velocity, uint8_t max_velocity, \
+ * @brief Initializing euclidean struct
+ * @param [euclidean] Euclidean Circle struct
+ * @param [steps_length] Number of steps in euclidean circle
+ * @param [octave_size] Range of playable notes
+ * @param [chord_list_length] Number of different possible chords in mode
+ * @param [mode] Music mode (e_midi_modes)
+ * @param [mode_beg_note] Reference note for the mode (e_notes)
+ * @param [notes_per_cycle] Number of notes playables in euclidean circle
+ * @param [mess_chance] Chance to skip a note/chord in euclidean circle (0-100)%
+ * @param [min_chord_size] Minimum length of chord/note played in euclidean step
+ * @param [max_chord_size] Maximum length of chord/note played in euclidean step
+ * @param [min_velocity] Minimum velocity for chord/note played
+ * @param [max_velocity] Maximum velocity for chord/note played
+ * @param [min_steps_duration] Minimum duration for chord/note played in euclidean step
+ * @param [max_steps_duration] Maximum duration for chord/note played in euclidean step
+ */
+void init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length,
+						   uint8_t octave_size, uint8_t chord_list_length,
+						   uint8_t mode, uint8_t mode_beg_note,
+						   uint8_t notes_per_cycle, uint8_t mess_chance,
+						   uint8_t min_chord_size, uint8_t max_chord_size,
+						   uint8_t min_velocity, uint8_t max_velocity,
 						   uint8_t min_steps_duration, uint8_t max_steps_duration)
 {
 	euclidean->euclidean_steps_length = steps_length;
@@ -412,30 +412,30 @@ void init_euclidean_struct(t_euclidean *euclidean, uint8_t steps_length, \
 }
 
 /**
-  * @brief Removing euclidean struct without leaks
-  * @param [euclidean] Euclidean Circle struct
-*/
-void	remove_euclidean_struct(t_euclidean *euclidean)
+ * @brief Removing euclidean struct without leaks
+ * @param [euclidean] Euclidean Circle struct
+ */
+void remove_euclidean_struct(t_euclidean *euclidean)
 {
 	free(euclidean->euclidean_steps);
 	free(euclidean->chords_list);
 }
 
 /**
-  * @brief Getting a new chord from chord list (Randomly)
-  *        and ajusting his pitch (Randomly)
-  *        this new chords are passing to the "euclidean_steps[]" variable
-  * @param [euclidean] Euclidean Circle struct
-*/
+ * @brief Getting a new chord from chord list (Randomly)
+ *        and ajusting his pitch (Randomly)
+ *        this new chords are passing to the "euclidean_steps[]" variable
+ * @param [euclidean] Euclidean Circle struct
+ */
 void get_new_euclidean_chords(t_euclidean *euclidean)
 {
 	for (uint8_t steps = 0; steps < euclidean->euclidean_steps_length; steps++)
 	{
 		if (steps % euclidean->step_gap == 0)
 		{
-			euclidean->euclidean_steps[steps] = get_new_chord_from_list(euclidean->chords_list, \
-								 euclidean->chords_list_length, steps, euclidean->euclidean_steps);
-			euclidean->euclidean_steps[steps] |= (rand() % euclidean->octaves_size) << 8; //add octave property
+			euclidean->euclidean_steps[steps] = get_new_chord_from_list(euclidean->chords_list,
+																		euclidean->chords_list_length, steps, euclidean->euclidean_steps);
+			euclidean->euclidean_steps[steps] |= (rand() % euclidean->octaves_size) << 8; // add octave property
 			printf("New step : %d\n", euclidean->euclidean_steps[steps]);
 		}
 		else
@@ -446,15 +446,15 @@ void get_new_euclidean_chords(t_euclidean *euclidean)
 }
 
 /**
-  * @brief Print the content of euclidean Steps (Variable euclidean_steps[])
-  * @param [euclidean] Euclidean Circle struct
-*/
-void	print_euclidean_steps(t_euclidean *euclidean)
+ * @brief Print the content of euclidean Steps (Variable euclidean_steps[])
+ * @param [euclidean] Euclidean Circle struct
+ */
+void print_euclidean_steps(t_euclidean *euclidean)
 {
 	for (uint8_t steps = 0; steps < euclidean->euclidean_steps_length; steps++)
 	{
-		printf("Step value : %d, octave : %d\n", euclidean->euclidean_steps[steps] & 0xFF, \
-										(euclidean->euclidean_steps[steps] & 0xFF00) >> 8);
+		printf("Step value : %d, octave : %d\n", euclidean->euclidean_steps[steps] & 0xFF,
+			   (euclidean->euclidean_steps[steps] & 0xFF00) >> 8);
 	}
 	printf("Chord list : ");
 	for (uint8_t chord_list_i = 0; chord_list_i < euclidean->chords_list_length; chord_list_i++)
@@ -464,22 +464,21 @@ void	print_euclidean_steps(t_euclidean *euclidean)
 	printf("\n");
 }
 
-
 /**
-  * @brief Function to write an multiple Euclidean midi step
-  * @param [music_data] Midi struct
-  * @param [euclidean] Struct that contain current euclidean values
-*/
-void	write_euclidean_step(t_music_data *music_data, t_euclidean *euclidean)
+ * @brief Function to write an multiple Euclidean midi step
+ * @param [music_data] Midi struct
+ * @param [euclidean] Struct that contain current euclidean values
+ */
+void write_euclidean_step(t_music_data *music_data, t_euclidean *euclidean)
 {
 	// Create chord if the current euclidean step contain note and the mess chance dont mess
 	if (euclidean->euclidean_steps[euclidean->current_step] != -1 && rand() % 100 >= euclidean->mess_chance)
 	{
 		create_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length,
-						euclidean->mode, euclidean->euclidean_steps[euclidean->current_step], euclidean->mode_beg_note,
-						map_number(rand() % 100, 0, 100, euclidean->min_chord_size, euclidean->max_chord_size),			/*chord size*/
-						map_number(rand() % 100, 0, 100, euclidean->min_velocity, euclidean->max_velocity),				/*velocity*/
-						map_number(rand() % 100, 0, 100, euclidean->min_steps_duration, euclidean->max_steps_duration)); /*note duration in steps*/
+					 euclidean->mode, euclidean->euclidean_steps[euclidean->current_step], euclidean->mode_beg_note,
+					 map_number(rand() % 100, 0, 100, euclidean->min_chord_size, euclidean->max_chord_size),		  /*chord size*/
+					 map_number(rand() % 100, 0, 100, euclidean->min_velocity, euclidean->max_velocity),			  /*velocity*/
+					 map_number(rand() % 100, 0, 100, euclidean->min_steps_duration, euclidean->max_steps_duration)); /*note duration in steps*/
 	}
 	// Update the current euclidean step
 	euclidean->current_step = (euclidean->current_step + 1) % euclidean->euclidean_steps_length;
@@ -503,18 +502,15 @@ void shift_euclidean_steps(t_euclidean *euclidean, int shift_value)
 			tmp = (7 + ((euclidean->euclidean_steps[steps] & 0x00FF) + tmp_shift)) % 7;
 			tmp |= ((((euclidean->euclidean_steps[steps] & 0xFF00) >> 8) + ((7 + ((euclidean->euclidean_steps[steps] & 0x00FF) + tmp_shift)) / 7 - 1)) << 8);
 			euclidean->euclidean_steps[steps] = tmp;
-
-
 		}
 	}
 }
 
-
 /**
-  * @brief Function to write an multiple Euclidean (4 tps / measure)
-  * @param [music_data] Midi struct
-  * @param [sensors_data] Struct that contain current sensors datas
-*/
+ * @brief Function to write an multiple Euclidean (4 tps / measure)
+ * @param [music_data] Midi struct
+ * @param [sensors_data] Struct that contain current sensors datas
+ */
 void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_data)
 {
 	// Number of euclidean "Circles"
@@ -531,7 +527,6 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		last_time = time(NULL);
 	}
 
-
 	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 100000);
 	// Update Midi quarter value to move towards the quarter goal value
 	update_quarter_value(music_data);
@@ -542,28 +537,27 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		if (!euclidean_datas[current_euclidean_data].initialized)
 		{
 			init_euclidean_struct(&euclidean_datas[current_euclidean_data],
-									20, /* steps_length */
-									2, /* octave_size */
-									7, /* chord_list_length */
-									M_MODE_HARMONIC_MINOR, /* mode */
-									A2, /* mode_beg_note */
-									4, /* notes_per_cycle */
-									(uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
-									1, /* min_chord_size */
-									1, /* max_chord_size */
-									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 48, 35), /* min_velocity */
-									(uint8_t)map_number(sensors_data->organ_1, 0, 1024, 70, 74), /* max_velocity */
-									10, /* min_steps_duration */
-									14 /* max_steps_duration */
-									);
+								  20,																/* steps_length */
+								  2,																/* octave_size */
+								  7,																/* chord_list_length */
+								  M_MODE_HARMONIC_MINOR,											/* mode */
+								  A2,																/* mode_beg_note */
+								  4,																/* notes_per_cycle */
+								  (uint8_t)map_number(sensors_data->carousel_state, 0, 180, 80, 0), /* mess_chance */
+								  1,																/* min_chord_size */
+								  1,																/* max_chord_size */
+								  (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 48, 35),		/* min_velocity */
+								  (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 70, 74),		/* max_velocity */
+								  10,																/* min_steps_duration */
+								  14																/* max_steps_duration */
+			);
 			if (current_euclidean_data == 0)
 			{
 				euclidean_datas[current_euclidean_data].octaves_size = 3;
 				euclidean_datas[current_euclidean_data].euclidean_steps_length = 24;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 4;
-				euclidean_datas[current_euclidean_data].step_gap = \
-					euclidean_datas[current_euclidean_data].euclidean_steps_length \
-						/ euclidean_datas[current_euclidean_data].notes_per_cycle;
+				euclidean_datas[current_euclidean_data].step_gap =
+					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
 
 				euclidean_datas[current_euclidean_data].mess_chance = 30;
 			}
@@ -578,9 +572,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].octaves_size = 3;
 				euclidean_datas[current_euclidean_data].euclidean_steps_length = 14;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 4;
-				euclidean_datas[current_euclidean_data].step_gap = \
-					euclidean_datas[current_euclidean_data].euclidean_steps_length \
-						/ euclidean_datas[current_euclidean_data].notes_per_cycle;
+				euclidean_datas[current_euclidean_data].step_gap =
+					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
 			}
 		}
@@ -591,31 +584,26 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	if ((uint32_t)sensors_data->photodiode_1 > 1024)
 	{
 		euclidean_datas[1].mess_chance = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 60, 20);
-		
+
 		if (euclidean_datas[1].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 5))
 		{
 			reset_needed = 1;
 		}
 		euclidean_datas[1].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 8);
-				euclidean_datas[1].step_gap = \
-					euclidean_datas[1].euclidean_steps_length \
-						/ euclidean_datas[1].notes_per_cycle;
+		euclidean_datas[1].step_gap =
+			euclidean_datas[1].euclidean_steps_length / euclidean_datas[1].notes_per_cycle;
 
 		euclidean_datas[2].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 8);
-			euclidean_datas[2].step_gap = \
-				euclidean_datas[2].euclidean_steps_length \
-					/ euclidean_datas[2].notes_per_cycle;
-
-
+		euclidean_datas[2].step_gap =
+			euclidean_datas[2].euclidean_steps_length / euclidean_datas[2].notes_per_cycle;
 
 		if (euclidean_datas[0].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9))
 		{
 			reset_needed = 1;
 		}
-				euclidean_datas[0].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9);
-				euclidean_datas[0].step_gap = \
-					euclidean_datas[0].euclidean_steps_length \
-						/ euclidean_datas[0].notes_per_cycle;
+		euclidean_datas[0].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9);
+		euclidean_datas[0].step_gap =
+			euclidean_datas[0].euclidean_steps_length / euclidean_datas[0].notes_per_cycle;
 
 		euclidean_datas[0].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
 		euclidean_datas[1].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
@@ -625,16 +613,13 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		euclidean_datas[1].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
 		euclidean_datas[2].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
 		// (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 60, 0);
-		
 	}
 
 	if ((uint32_t)sensors_data->photodiode_1 > 2048)
 	{
 		euclidean_datas[2].mess_chance = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 2048, 4096, 80, 20);
-
 	}
 	// /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\.
-
 
 	// Each 30-60 seconds, request to get new notes in euclidean circles
 	printf("Time : %ld", time(NULL));
@@ -663,12 +648,11 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		print_euclidean_steps(&euclidean_datas[current_euclidean_data]);
 	}
 
-
 	uint16_t div_counter = 0;
 	uint16_t div_goal = 512; // Whole division (quarter * 4)
 	uint16_t looseness = 40; // Humanization in divisions delta, cannot be superior of divgoal / 8
 
-	// Write a midi measure (iterate on each quarter) 
+	// Write a midi measure (iterate on each quarter)
 	for (uint8_t current_quarter = 0; current_quarter < 4; current_quarter++)
 	{
 		uint16_t current_div_duration;
@@ -691,17 +675,16 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		midi_delay_divs(music_data, current_div_duration);
 		div_counter += current_div_duration;
 	}
-
 }
 
 /**
-  * @brief Function to write an Euclidean measure
-  * @param [music_data] Midi struct
-  * @param [sensors_data] Struct that contain current sensors datas
-*/
+ * @brief Function to write an Euclidean measure
+ * @param [music_data] Midi struct
+ * @param [sensors_data] Struct that contain current sensors datas
+ */
 void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
-// Number of euclidean "Circles"
+	// Number of euclidean "Circles"
 	// const uint8_t EUCLIDEAN_DATAS_LENGTH = 3;
 	// Initializing euclidean "Circles" datas with NULL
 	static t_euclidean euclidean_datas[EUCLIDEAN_DATAS_LENGTH];
@@ -731,7 +714,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	// 5000000
 	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 50000000, 1800000); // RM THAT !!
 	// music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 100000000, 3500000); // RM THAT !!
-
 
 	// printf("\033[1;32mmusic data current quarter value after  : %d\033[1;37m\n", music_data->current_quarter_value);
 
@@ -802,7 +784,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		}
 	}
 
-
 	if (delta_shift != (int16_t)map_number((uint32_t)sensors_data->spectro_current, 0, 33535, 0, 10))
 	{
 
@@ -846,7 +827,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 
 	euclidean_datas[0].min_chord_size = (sensors_data->vin_current % 4) + 1; //(uint8_t)map_number((uint32_t)sensors_data->temperature_3, 0, FIX_4096 - 400, 1, 7);	//temperature_3
 	euclidean_datas[0].max_chord_size = (sensors_data->vin_current % 4) + 1; // temperature_3
-
 
 	static uint16_t mode_requested = A2;
 	static uint16_t type_mode_requested = M_MODE_MAJOR;
@@ -1006,7 +986,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		get_new_euclidean_chords(&euclidean_datas[0]);
 		measure_count_1 = 0;
 		// printf("\n\n\n\n\n! RESETING 0 !\n\n\n\n\n\n");
-
 	}
 
 	if (measure_count_2 > 55)
@@ -1021,7 +1000,6 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 		get_new_euclidean_chords(&euclidean_datas[2]);
 		measure_count_3 = 0;
 		// printf("\n\n\n\n\n! RESETING 2 !\n\n\n\n\n\n");
-
 	}
 
 	// Initialize notes or if requested to get new note, pick new random notes from allowed ones
@@ -1053,17 +1031,14 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	// show_euclidean_circle(&curses_env, 2, &euclidean_datas[2]);
 	// show_euclidean_circle(&curses_env, 3, &euclidean_datas[3]);
 
-
-
 	uint16_t div_counter = 0;
 	uint16_t div_goal = 512; // Whole division (quarter * 4)
-	uint16_t looseness = 42; //40; // Humanization in divisions delta, cannot be superior of (divgoal / 3 - divgoal / 4)
+	uint16_t looseness = 42; // 40; // Humanization in divisions delta, cannot be superior of (divgoal / 3 - divgoal / 4)
 
 	// Write a midi measure (iterate on each quarter)
 	for (uint8_t current_quarter = 0; current_quarter < 4; current_quarter++)
 	{
 		uint16_t current_div_duration;
-
 
 		// For each euclidean circle, create corresponding chord
 		for (uint8_t current_euclidean_data = 0; current_euclidean_data < EUCLIDEAN_DATAS_LENGTH; current_euclidean_data++)
@@ -1100,10 +1075,10 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 }
 
 /**
-  * @brief Function to write an 4 stroke measure
-  * @param [music_data] Midi struct
-  * @param [sensors_data] Struct that contain current sensors datas
-*/
+ * @brief Function to write an 4 stroke measure
+ * @param [music_data] Midi struct
+ * @param [sensors_data] Struct that contain current sensors datas
+ */
 void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 {
 	uint8_t gamme[7];
@@ -1333,9 +1308,9 @@ void midi_write_measure(t_music_data *music_data, t_sensors *sensors_data)
 }
 
 /**
-  * @brief Write end of midi file (and close it)
-  * @param [music_data] Midi struct of an opened midi file
-*/
+ * @brief Write end of midi file (and close it)
+ * @param [music_data] Midi struct of an opened midi file
+ */
 void midi_write_end(t_music_data *music_data)
 {
 	MIDI_write_end_of_track(music_data->midi_file);
@@ -1350,9 +1325,9 @@ void midi_write_end(t_music_data *music_data)
 
 // TODO : Create new data file with sensors data
 /**
-  * @brief Called when signal "SIGTERM" is sended
-  * @param [signal] Signal Number (Probably 15)
-*/
+ * @brief Called when signal "SIGTERM" is sended
+ * @param [signal] Signal Number (Probably 15)
+ */
 void terminate_session(int signal)
 {
 	(void)signal;
@@ -1360,11 +1335,11 @@ void terminate_session(int signal)
 }
 
 /**
-  * @brief Convert an string date to integer date and time
-  * @param [data_time] date to convert (format "YY/MM/DD HH:mm:ss")
-  * @param [date] date output (format "YYYYMMDD")
-  * @param [time] time output (format "HHmmSS")
-*/
+ * @brief Convert an string date to integer date and time
+ * @param [data_time] date to convert (format "YY/MM/DD HH:mm:ss")
+ * @param [date] date output (format "YYYYMMDD")
+ * @param [time] time output (format "HHmmSS")
+ */
 uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *time)
 {
 	uint32_t DD = 0;
@@ -1387,10 +1362,10 @@ uint8_t date_time_to_date_and_time(char *date_time, uint32_t *date, uint32_t *ti
 }
 
 /**
-  * @brief Check if filename syntax is "YYYY_MM_DD__HH_mm_SS.json"
-  * @param [file] file to check
-  * @return 6 if filename seems correct else 0
-*/
+ * @brief Check if filename syntax is "YYYY_MM_DD__HH_mm_SS.json"
+ * @param [file] file to check
+ * @return 6 if filename seems correct else 0
+ */
 int8_t cmp_filename(struct dirent *file)
 {
 	char *name1tmp = file->d_name;
@@ -1417,19 +1392,19 @@ int8_t cmp_filename(struct dirent *file)
 }
 
 /**
-  * @brief Print Time from seconds to DDhMMmSSs(Time)
-  * @param [beg] String to print before the time
-  * @param [end] String to print after the time
-*/
+ * @brief Print Time from seconds to DDhMMmSSs(Time)
+ * @param [beg] String to print before the time
+ * @param [end] String to print after the time
+ */
 void print_time(char *beg, uint32_t time, char *end)
 {
 	printf("%s%02dh%02dm%02ds(%d)%s", beg, time / 60 / 60, time / 60 % 60, time % 60, time, end);
 }
 
 /**
-  * @brief Debug function, print current sensors datas
-  * @param [sensors_data] Struct that contain current sensors datas
-*/
+ * @brief Debug function, print current sensors datas
+ * @param [sensors_data] Struct that contain current sensors datas
+ */
 void print_sensors_data(t_sensors *sensors_data)
 {
 	t_sensors *sensors_tmp;
@@ -1443,34 +1418,34 @@ void print_sensors_data(t_sensors *sensors_data)
 		printf("%scurrent data : %d\n", "\033[1;35m", current_data);
 		print_time("> Time : ", sensors_tmp->time, "\n\033[1;37m");
 		current_data++;
-		// printf("Photodiodes\n");
-		// printf("          1 : %f\n", sensors_tmp->photodiode_1);
-		// printf("          2 : %f\n", sensors_tmp->photodiode_2);
-		// printf("          3 : %f\n", sensors_tmp->photodiode_3);
-		// printf("          4 : %f\n", sensors_tmp->photodiode_4);
-		// printf("          5 : %f\n", sensors_tmp->photodiode_5);
-		// printf("          6 : %f\n", sensors_tmp->photodiode_6);
-		// printf("Temperatures\n");
-		// printf("vin current : %f\n", sensors_tmp->vin_current);
-		// printf("          1 : %f\n", sensors_tmp->temperature_1);
-		// printf("          2 : %f\n", sensors_tmp->temperature_2);
-		// printf("          3 : %f\n", sensors_tmp->temperature_3);
-		// printf("          4 : %f\n", sensors_tmp->temperature_4);
-		// printf("          5 : %f\n", sensors_tmp->temperature_5);
-		// printf("          6 : %f\n", sensors_tmp->temperature_6);
-		// printf("          7 : %f\n", sensors_tmp->temperature_7);
-		// printf("          8 : %f\n", sensors_tmp->temperature_8);
-		// printf("          9 : %f\n", sensors_tmp->temperature_9);
-		// printf("          10 : %f\n", sensors_tmp->temperature_10);
-		// printf("lid state : %d\n", sensors_tmp->lid_state);
+		printf("Photodiodes\n");
+		printf("          1 : %d\n", sensors_tmp->photodiode_1);
+		printf("          2 : %d\n", sensors_tmp->photodiode_2);
+		printf("          3 : %d\n", sensors_tmp->photodiode_3);
+		printf("          4 : %d\n", sensors_tmp->photodiode_4);
+		printf("          5 : %d\n", sensors_tmp->photodiode_5);
+		printf("          6 : %d\n", sensors_tmp->photodiode_6);
+		printf("Temperatures\n");
+		printf("vin current : %d\n", sensors_tmp->vin_current);
+		printf("          1 : %d\n", sensors_tmp->temperature_1);
+		printf("          2 : %d\n", sensors_tmp->temperature_2);
+		printf("          3 : %d\n", sensors_tmp->temperature_3);
+		printf("          4 : %d\n", sensors_tmp->temperature_4);
+		printf("          5 : %d\n", sensors_tmp->temperature_5);
+		printf("          6 : %d\n", sensors_tmp->temperature_6);
+		printf("          7 : %d\n", sensors_tmp->temperature_7);
+		printf("          8 : %d\n", sensors_tmp->temperature_8);
+		printf("          9 : %d\n", sensors_tmp->temperature_9);
+		printf("          10 : %d\n", sensors_tmp->temperature_10);
+		printf("lid state : %d\n", sensors_tmp->lid_state);
 		// printf("first sample : %s\n", sensors_tmp->first_sample ? "true" : "false");
-		// printf("spectro current : %f\n", sensors_tmp->spectro_current);
-		// printf("electro current : %f\n", sensors_tmp->electro_current);
-		// printf("organ current : %f\n", sensors_tmp->organ_current);
-		// printf("q7 current : %f\n", sensors_tmp->q7_current);
-		// printf("5v current : %f\n", sensors_tmp->t5v_current);
-		// printf("3.3v current : %f\n", sensors_tmp->t3_3v_current);
-		// printf("motor current : %f\n", sensors_tmp->motor_current);
+		printf("spectro current : %d\n", sensors_tmp->spectro_current);
+		// printf("electro current : %d\n", sensors_tmp->electro_current);
+		printf("organ current : %d\n", sensors_tmp->organ_current);
+		printf("q7 current : %d\n", sensors_tmp->q7_current);
+		printf("5v current : %d\n", sensors_tmp->t5v_current);
+		printf("3.3v current : %d\n", sensors_tmp->t3_3v_current);
+		printf("motor current : %d\n", sensors_tmp->motor_current);
 		// printf("position 360 : %d\n", sensors_tmp->position_360);
 		// printf("spectrum : %d\n", sensors_tmp->spectrum);
 		// printf("organ : %f\n", sensors_tmp->organ);
@@ -1479,9 +1454,9 @@ void print_sensors_data(t_sensors *sensors_data)
 }
 
 /**
-  * @brief Clear all sensors_data list
-  * @param [sensors_data] Struct that contain current sensors datas
-*/
+ * @brief Clear all sensors_data list
+ * @param [sensors_data] Struct that contain current sensors datas
+ */
 void clear_sensors_data(t_sensors *sensors_data)
 {
 	t_sensors *sensors_tmp;
@@ -1494,12 +1469,78 @@ void clear_sensors_data(t_sensors *sensors_data)
 	}
 }
 
+t_sensors *get_next_buffer_values(t_circular_buffer circular_buffer, uint64_t *latest_timestamp)
+{
+	t_sensors *sensors = (t_sensors *)malloc(sizeof(t_sensors));
+	for (uint16_t i = 0; i < 10; i++)
+	{
+		if (circular_buffer.data[(i + circular_buffer.older_block) % 10].timestamp > *latest_timestamp)
+		{
+			sensors->photodiode_1 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_1;		 // 0 - 4095
+			sensors->photodiode_2 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_2;		 // 0 - 4095
+			sensors->photodiode_3 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_3;		 // 0 - 4095
+			sensors->photodiode_4 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_4;		 // 0 - 4095
+			sensors->photodiode_5 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_5;		 // 0 - 4095
+			sensors->photodiode_6 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_6;		 // 0 - 4095
+			sensors->temperature_1 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_1;	 // 0 - 4095
+			sensors->temperature_2 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_2;	 // 0 - 4095
+			sensors->temperature_3 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_3;	 // 0 - 4095
+			sensors->temperature_4 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_4;	 // 0 - 4095
+			sensors->temperature_5 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_5;	 // 0 - 4095
+			sensors->temperature_6 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_6;	 // 0 - 4095
+			sensors->temperature_7 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_7;	 // 0 - 4095
+			sensors->temperature_8 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_8;	 // 0 - 4095
+			sensors->temperature_9 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_9;	 // 0 - 4095
+			sensors->temperature_10 = circular_buffer.data[(i + circular_buffer.older_block) % 10].temperature_10;	 // 0 - 4095
+			sensors->microphone = circular_buffer.data[(i + circular_buffer.older_block) % 10].microphone;			 // 0 - 1
+			sensors->spectro_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].spectro_current; // 0 - 65535
+			sensors->organ_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_current;	 // 0 - 255
+			sensors->vin_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].vin_current;		 // 0 - 65535//
+			sensors->q7_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].q7_current;			 // 0 - 255
+			sensors->t5v_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].t5v_current;		 // 0 - 255
+			sensors->t3_3v_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].t3_3v_current;	 // 0 - 255
+			sensors->motor_current = circular_buffer.data[(i + circular_buffer.older_block) % 10].motor_current;	 // 0 - 65535
+			sensors->carousel_state = circular_buffer.data[(i + circular_buffer.older_block) % 10].carousel_state;	 // 0 - 119
+			sensors->lid_state = circular_buffer.data[(i + circular_buffer.older_block) % 10].lid_state;			 // 0 - 53
+			sensors->organ_1 = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_1;				 // 0 - 1023
+			sensors->organ_2 = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_2;				 // 0 - 1023
+			sensors->organ_3 = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_3;				 // 0 - 1023
+			sensors->organ_4 = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_4;				 // 0 - 1023
+			sensors->organ_5 = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_5;				 // 0 - 1023
+			sensors->organ_6 = circular_buffer.data[(i + circular_buffer.older_block) % 10].organ_6;				 // 0 - 1023
+			sensors->timestamp = circular_buffer.data[(i + circular_buffer.older_block) % 10].timestamp;			 // 0 - oo
+			sensors->next = NULL;
+			*latest_timestamp = circular_buffer.data[(i + circular_buffer.older_block) % 10].timestamp;
+			return (sensors);
+		}
+	}
+	free(sensors);
+	return (NULL);
+}
+
+t_sensors *get_new_buffer_values(t_circular_buffer circular_buffer, uint64_t *latest_timestamp, t_sensors *sensorsData)
+{
+	if (!sensorsData)
+	{
+		sensorsData = get_next_buffer_values(circular_buffer, latest_timestamp);
+	}
+	else
+	{
+		t_sensors *tmp = sensorsData;
+		while ((tmp->next = get_next_buffer_values(circular_buffer, latest_timestamp)) != 0)
+		{
+			tmp = tmp->next;
+		}
+	}
+	return (sensorsData);
+}
+
 /**
-  * @brief Deserialize json file to t_sensors chained list
-  * @param [file_length] Length of json to parse (char number)
-  * @param [file_content] String that contain json file
-  * @return Chained list that contain all sensors datas
-*/
+ * @brief Deserialize json file to t_sensors chained list
+ * @param [file_length] Length of json to parse (char number)
+ * @param [file_content] String that contain json file
+ * @return Chained list that contain all sensors datas
+ */
 t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 {
 	jsmn_parser p;
@@ -1531,7 +1572,7 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 	sensors_data = current_sensors;
 
 	// printf("main addr : %p\n", sensors_data);
-	//TODO : fix le i et le r genre WTF je comprends pas
+	// TODO : fix le i et le r genre WTF je comprends pas
 	for (i = 3; i < r; i++)
 	{
 
@@ -1540,16 +1581,16 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 		{
 			// printf("\n");
 			// printf("addr :%p\n", current_sensors);
-			//obj_size = t[i].size;
+			// obj_size = t[i].size;
 			i++;
 			if (JSON_cmp(file_content, &t[i], "Time") == 0)
 			{
 				char tmp[t[i + 1].end - t[i + 1].start + 1];
-				strncpy(tmp,file_content + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+				strncpy(tmp, file_content + t[i + 1].start, t[i + 1].end - t[i + 1].start);
 				tmp[t[i + 1].end - t[i + 1].start] = '\0';
 
 				printf("- Time: %.*s\n", t[i + 1].end - t[i + 1].start,
-				   file_content + t[i + 1].start);
+					   file_content + t[i + 1].start);
 				printf("tmp value omg %s\n", tmp);
 
 				date_time_to_date_and_time(tmp,
@@ -1747,11 +1788,11 @@ t_sensors *json_deserialize(uint32_t file_length, char *file_content)
 }
 
 /**
-  * @brief Find the first file well formated alphabetically 
-  * @param [directory] Directory to scan
-  * @param [file_path] Futur path of file
-  * @return 1 if succeed else 0
-*/
+ * @brief Find the first file well formated alphabetically
+ * @param [directory] Directory to scan
+ * @param [file_path] Futur path of file
+ * @return 1 if succeed else 0
+ */
 int get_first_data_file_in_directory(char *directory, char *file_path)
 {
 	struct dirent **namelist;
@@ -1795,14 +1836,14 @@ int get_first_data_file_in_directory(char *directory, char *file_path)
 }
 
 /**
-  * @brief Open file, save it to string (char*) and close it
-  * @param [file_length] Futur length of string
-  * @param [filename] File to open
-  * @return string (char*)
-*/
+ * @brief Open file, save it to string (char*) and close it
+ * @param [file_length] Futur length of string
+ * @param [filename] File to open
+ * @return string (char*)
+ */
 char *load_file(uint32_t *file_length, char *fileName)
 {
-	//Delay to wait write file end
+	// Delay to wait write file end
 	usleep(50000);
 	FILE *file_ptr;
 	if (!(file_ptr = fopen(fileName, "r")))
@@ -1821,10 +1862,10 @@ char *load_file(uint32_t *file_length, char *fileName)
 }
 
 /**
-  * @brief Create file path if doesnt exists
-  * @param [file_path] File path, /!\ cant be const /!\
-  * @param [mode] Permission bit masks for mode
-*/
+ * @brief Create file path if doesnt exists
+ * @param [file_path] File path, /!\ cant be const /!\
+ * @param [mode] Permission bit masks for mode
+ */
 int make_path(char *file_path, mode_t mode)
 {
 	for (char *p = strchr(file_path + 1, '/'); p; p = strchr(p + 1, '/'))
@@ -1845,12 +1886,12 @@ int make_path(char *file_path, mode_t mode)
 
 // TODO : Supress else
 /**
-  * @brief Create midi file, name it with the date of current music data and open it 
-  * @param [music_data] Midi struct of midi file
-  * @param [output_directory] location of this midi file
-  * @param [output_directory_redundancy] location of redundancy midi file
-  * @param [sensors_data] Struct that contain current sensors datas
-*/
+ * @brief Create midi file, name it with the date of current music data and open it
+ * @param [music_data] Midi struct of midi file
+ * @param [output_directory] location of this midi file
+ * @param [output_directory_redundancy] location of redundancy midi file
+ * @param [sensors_data] Struct that contain current sensors datas
+ */
 void create_dated_midi_file(t_music_data *music_data, char *output_directory,
 							char *output_directory_redundancy, t_sensors *sensors_data)
 {
@@ -1864,14 +1905,28 @@ void create_dated_midi_file(t_music_data *music_data, char *output_directory,
 
 	if (sensors_data)
 	{
-		sprintf(fileName, "%04d_%02d_%02d__%02d_%02d_%02d.mid",
-				sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,
-				sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
-		sprintf(fileNameRedundancy, "%04d_%02d_%02d__%02d_%02d_%02d_.mid",
-				sensors_data->date / 10000, sensors_data->date / 100 % 100, sensors_data->date % 100,
-				sensors_data->time / 60 / 60, sensors_data->time / 60 % 60, sensors_data->time % 60);
+
+		// print_sensors_data(sensors_data);
+		// printf("TIMESTAMP : %llu\n", sensors_data->timestamp);
+		time_t test = sensors_data->timestamp;
+
+		// now = time(NULL);
+		// printf("TIMESTAMP : %llu\n", now);
+		// tm_now = *localtime(&now);
+
+		tm_now = *localtime(&test); //
+		char s_now[sizeof("AAAA_mm_JJ__HH_MM_SS")];
+
+		strftime(s_now, sizeof("AAAA_mm_JJ__HH_MM_SS"), "%Y_%m_%d__%H_%M_%S", &tm_now); //
+		// data[i].time = strdup(s_now);
+
+		// printf("---Time : %s\n", s_now);
+
+		// sleep(100);
+		sprintf(fileName, "%s.mid", s_now);
+		sprintf(fileNameRedundancy, "%s_.mid", s_now);
 	}
-	else //Ne passe normalement jamais ICI
+	else // Ne passe normalement jamais ICI
 	{
 		now = time(NULL);
 		tm_now = *localtime(&now);
@@ -1890,9 +1945,9 @@ void create_dated_midi_file(t_music_data *music_data, char *output_directory,
 }
 
 /**
-  * @brief Terminate properly midi notes (for exiting file/program)
-  * @param [music_data] Midi struct of midi file
-*/
+ * @brief Terminate properly midi notes (for exiting file/program)
+ * @param [music_data] Midi struct of midi file
+ */
 void terminate_notes(t_music_data *music_data)
 {
 	// remove_chord(music_data, playing_notes_duration, playing_notes, playing_notes_length);
@@ -1915,36 +1970,37 @@ void terminate_notes(t_music_data *music_data)
 }
 
 /**
-  * @brief Initialize music_data 
-  * @param [music_data] Midi struct of midi file
-  * @param [partition_duration] Partition duration in minutes
-  * @param [quarter_value] Quarter value in micro-seconds
-  * @param [tempo_acceleration] Acceleration per measure in percentage (1.0=100%, 0.05=5%)
-  * 
-*/
-void init_music_data(t_music_data *music_data, uint32_t partition_duration, \
-					 uint32_t quarter_value, uint32_t quarter_value_goal, \
+ * @brief Initialize music_data
+ * @param [music_data] Midi struct of midi file
+ * @param [partition_duration] Partition duration in minutes
+ * @param [quarter_value] Quarter value in micro-seconds
+ * @param [tempo_acceleration] Acceleration per measure in percentage (1.0=100%, 0.05=5%)
+ *
+ */
+void init_music_data(t_music_data *music_data, uint32_t partition_duration,
+					 uint32_t quarter_value, uint32_t quarter_value_goal,
 					 float tempo_acceleration)
 {
-	music_data->partition_duration = 60000000 * partition_duration;//10 minutes
-	music_data->measure_value = 500000 * 4;//useless
+	music_data->partition_duration = 60000000 * partition_duration; // 10 minutes
+	music_data->measure_value = 500000 * 4;							// useless
 	music_data->measures_writed = 0;
 	music_data->delta_time = 0;
 	music_data->quarter_value_step = 100000;
-	//music_data->quarter_value_goal = quarter_value;
+	// music_data->quarter_value_goal = quarter_value;
 	music_data->quarter_value_goal = quarter_value_goal;
 	//                          100000
-	music_data->quarter_value = 500000;//define metadata 500000=120bpm
+	music_data->quarter_value = 500000; // define metadata 500000=120bpm
 	music_data->current_quarter_value = quarter_value;
-	music_data->quarter_value_step_updating = tempo_acceleration;//Acceleration per measure in percentage (1.0=100%, 0.05=5%)
-
+	music_data->quarter_value_step_updating = tempo_acceleration; // Acceleration per measure in percentage (1.0=100%, 0.05=5%)
 }
 
 int main(int argc, char **argv)
 {
-	//durée d'une partition 40 000 000us
+	// durée d'une partition 40 000 000us
 	t_music_data music_data = {0};
 	init_music_data(&music_data, 10, 1000000, 250000, 0.03);
+
+	uint64_t latest_timestamp = 0;
 
 	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
@@ -1970,49 +2026,81 @@ int main(int argc, char **argv)
 	sensorsData = NULL;
 	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
-	//Main loop
-	while (!g_exit_requested)
+	int shmid;
+	struct shmseg *shmp;
+	shmid = shmget(SHM_KEY, sizeof(struct shmseg), 0644 | IPC_CREAT);
+
+	if (shmid == -1)
+	{
+		perror("Shared memory");
+		return 1;
+	}
+
+	// Attach to the segment to get a pointer to it.
+	shmp = shmat(shmid, NULL, 0);
+	if (shmp == (void *)-1)
+	{
+		perror("Shared memory attach");
+		return 1;
+	}
+
+	// Main loop
+	while (!g_exit_requested && shmp->complete != 1)
 	{
 		if (!sensorsData || !sensorsData->next)
 		{
-			if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
+
+			// if (get_first_data_file_in_directory(filesDirectory, currentDataFileName))
+			// {
+			// 	// printf("__Fichier trouvé : %s\n", currentDataFileName);
+			// 	char *file_content;
+			// 	uint32_t file_length;
+
+			// 	if (!(file_content = load_file(&file_length, currentDataFileName)))
+			// 	{
+			// 		printf("Error loading file\n");
+			// 		exit(-1);
+			// 	}
+
+			// 	if (!sensorsData)
+			// 	{
+			// 		sensorsData = json_deserialize(file_length, file_content);
+			// 	}
+			// 	else // Normalement ne sert plus a R
+			// 	{
+			// 		// verifier si ca c'est legit
+			// 		sensorsData->next = json_deserialize(file_length, file_content);
+			// 	}
+			// 	free(file_content);
+			// 	// print_sensors_data(sensorsData);
+
+			// 	// Remove? reouvrir le precedent si SIGTERM? LOGS?
+			// 	if (remove(currentDataFileName))
+			// 	{
+			// 		printf("Error while deleting file\n");
+			// 	}
+			// 	else
+			// 	{
+			// 		// printf("File succefully deleted\n");
+			// 	}
+			// }
+			// else
+			// {
+			// 	// printf("Pas de fichiers trouvés\n");
+			// 	sleep(5);
+			// }
+			// &((t_circular_buffer*)bufptr)->data[i]
+			if ((sensorsData = get_new_buffer_values(*(t_circular_buffer *)shmp->buf, &latest_timestamp, sensorsData)) != 0)
 			{
-				// printf("__Fichier trouvé : %s\n", currentDataFileName);
-				char *file_content;
-				uint32_t file_length;
-
-				if (!(file_content = load_file(&file_length, currentDataFileName)))
-				{
-					printf("Error loading file\n");
-					exit(-1);
-				}
-
-				if (!sensorsData)
-				{
-					sensorsData = json_deserialize(file_length, file_content);
-				}
-				else // Normalement ne sert plus a R
-				{
-					//verifier si ca c'est legit
-					sensorsData->next = json_deserialize(file_length, file_content);
-				}
-				free(file_content);
-				// print_sensors_data(sensorsData);
-
-				//Remove? reouvrir le precedent si SIGTERM? LOGS?
-				if (remove(currentDataFileName))
-				{
-					printf("Error while deleting file\n");
-				}
-				else
-				{
-					// printf("File succefully deleted\n");
-				}
 			}
 			else
 			{
-				// printf("Pas de fichiers trouvés\n");
 				sleep(5);
+			}
+			if (shmp->cnt == -1)
+			{
+				perror("read");
+				return 1;
 			}
 		}
 		// Si on a pas de fichier midi ouvert on en ouvre un nouveau
@@ -2054,15 +2142,15 @@ int main(int argc, char **argv)
 				music_data.delta_time += (music_data.current_quarter_value * 4);
 				music_data.data_time = music_data.entry_data_time + ((music_data.delta_time) / 1000000);
 			}
-			//DEBUG
-			// if (!sensorsData->next)
-			// {
-			// 	printf("***Pas de data next\n");
-			// }
-			// else
-			// {
-			// 	// printf("***Next time : %d\n", sensorsData->next->time);
-			// 	print_time("***Next time : ",sensorsData->next->time, "\n");
+			// DEBUG
+			//  if (!sensorsData->next)
+			//  {
+			//  	printf("***Pas de data next\n");
+			//  }
+			//  else
+			//  {
+			//  	// printf("***Next time : %d\n", sensorsData->next->time);
+			//  	print_time("***Next time : ",sensorsData->next->time, "\n");
 
 			// 	// printf("***Music time : %d\n", music_data.data_time);
 			// 	print_time("***Music time : ",music_data.data_time, "\n");
@@ -2107,6 +2195,12 @@ int main(int argc, char **argv)
 	// Note dans les LOGS le temps d'arret midi et log
 
 	// printf("MIDI prgrm EXIT\n");
+
+	if (shmdt(shmp) == -1)
+	{
+		perror("shmdt");
+		return 1;
+	}
 	if (music_data.midi_file) //&& music_data.midi_file_redundancy?
 	{
 		printf("Midi write end 2\n");

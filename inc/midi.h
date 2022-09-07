@@ -12,6 +12,11 @@
 # include <time.h> //ADD raspbian
 # include <signal.h> //ADD raspbian
 
+
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+
 // Folder, (ls)
 # include <dirent.h> 
 
@@ -38,6 +43,10 @@
 # define reverb 0x5B
 # define chorus 0x5D
 # define phaser 0x5F
+
+
+#define SHM_KEY 0x1237
+
 
 int errno;
 
@@ -77,9 +86,60 @@ typedef struct		s_sensors
 	uint16_t organ_4;		  // 0 - 1023
 	uint16_t organ_5;		  // 0 - 1023
 	uint16_t organ_6;		  // 0 - 1023
-	uint32_t timestamp;		  // 0 - oo
+	uint64_t timestamp;		  // 0 - oo
 	struct s_sensors *next;
 }					t_sensors;
+
+typedef struct s_sensors2
+{
+   uint16_t photodiode_1;    // 0 - 4095
+   uint16_t photodiode_2;    // 0 - 4095
+   uint16_t photodiode_3;    // 0 - 4095
+   uint16_t photodiode_4;    // 0 - 4095
+   uint16_t photodiode_5;    // 0 - 4095
+   uint16_t photodiode_6;    // 0 - 4095
+   uint16_t temperature_1;   // 0 - 4095
+   uint16_t temperature_2;   // 0 - 4095
+   uint16_t temperature_3;   // 0 - 4095
+   uint16_t temperature_4;   // 0 - 4095
+   uint16_t temperature_5;   // 0 - 4095
+   uint16_t temperature_6;   // 0 - 4095
+   uint16_t temperature_7;   // 0 - 4095
+   uint16_t temperature_8;   // 0 - 4095
+   uint16_t temperature_9;   // 0 - 4095
+   uint16_t temperature_10;  // 0 - 4095
+   int8_t microphone;        // 0 - 1
+   uint16_t spectro_current; // 0 - 65535
+   uint8_t organ_current;    // 0 - 255
+   uint16_t vin_current;     // 0 - 65535//
+   uint8_t q7_current;       // 0 - 255
+   uint8_t t5v_current;      // 0 - 255
+   uint8_t t3_3v_current;    // 0 - 255
+   uint16_t motor_current;   // 0 - 65535
+   uint8_t carousel_state;   // 0 - 119
+   uint8_t lid_state;        // 0 - 53
+   uint16_t organ_1;         // 0 - 1023
+   uint16_t organ_2;         // 0 - 1023
+   uint16_t organ_3;         // 0 - 1023
+   uint16_t organ_4;         // 0 - 1023
+   uint16_t organ_5;         // 0 - 1023
+   uint16_t organ_6;         // 0 - 1023
+   uint32_t timestamp;       // 0 - oo
+} t_sensors2;
+
+typedef struct s_circular_buffer
+{
+   int16_t buffer_rounds;
+   int16_t older_block;
+   t_sensors data[10];
+} t_circular_buffer;
+
+struct shmseg
+{
+   int cnt;
+   int complete;
+   char buf[sizeof(t_sensors)];
+};
 
 
 typedef struct		s_music_data
