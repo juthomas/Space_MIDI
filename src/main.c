@@ -345,7 +345,6 @@ int16_t get_new_chord_from_list(uint8_t *chords_list, uint8_t chord_list_length,
 		// While chords indexes doesnt exist in euclidean steps and dont check for steps not yet attributed
 		while (euclidean_steps[steps] != chord_to_test && steps < current_step)
 		{
-		printf("EUCLIDEAN CURRENT STEP : %d:%d\n", steps, current_step);
 			steps++;
 		}
 		// If chords indexes doesnt exist in euclidean steps, feed in a chord list
@@ -545,7 +544,6 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 50000000, 1800000); // RM THAT !!
 	// music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 100000000, 3500000); // RM THAT !!
 
-
 	// printf("\033[1;32mmusic data current quarter value after  : %d\033[1;37m\n", music_data->current_quarter_value);
 
 	// update_quarter_value(music_data); RM TO FIX
@@ -615,7 +613,6 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		}
 	}
 
-
 	if (delta_shift != (uint32_t)map_number((uint32_t)sensors_data->spectro_current, 0, 33535, 0, 10))
 	{
 
@@ -659,7 +656,6 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	euclidean_datas[0].min_chord_size = (sensors_data->vin_current % 4) + 1; //(uint8_t)map_number((uint32_t)sensors_data->temperature_3, 0, FIX_4096 - 400, 1, 7);	//temperature_3
 	euclidean_datas[0].max_chord_size = (sensors_data->vin_current % 4) + 1; // temperature_3
-
 
 	static uint16_t mode_requested = A2;
 	static uint16_t type_mode_requested = M_MODE_MAJOR;
@@ -819,7 +815,6 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		get_new_euclidean_chords(&euclidean_datas[0]);
 		measure_count_1 = 0;
 		// printf("\n\n\n\n\n! RESETING 0 !\n\n\n\n\n\n");
-
 	}
 
 	if (measure_count_2 > 55)
@@ -834,7 +829,6 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		get_new_euclidean_chords(&euclidean_datas[2]);
 		measure_count_3 = 0;
 		// printf("\n\n\n\n\n! RESETING 2 !\n\n\n\n\n\n");
-
 	}
 
 	// Initialize notes or if requested to get new note, pick new random notes from allowed ones
@@ -866,11 +860,9 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	// show_euclidean_circle(&curses_env, 2, &euclidean_datas[2]);
 	// show_euclidean_circle(&curses_env, 3, &euclidean_datas[3]);
 
-
-
 	uint16_t div_counter = 0;
 	uint16_t div_goal = 512; // Whole division (quarter * 4)
-	uint16_t looseness = 42; //40; // Humanization in divisions delta, cannot be superior of (divgoal / 3 - divgoal / 4)
+	uint16_t looseness = 42; // 40; // Humanization in divisions delta, cannot be superior of (divgoal / 3 - divgoal / 4)
 
 	// Write a midi measure (iterate on each quarter)
 	for (uint8_t current_quarter = 0; current_quarter < 4; current_quarter++)
@@ -921,6 +913,8 @@ void midi_write_euclidean_measure(t_music_data *music_data, t_sensors *sensors_d
 	// Number of euclidean "Circles"
 	// const uint8_t EUCLIDEAN_DATAS_LENGTH = 3;
 	// Initializing euclidean "Circles" datas with NULL
+	printf("Beg of eucliean measure\n");
+
 	static t_euclidean euclidean_datas[EUCLIDEAN_DATAS_LENGTH];
 	// Start with an reatribution of midi notes in euclidean Circle
 	static uint8_t reset_needed = 1;
@@ -1650,7 +1644,7 @@ void print_sensors_data(t_sensors *sensors_data)
 	{
 		// printf("Time %d %d\n", sensors_tmp->date, sensors_tmp->time);
 		printf("%scurrent data : %d\n", "\033[1;35m", current_data);
-		print_time("> Time : ", sensors_tmp->time, "\n\033[1;37m");
+		// print_time("> Time : ", sensors_tmp->time, "\n\033[1;37m");
 		current_data++;
 		printf("Photodiodes\n");
 		printf("          1 : %d\n", sensors_tmp->photodiode_1);
@@ -1706,8 +1700,12 @@ void clear_sensors_data(t_sensors *sensors_data)
 t_sensors *get_next_buffer_values(t_circular_buffer circular_buffer, uint64_t *latest_timestamp)
 {
 	t_sensors *sensors = (t_sensors *)malloc(sizeof(t_sensors));
+	// printf("Buffer header data : %d, %d\n", circular_buffer.buffer_rounds, circular_buffer.older_block);
+	// printf("RECEIVER FIRST TIMESTAMP OFFSET %d\n", ((long)&circular_buffer.data[0].timestamp - (long)&circular_buffer));
+	// printf("LATEST TIMESTAMP : %d\n", *latest_timestamp);
 	for (uint16_t i = 0; i < 10; i++)
 	{
+		// printf("Data[%d] timestamp : %llu\n",(i + circular_buffer.older_block) % 10, circular_buffer.data[(i + circular_buffer.older_block) % 10].timestamp);
 		if (circular_buffer.data[(i + circular_buffer.older_block) % 10].timestamp > *latest_timestamp)
 		{
 			sensors->photodiode_1 = circular_buffer.data[(i + circular_buffer.older_block) % 10].photodiode_1;		 // 0 - 4095
@@ -1757,6 +1755,7 @@ t_sensors *get_new_buffer_values(t_circular_buffer circular_buffer, uint64_t *la
 	if (!sensorsData)
 	{
 		sensorsData = get_next_buffer_values(circular_buffer, latest_timestamp);
+		printf("FIRST CONDITION\n");
 	}
 	else
 	{
@@ -1765,260 +1764,14 @@ t_sensors *get_new_buffer_values(t_circular_buffer circular_buffer, uint64_t *la
 		{
 			tmp = tmp->next;
 		}
+		if (tmp == sensorsData)
+		{
+			sleep(3);
+		}
+
+		printf("SECOND CONDITION\n");
 	}
 	return (sensorsData);
-}
-
-/**
- * @brief Deserialize json file to t_sensors chained list
- * @param [file_length] Length of json to parse (char number)
- * @param [file_content] String that contain json file
- * @return Chained list that contain all sensors datas
- */
-t_sensors *json_deserialize(uint32_t file_length, char *file_content)
-{
-	jsmn_parser p;
-	jsmntok_t t[1280];
-	uint32_t r;
-	uint32_t i;
-
-	jsmn_init(&p);
-	r = jsmn_parse(&p, file_content, file_length, t,
-				   sizeof(t) / sizeof(t[0]));
-	if (r < 0)
-	{
-		printf("Failed to parse JSON: %d\n", r);
-		return (NULL);
-	}
-
-	/* Assume the top-level element is an object */
-	if (r < 1 || t[0].type != JSMN_OBJECT)
-	{
-		printf("Object expected\n");
-		return (NULL);
-	}
-	uint32_t nu_of_measures = 0; // Usefull?
-
-	t_sensors *sensors_data;
-	t_sensors *current_sensors;
-
-	current_sensors = (t_sensors *)malloc(sizeof(t_sensors));
-	sensors_data = current_sensors;
-
-	// printf("main addr : %p\n", sensors_data);
-	// TODO : fix le i et le r genre WTF je comprends pas
-	for (i = 3; i < r; i++)
-	{
-
-		printf("TEST 0123 : %d - %d - %d - %d\n", t[i].type, t[i].size, i, r);
-		if (t[i].type == JSMN_OBJECT && t[i].size == (32 + 1))
-		{
-			// printf("\n");
-			// printf("addr :%p\n", current_sensors);
-			// obj_size = t[i].size;
-			i++;
-			if (JSON_cmp(file_content, &t[i], "Time") == 0)
-			{
-				char tmp[t[i + 1].end - t[i + 1].start + 1];
-				strncpy(tmp, file_content + t[i + 1].start, t[i + 1].end - t[i + 1].start);
-				tmp[t[i + 1].end - t[i + 1].start] = '\0';
-
-				printf("- Time: %.*s\n", t[i + 1].end - t[i + 1].start,
-					   file_content + t[i + 1].start);
-				printf("tmp value omg %s\n", tmp);
-
-				date_time_to_date_and_time(tmp,
-										   &current_sensors->date, &current_sensors->time);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode_1") == 0)
-			{
-				current_sensors->photodiode_1 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode_2") == 0)
-			{
-				current_sensors->photodiode_2 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode_3") == 0)
-			{
-				current_sensors->photodiode_3 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode_4") == 0)
-			{
-				current_sensors->photodiode_4 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode_5") == 0)
-			{
-				current_sensors->photodiode_5 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Photodiode_6") == 0)
-			{
-				current_sensors->photodiode_6 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-
-			if (JSON_cmp(file_content, &t[i], "Temperature_1") == 0)
-			{
-				current_sensors->temperature_1 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_2") == 0)
-			{
-				current_sensors->temperature_2 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_3") == 0)
-			{
-				current_sensors->temperature_3 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_4") == 0)
-			{
-				current_sensors->temperature_4 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_5") == 0)
-			{
-				current_sensors->temperature_5 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_6") == 0)
-			{
-				current_sensors->temperature_6 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_7") == 0)
-			{
-				current_sensors->temperature_7 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_8") == 0)
-			{
-				current_sensors->temperature_8 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_9") == 0)
-			{
-				current_sensors->temperature_9 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Temperature_10") == 0)
-			{
-				current_sensors->temperature_10 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-
-			if (JSON_cmp(file_content, &t[i], "Microphone") == 0)
-			{
-				current_sensors->microphone = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-
-			if (JSON_cmp(file_content, &t[i], "Spectro_current") == 0)
-			{
-				current_sensors->spectro_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-
-			if (JSON_cmp(file_content, &t[i], "Organ_current") == 0)
-			{
-				current_sensors->organ_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Vin_current") == 0)
-			{
-				current_sensors->vin_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Q7_current") == 0)
-			{
-				current_sensors->q7_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "5v_current") == 0)
-			{
-				current_sensors->t5v_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "3.3v_current") == 0)
-			{
-				current_sensors->t3_3v_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Motor_current") == 0)
-			{
-				current_sensors->motor_current = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-
-			if (JSON_cmp(file_content, &t[i], "Carousel_state") == 0)
-			{
-				current_sensors->carousel_state = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Lid_state") == 0)
-			{
-				current_sensors->lid_state = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-
-			// if (JSON_cmp(file_content, &t[i], "Spectrum") == 0)
-			// {
-			// 	current_sensors->spectrum = atoi(file_content + t[i + 1].start);
-			// 	i += 2;
-			// }
-
-			if (JSON_cmp(file_content, &t[i], "Organ_1") == 0)
-			{
-				current_sensors->organ_1 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Organ_2") == 0)
-			{
-				current_sensors->organ_2 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Organ_3") == 0)
-			{
-				current_sensors->organ_3 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Organ_4") == 0)
-			{
-				current_sensors->organ_4 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Organ_5") == 0)
-			{
-				current_sensors->organ_5 = atoi(file_content + t[i + 1].start);
-				i += 2;
-			}
-			if (JSON_cmp(file_content, &t[i], "Organ_6") == 0)
-			{
-				current_sensors->organ_6 = atoi(file_content + t[i + 1].start);
-				i += 1;
-			}
-
-			if (i + (33 * 2 + 2) < r)
-			{
-				(current_sensors->next) = (t_sensors *)malloc(sizeof(t_sensors));
-				current_sensors = current_sensors->next;
-			}
-			else
-			{
-				current_sensors->next = NULL;
-			}
-			nu_of_measures++;
-		}
-	}
-	// printf("main addr : %p\n", sensors_data);
-	// printf("Number of measures : %d\n", nu_of_measures);
-	return (sensors_data);
 }
 
 /**
@@ -2145,7 +1898,7 @@ void create_dated_midi_file(t_music_data *music_data, char *output_directory,
 		time_t test = sensors_data->timestamp;
 
 		// now = time(NULL);
-		// printf("TIMESTAMP : %llu\n", now);
+		printf("TIMESTAMP : %llu\n", now);
 		// tm_now = *localtime(&now);
 
 		tm_now = *localtime(&test); //
@@ -2326,9 +2079,12 @@ int main(int argc, char **argv)
 			// &((t_circular_buffer*)bufptr)->data[i]
 			if ((sensorsData = get_new_buffer_values(*(t_circular_buffer *)shmp->buf, &latest_timestamp, sensorsData)) != 0)
 			{
+				printf("--New values from sender getted--\n");
+				// print_sensors_data(sensorsData);
 			}
 			else
 			{
+				printf("--Waiting for new values from sender--\n");
 				sleep(5);
 			}
 			if (shmp->cnt == -1)
@@ -2351,6 +2107,7 @@ int main(int argc, char **argv)
 		// datas dans le fichier midi
 		while (music_data.midi_file && sensorsData) // && music_data.midi_file_redundancy?
 		{
+			// print_sensors_data(sensorsData);
 			if (music_data.data_time == 0)
 			{
 				music_data.data_time = sensorsData->time; // * 1000000;
@@ -2417,7 +2174,7 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					sensorsData = NULL;
+					sensorsData = NULL;//free?
 				}
 			}
 			// printf("left : datatime : %d, sensor time : %d\n",  music_data.data_time,  sensorsData->time);

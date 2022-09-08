@@ -124,21 +124,21 @@ typedef struct s_sensors2
    uint16_t organ_4;         // 0 - 1023
    uint16_t organ_5;         // 0 - 1023
    uint16_t organ_6;         // 0 - 1023
-   uint32_t timestamp;       // 0 - oo
+   uint64_t timestamp;       // 0 - oo
 } t_sensors2;
 
 typedef struct s_circular_buffer
 {
    int16_t buffer_rounds;
    int16_t older_block;
-   t_sensors data[10];
+   t_sensors2 data[10];
 } t_circular_buffer;
 
 struct shmseg
 {
    int cnt;
    int complete;
-   char buf[sizeof(t_sensors)];
+   char buf[sizeof(t_circular_buffer)];
 };
 
 
