@@ -537,14 +537,18 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	// print_sensors_data(sensors_data);
 
-	music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 100000000, 35000000);
+	/////// music_data->quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 100000000, 35000000);
 	// Update Midi quarter value to move towards the quarter goal value
 	// printf("\033[1;32mmusic data current quarter value : %d\033[1;37m\n", music_data->current_quarter_value);
 	// 5000000
-	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 50000000, 1800000); // RM THAT !!
-	// music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 100000000, 3500000); // RM THAT !!
+	
+	
+	// /////music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 50000000, 1800000); // RM THAT !!
+	
+	
+	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, FIX_4096, 1000000, 3500); // RM THAT !!
 
-	// printf("\033[1;32mmusic data current quarter value after  : %d\033[1;37m\n", music_data->current_quarter_value);
+	printf("\033[1;32mmusic data current quarter value after  : %d\033[1;37m\n", music_data->current_quarter_value);
 
 	// update_quarter_value(music_data); RM TO FIX
 	// Iterate for each euclidean circle
@@ -1985,6 +1989,7 @@ int main(int argc, char **argv)
 {
 	// durée d'une partition 40 000 000us
 	t_music_data music_data = {0};
+	// init_music_data(&music_data, 10, 100000000, 250000, 0.33);
 	init_music_data(&music_data, 10, 1000000, 250000, 0.03);
 
 	uint64_t latest_timestamp = 0;
@@ -2108,10 +2113,11 @@ int main(int argc, char **argv)
 		while (music_data.midi_file && sensorsData) // && music_data.midi_file_redundancy?
 		{
 			// print_sensors_data(sensorsData);
+	printf("\033[1;96mDATA TIME : %llu, TIMESTAMP : %llu\033[1;37m\n", music_data.data_time, sensorsData->timestamp);
 			if (music_data.data_time == 0)
 			{
-				music_data.data_time = sensorsData->time; // * 1000000;
-				music_data.entry_data_time = sensorsData->time;
+				music_data.data_time = sensorsData->timestamp; // * 1000000;
+				music_data.entry_data_time = sensorsData->timestamp;
 				// print_time("-_- new time : ",sensorsData->time, "\n");
 
 				// t_sensors *sensors_tmp;
@@ -2119,7 +2125,8 @@ int main(int argc, char **argv)
 				// free(sensorsData);
 				// sensorsData = sensors_tmp;
 			}
-			if (music_data.data_time <= sensorsData->time)
+
+			if (music_data.data_time <= sensorsData->timestamp)
 			{
 				// if (music_data.current_quarter_value >= 50000)
 				// {
@@ -2129,9 +2136,15 @@ int main(int argc, char **argv)
 				midi_write_multiple_euclidean(&music_data, sensorsData);
 
 				// midi_write_euclidean_measure(&music_data, sensorsData);
+				printf("\033[1;96mBEFORE DATA TIME : %llu, DELTA : %llu\033[1;37m\n", music_data.data_time, music_data.delta_time);
+
 				music_data.measures_writed++; //
 				music_data.delta_time += (music_data.current_quarter_value * 4);
+				// music_data.data_time = music_data.entry_data_time + ((music_data.delta_time) / 10000000);
 				music_data.data_time = music_data.entry_data_time + ((music_data.delta_time) / 1000000);
+
+				printf("\033[1;95mAFTER DATA TIME : %llu, DELTA : %llu\033[1;37m\n", music_data.data_time, music_data.delta_time);
+
 			}
 			// DEBUG
 			//  if (!sensorsData->next)
@@ -2163,7 +2176,7 @@ int main(int argc, char **argv)
 
 			// printf("datatime : %d, sensor time : %d\n",  music_data.data_time,  sensorsData->time);
 			// while (sensorsData->next && music_data.data_time > sensorsData->next->time)
-			while (sensorsData && music_data.data_time >= sensorsData->time) // >= ???
+			while (sensorsData && music_data.data_time >= sensorsData->timestamp) // >= ???
 			{
 				if (sensorsData->next)
 				{

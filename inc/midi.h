@@ -45,7 +45,7 @@
 # define phaser 0x5F
 
 
-#define SHM_KEY 0x1237
+#define SHM_KEY 0x1240
 
 
 int errno;
@@ -129,9 +129,8 @@ typedef struct s_sensors2
 
 typedef struct s_circular_buffer
 {
-   int16_t buffer_rounds;
    int16_t older_block;
-   t_sensors2 data[10];
+   t_sensors2 data[42];
 } t_circular_buffer;
 
 struct shmseg
@@ -152,7 +151,7 @@ typedef struct		s_music_data
 	uint32_t		partition_duration;
 	uint32_t		measure_value;//
 	uint32_t		measures_writed;//
-	uint32_t		data_time;
+	uint64_t		data_time;
 	uint32_t		delta_time; //TODO : replace all measures writed by this
 	uint32_t		current_quarter_value;
 	uint32_t		quarter_value_goal;
