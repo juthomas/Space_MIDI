@@ -1085,21 +1085,18 @@ int main(int argc, char **argv)
 
 	uint64_t latest_timestamp = 0;
 
-	char *filesDirectory = "data_files";
 	char *outputDirectory = "midi_files";
 	char *outputDirectoryRedundancy = "midi_files";
 
-	if (argc == 3)
+	if (argc == 2)
 	{
-		filesDirectory = argv[1];
-		outputDirectory = argv[2];
-		outputDirectoryRedundancy = argv[2];
+		outputDirectory = argv[1];
+		outputDirectoryRedundancy = argv[1];
 	}
-	else if (argc == 4)
+	else if (argc == 3)
 	{
-		filesDirectory = argv[1];
-		outputDirectory = argv[2];
-		outputDirectoryRedundancy = argv[3];
+		outputDirectory = argv[1];
+		outputDirectoryRedundancy = argv[2];
 	}
 
 	signal(SIGTERM, (void (*)(int))terminate_session);
