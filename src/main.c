@@ -4,6 +4,10 @@
 #include "../inc/midi_modes.h"
 #include "../inc/midi_euclidean.h"
 
+// Structure pour les opérations P() et V() sur les sémaphores
+struct sembuf P = {0, -1, SEM_UNDO}; // Opération P (wait)
+struct sembuf V = {0, 1, SEM_UNDO};	 // Opération V (signal)
+
 #define LOG_ALL 0
 #define EUCLIDEAN_DATAS_LENGTH 4
 
@@ -828,6 +832,10 @@ void print_time(char *beg, uint32_t time, char *end)
 	printf("%s%02dh%02dm%02ds(%d)%s", beg, time / 60 / 60, time / 60 % 60, time % 60, time, end);
 }
 
+void print_colored_value(char *name, int32_t value)
+{
+	printf("\033[1;34m%s\033[1;37m : \033[1;33m%d\033[0m\n", name, value);
+}
 /**
  * @brief Debug function, print current sensors datas
  * @param [sensors_data] Struct that contain current sensors datas
@@ -841,34 +849,34 @@ void print_sensors_data(t_sensors *sensors_data)
 	printf("Struct print :\n");
 	while (sensors_tmp)
 	{
-		printf("%scurrent data : %d\n", "\033[1;35m", current_data);
+		printf("\033[1;32mcurrent data\033[1;37m : \033[1;33m%d\033[0m\n", current_data);
 		current_data++;
-		printf("Photodiodes\n");
-		printf("          1 : %d\n", sensors_tmp->photodiode_1);
-		printf("          2 : %d\n", sensors_tmp->photodiode_2);
-		printf("          3 : %d\n", sensors_tmp->photodiode_3);
-		printf("          4 : %d\n", sensors_tmp->photodiode_4);
-		printf("          5 : %d\n", sensors_tmp->photodiode_5);
-		printf("          6 : %d\n", sensors_tmp->photodiode_6);
-		printf("Temperatures\n");
-		printf("vin current : %d\n", sensors_tmp->vin_current);
-		printf("          1 : %d\n", sensors_tmp->temperature_1);
-		printf("          2 : %d\n", sensors_tmp->temperature_2);
-		printf("          3 : %d\n", sensors_tmp->temperature_3);
-		printf("          4 : %d\n", sensors_tmp->temperature_4);
-		printf("          5 : %d\n", sensors_tmp->temperature_5);
-		printf("          6 : %d\n", sensors_tmp->temperature_6);
-		printf("          7 : %d\n", sensors_tmp->temperature_7);
-		printf("          8 : %d\n", sensors_tmp->temperature_8);
-		printf("          9 : %d\n", sensors_tmp->temperature_9);
-		printf("          10 : %d\n", sensors_tmp->temperature_10);
-		printf("lid state : %d\n", sensors_tmp->lid_state);
-		printf("spectro current : %d\n", sensors_tmp->spectro_current);
-		printf("organ current : %d\n", sensors_tmp->organ_current);
-		printf("q7 current : %d\n", sensors_tmp->q7_current);
-		printf("5v current : %d\n", sensors_tmp->t5v_current);
-		printf("3.3v current : %d\n", sensors_tmp->t3_3v_current);
-		printf("motor current : %d\n", sensors_tmp->motor_current);
+		print_colored_value("Photodiodes 1  ", sensors_tmp->photodiode_1);
+		print_colored_value("Photodiodes 2  ", sensors_tmp->photodiode_2);
+		print_colored_value("Photodiodes 3  ", sensors_tmp->photodiode_3);
+		print_colored_value("Photodiodes 4  ", sensors_tmp->photodiode_4);
+		print_colored_value("Photodiodes 5  ", sensors_tmp->photodiode_5);
+		print_colored_value("Photodiodes 6  ", sensors_tmp->photodiode_6);
+
+		print_colored_value("vin current    ", sensors_tmp->vin_current);
+		print_colored_value("Temperature 1  ", sensors_tmp->temperature_1);
+		print_colored_value("Temperature 2  ", sensors_tmp->temperature_2);
+		print_colored_value("Temperature 3  ", sensors_tmp->temperature_3);
+		print_colored_value("Temperature 4  ", sensors_tmp->temperature_4);
+		print_colored_value("Temperature 5  ", sensors_tmp->temperature_5);
+		print_colored_value("Temperature 6  ", sensors_tmp->temperature_6);
+		print_colored_value("Temperature 7  ", sensors_tmp->temperature_7);
+		print_colored_value("Temperature 8  ", sensors_tmp->temperature_8);
+		print_colored_value("Temperature 9  ", sensors_tmp->temperature_9);
+		print_colored_value("Temperature 10 ", sensors_tmp->temperature_10);
+
+		print_colored_value("lid state      ", sensors_tmp->lid_state);
+		print_colored_value("spectro current", sensors_tmp->spectro_current);
+		print_colored_value("organ current  ", sensors_tmp->organ_current);
+		print_colored_value("q7 current     ", sensors_tmp->q7_current);
+		print_colored_value("5v current     ", sensors_tmp->t5v_current);
+		print_colored_value("3.3v current   ", sensors_tmp->t3_3v_current);
+		print_colored_value("motor current  ", sensors_tmp->motor_current);
 		sensors_tmp = sensors_tmp->next;
 	}
 }
@@ -1101,6 +1109,13 @@ int main(int argc, char **argv)
 	sensorsData = NULL;
 	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
+	int semid = semget(SEM_KEY, 1, 0);
+	if (semid == -1)
+	{
+		perror("semget");
+		return 1;
+	}
+
 	int shmid;
 	struct shmseg *shmp;
 	shmid = shmget(SHM_KEY, sizeof(struct shmseg), 0644 | IPC_CREAT);
@@ -1124,10 +1139,15 @@ int main(int argc, char **argv)
 	{
 		if (!sensorsData || !sensorsData->next)
 		{
+			semop(semid, &P, 1); // Verrouiller le sémaphore
 
-			if ((sensorsData = get_new_buffer_values(*(t_circular_buffer *)shmp->buf, &latest_timestamp, sensorsData)) != 0)
+			sensorsData = get_new_buffer_values(*(t_circular_buffer *)shmp->buf, &latest_timestamp, sensorsData);
+			semop(semid, &V, 1); // Déverrouiller le sémaphore
+
+			if (sensorsData != 0)
 			{
-				printf("--New values from sender getted--\n");
+				printf("--New values from sender taken--\n");
+				print_sensors_data(sensorsData);
 			}
 			else
 			{

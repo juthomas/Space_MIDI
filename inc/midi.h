@@ -14,6 +14,8 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
+
 #include <sys/types.h>
 
 // Folder, (ls)
@@ -28,7 +30,8 @@
 #define chorus 0x5D
 #define phaser 0x5F
 
-#define SHM_KEY 0x1240
+#define SHM_KEY 0x1240 // Clé d'identification de la mémoire partagée
+#define SEM_KEY 0x1240 // Clé d'identification des sémaphores
 
 int errno;
 
