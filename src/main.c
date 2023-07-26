@@ -464,6 +464,23 @@ void shift_euclidean_steps(t_euclidean *euclidean, int shift_value)
 	}
 }
 
+uint16_t get_maximum_value(uint16_t a, uint16_t b, uint16_t c, uint16_t d, uint16_t e, uint16_t f)
+{
+	uint16_t max = a;
+
+	if (b > max)
+		max = b;
+	if (c > max)
+		max = c;
+	if (d > max)
+		max = d;
+	if (e > max)
+		max = e;
+	if (f > max)
+		max = f;
+	return (max);
+}
+
 /**
  * @brief Function to write an multiple Euclidean (4 tps / measure)
  * @param [music_data] Midi struct
@@ -489,9 +506,16 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	{
 		last_time = time(NULL);
 	}
+	// Get the maximum value between all photodiodes values
+	uint16_t max_photodiodes = get_maximum_value(sensors_data->photodiode_1,
+												 sensors_data->photodiode_2,
+												 sensors_data->photodiode_3,
+												 sensors_data->photodiode_4,
+												 sensors_data->photodiode_5,
+												 sensors_data->photodiode_6);
 
 	// music_data->current_quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // CHANGE TO THAT
-	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // RM THAT
+	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 1000000, 3500); // RM THAT
 	// update_quarter_value(music_data); // CHANGE TO THAT
 
 	// Iterate for each euclidean circle
@@ -634,7 +658,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	type_mode_requested = sensors_data->lid_state / 5;
 
-	if (sensors_data->photodiode_1 < 500)
+	if (max_photodiodes < 500)
 	{
 		if (euclidean_datas[0].mode != type_mode_requested)
 			reset_needed = 1;
@@ -651,7 +675,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	// Change euclidean datas with sensors values
 	// \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
-	if ((uint32_t)sensors_data->photodiode_2 > 1024)
+	if (max_photodiodes > 1024)
 	{
 		euclidean_datas[1].mess_chance = 40;
 
@@ -684,7 +708,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		euclidean_datas[1].mess_chance = 100;
 	}
 
-	if ((uint32_t)sensors_data->photodiode_2 > 2048)
+	if (max_photodiodes > 2048)
 	{
 		euclidean_datas[2].mess_chance = 40;
 	}
