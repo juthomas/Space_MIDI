@@ -217,7 +217,7 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 				  uint8_t playing_notes_length, uint8_t mode, int16_t note_i,
 				  uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
 {
-	bool current_note_done = false;
+		bool current_note_done = false;
 
 	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
 	{
@@ -229,7 +229,7 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 			if (playing_notes[playing_notes_i] == note_offset + ((note_i & 0xFF00) >> 8) * 12 + g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note) % 7] + 12 * (((note_i & 0xFF) + 2 * current_note) / 7))
 			{
 
-				playing_notes_duration[playing_notes_i] = steps_duration;
+				playing_notes_duration[playing_notes_i] = steps_duration + 1;
 				current_note_done = true;
 			}
 		}
@@ -240,7 +240,7 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 			if (!playing_notes_duration[playing_notes_i])
 			{
 
-				playing_notes_duration[playing_notes_i] = steps_duration;
+				playing_notes_duration[playing_notes_i] = steps_duration + 1;
 				playing_notes[playing_notes_i] = note_offset + ((note_i & 0xFF00) >> 8) * 12 + g_midi_mode[mode].mode_sequence[((note_i & 0xFF) + 2 * current_note) % 7] + 12 * (((note_i & 0xFF) + 2 * current_note) / 7);
 				// beg note
 				midi_write_measure_note(music_data, ON, 1, playing_notes[playing_notes_i], velocity);
@@ -576,8 +576,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].step_gap =
 					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
-				euclidean_datas[current_euclidean_data].min_steps_duration = 1;
-				euclidean_datas[current_euclidean_data].max_steps_duration = 2;
+				euclidean_datas[current_euclidean_data].min_steps_duration = 2;
+				euclidean_datas[current_euclidean_data].max_steps_duration = 4;
 			}
 		}
 	}
@@ -1124,6 +1124,8 @@ int main(int argc, char **argv)
 	}
 
 	signal(SIGTERM, (void (*)(int))terminate_session);
+	signal(SIGINT, (void (*)(int))terminate_session);
+	signal(SIGSTOP, (void (*)(int))terminate_session);
 
 	char *currentDataFileName;
 	t_sensors *sensorsData;
