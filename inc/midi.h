@@ -56,13 +56,13 @@ typedef struct s_sensors
 	uint16_t temperature_9;	  // 0 - 4095
 	uint16_t temperature_10;  // 0 - 4095
 	int8_t microphone;		  // 0 - 1
-	uint16_t spectro_current; // 0 - 65535
-	uint8_t organ_current;	  // 0 - 255
-	uint16_t vin_current;	  // 0 - 65535//
-	uint8_t q7_current;		  // 0 - 255
-	uint8_t t5v_current;	  // 0 - 255
-	uint8_t t3_3v_current;	  // 0 - 255
-	uint16_t motor_current;	  // 0 - 65535
+	int16_t spectro_current; // 0 - 65535
+	int8_t organ_current;	  // 0 - 255
+	int16_t vin_current;	  // 0 - 65535//
+	int8_t q7_current;		  // 0 - 255
+	int8_t t5v_current;	  // 0 - 255
+	int8_t t3_3v_current;	  // 0 - 255
+	int16_t motor_current;	  // 0 - 65535
 	uint8_t carousel_state;	  // 0 - 119
 	uint8_t lid_state;		  // 0 - 53
 	uint16_t organ_1;		  // 0 - 1023
