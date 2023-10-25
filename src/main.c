@@ -581,11 +581,11 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 			}
 		}
 	}
-
-	if (delta_shift != (uint16_t)map_number((uint32_t)sensors_data->spectro_current, 0, 33535, 0, 10))
+	//Changed spectro to motor
+	if (delta_shift != (uint16_t)map_number((uint32_t)sensors_data->motor_current, 0, 33535, 0, 10))
 	{
 
-		int16_t tmp = (uint32_t)map_number((uint32_t)sensors_data->spectro_current, 0, 33535, 0, 10) - delta_shift;
+		int16_t tmp = (uint32_t)map_number((uint32_t)sensors_data->motor_current, 0, 33535, 0, 10) - delta_shift;
 		shift_euclidean_steps(&euclidean_datas[3], tmp);
 		delta_shift += tmp;
 	}
