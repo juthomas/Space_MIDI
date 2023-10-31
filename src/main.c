@@ -36,6 +36,10 @@ static bool g_exit_requested = false;
  */
 int32_t map_number(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
 {
+	if (x < in_min)
+		return out_min;
+	if (x > in_max)
+		return out_max;
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
@@ -515,7 +519,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 												 sensors_data->photodiode_6);
 
 	// music_data->current_quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // CHANGE TO THAT
-	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 1000000, 3500); // RM THAT
+	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 3500); // RM THAT
 	// update_quarter_value(music_data); // CHANGE TO THAT
 
 	// Iterate for each euclidean circle
@@ -531,11 +535,11 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 								  M_MODE_MAJOR,														/* mode */
 								  A2,																/* mode_beg_note */
 								  4,																/* notes_per_cycle */
-								  (uint8_t)map_number(sensors_data->carousel_state, 0, 119, 80, 0), /* mess_chance */
+								  (uint8_t)map_number(sensors_data->carousel_state, 0, 54, 0, 80), /* mess_chance */
 								  1,																/* min_chord_size */
 								  1,																/* max_chord_size */
-								  (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 48, 35),		/* min_velocity */
-								  (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 70, 74),		/* max_velocity */
+								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 48, 35),		/* min_velocity */
+								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 70, 74),		/* max_velocity */
 								  10,																/* min_steps_duration */
 								  14																/* max_steps_duration */
 			);
@@ -552,7 +556,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 			}
 			else if (current_euclidean_data == 1)
 			{
-				euclidean_datas[current_euclidean_data].euclidean_steps_length = (uint8_t)map_number((uint32_t)sensors_data->temperature_1, 0, 4096, 26, 79); // 13 39
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = (uint8_t)map_number((uint32_t)sensors_data->temperature_1, 400, 480, 26, 79); // 13 39
 				euclidean_datas[current_euclidean_data].mode_beg_note = A2 - 12;
 				euclidean_datas[current_euclidean_data].octaves_size = 3;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
@@ -561,7 +565,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 			else if (current_euclidean_data == 2)
 			{
 				euclidean_datas[current_euclidean_data].octaves_size = 3;
-				euclidean_datas[current_euclidean_data].euclidean_steps_length = (uint8_t)map_number((uint32_t)sensors_data->temperature_2, 0, 4096, 30, 91); // 15 45
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = (uint8_t)map_number((uint32_t)sensors_data->temperature_2, 400, 480, 30, 91); // 15 45
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 4;
 				euclidean_datas[current_euclidean_data].step_gap =
 					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
@@ -582,10 +586,10 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		}
 	}
 	//Changed spectro to motor
-	if (delta_shift != (uint16_t)map_number((uint32_t)sensors_data->motor_current, 0, 33535, 0, 10))
+	if (delta_shift != (uint16_t)map_number((uint32_t)sensors_data->motor_current, 0, 12000, 0, 10))
 	{
 
-		int16_t tmp = (uint32_t)map_number((uint32_t)sensors_data->motor_current, 0, 33535, 0, 10) - delta_shift;
+		int16_t tmp = (uint32_t)map_number((uint32_t)sensors_data->motor_current, 0, 12000, 0, 10) - delta_shift;
 		shift_euclidean_steps(&euclidean_datas[3], tmp);
 		delta_shift += tmp;
 	}
@@ -656,7 +660,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		mode_requested = G2;
 	}
 
-	type_mode_requested = sensors_data->lid_state / 5;
+	type_mode_requested = sensors_data->vin_current % 10;
 
 	if (max_photodiodes < 500)
 	{
@@ -679,29 +683,29 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	{
 		euclidean_datas[1].mess_chance = 40;
 
-		if (euclidean_datas[1].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 5))
+		if (euclidean_datas[1].notes_per_cycle != (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 2, 5))
 		{
 			reset_needed = 1;
 		}
-		euclidean_datas[1].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 2, 5);
+		euclidean_datas[1].notes_per_cycle = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 2, 5);
 		euclidean_datas[1].step_gap =
 			euclidean_datas[1].euclidean_steps_length / euclidean_datas[1].notes_per_cycle;
 
-		if (euclidean_datas[0].notes_per_cycle != (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9))
+		if (euclidean_datas[0].notes_per_cycle != (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 4, 9))
 		{
 			reset_needed = 1;
 		}
-		euclidean_datas[0].notes_per_cycle = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 4, 9);
+		euclidean_datas[0].notes_per_cycle = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 4, 9);
 		euclidean_datas[0].step_gap =
 			euclidean_datas[0].euclidean_steps_length / euclidean_datas[0].notes_per_cycle;
 
-		euclidean_datas[0].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
-		euclidean_datas[1].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
-		euclidean_datas[2].min_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 10, 2);
+		euclidean_datas[0].min_steps_duration = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 10, 2);
+		euclidean_datas[1].min_steps_duration = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 10, 2);
+		euclidean_datas[2].min_steps_duration = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 10, 2);
 
-		euclidean_datas[0].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
-		euclidean_datas[1].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
-		euclidean_datas[2].max_steps_duration = (uint8_t)map_number(sensors_data->organ_1, 0, 1024, 14, 3);
+		euclidean_datas[0].max_steps_duration = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 14, 3);
+		euclidean_datas[1].max_steps_duration = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 14, 3);
+		euclidean_datas[2].max_steps_duration = (uint8_t)map_number(sensors_data->temperature_9, 1500, 1550, 14, 3);
 	}
 	else
 	{
@@ -928,38 +932,38 @@ t_sensors *get_next_buffer_values(t_circular_buffer circular_buffer, uint64_t *l
 	{
 		if (circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].timestamp > *latest_timestamp)
 		{
-			sensors->photodiode_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_1;		// 0 - 4095
-			sensors->photodiode_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_2;		// 0 - 4095
-			sensors->photodiode_3 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_3;		// 0 - 4095
-			sensors->photodiode_4 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_4;		// 0 - 4095
-			sensors->photodiode_5 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_5;		// 0 - 4095
-			sensors->photodiode_6 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_6;		// 0 - 4095
-			sensors->temperature_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_1;		// 0 - 4095
-			sensors->temperature_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_2;		// 0 - 4095
-			sensors->temperature_3 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_3;		// 0 - 4095
-			sensors->temperature_4 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_4;		// 0 - 4095
-			sensors->temperature_5 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_5;		// 0 - 4095
-			sensors->temperature_6 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_6;		// 0 - 4095
-			sensors->temperature_7 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_7;		// 0 - 4095
-			sensors->temperature_8 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_8;		// 0 - 4095
-			sensors->temperature_9 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_9;		// 0 - 4095
-			sensors->temperature_10 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_10;	// 0 - 4095
-			sensors->microphone = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].microphone;			// 0 - 1
-			sensors->spectro_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].spectro_current; // 0 - 65535
-			sensors->organ_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_current;		// 0 - 255
-			sensors->vin_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].vin_current;			// 0 - 65535//
-			sensors->q7_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].q7_current;			// 0 - 255
-			sensors->t5v_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].t5v_current;			// 0 - 255
-			sensors->t3_3v_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].t3_3v_current;		// 0 - 255
-			sensors->motor_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].motor_current;		// 0 - 65535
-			sensors->carousel_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].carousel_state;	// 0 - 119
-			sensors->lid_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].lid_state;				// 0 - 53
-			sensors->organ_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_1;					// 0 - 1023
-			sensors->organ_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_2;					// 0 - 1023
-			sensors->organ_3 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_3;					// 0 - 1023
-			sensors->organ_4 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_4;					// 0 - 1023
-			sensors->organ_5 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_5;					// 0 - 1023
-			sensors->organ_6 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_6;					// 0 - 1023
+			sensors->photodiode_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_1;		// 0 - 4095  PD0
+			sensors->photodiode_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_2;		// 0 - 4095  PD1
+			sensors->photodiode_3 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_3;		// 0 - 4095  PD2
+			sensors->photodiode_4 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_4;		// 0 - 4095  PD3
+			sensors->photodiode_5 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_5;		// 0 - 4095  PD4
+			sensors->photodiode_6 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].photodiode_6;		// 0 - 4095  PD5
+			sensors->temperature_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_1;		// 0 - 4095  PT0
+			sensors->temperature_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_2;		// 0 - 4095  PT1
+			sensors->temperature_3 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_3;		// 0 - 4095  PT2
+			sensors->temperature_4 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_4;		// 0 - 4095  PT3
+			sensors->temperature_5 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_5;		// 0 - 4095  PT4
+			sensors->temperature_6 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_6;		// 0 - 4095  PT5
+			sensors->temperature_7 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_7;		// 0 - 4095  PT6
+			sensors->temperature_8 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_8;		// 0 - 4095  PT1 OSCAR
+			sensors->temperature_9 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_9;		// 0 - 4095  PT2 OSCAR
+			sensors->temperature_10 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].temperature_10;	// 0 - 4095  PT3 OSCAR
+			sensors->microphone = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].microphone;			// 0 - 1     Mostly 0
+			sensors->spectro_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].spectro_current; // -32768 - 32767 I INA SPECTRO
+			sensors->organ_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_current;		// -128 - 127     I INA OSCAR
+			sensors->vin_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].vin_current;		 	// -32768 - 32767 I INA DC_BUS
+			sensors->q7_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].q7_current;			// -128 - 127     I INA Q7
+			sensors->t5v_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].t5v_current;			// -128 - 127     I INA 5V
+			sensors->t3_3v_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].t3_3v_current;		// -128 - 127     I INA 3V3
+			sensors->motor_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].motor_current;		// -32768 - 32767 I INA MOTORS
+			sensors->carousel_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].carousel_state;	// 0 - 119  Lid Open = 0, Lid Closed 0 - 119 
+			sensors->lid_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].lid_state;				// 0 - 53   Lid Open = 0, Lid Closed 53/2
+			sensors->organ_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_1;					// 0 - 4096  POT1 OSCAR
+			sensors->organ_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_2;					// 0 - 4096  POT2 OSCAR
+			sensors->organ_3 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_3;					// 0 - 4096  POT3 OSCAR
+			sensors->organ_4 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_4;					// 0 - 4096  POT4 OSCAR
+			sensors->organ_5 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_5;					// 0 - 4096  POT5 OSCAR
+			sensors->organ_6 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_6;					// 0 - 4096  POT6 OSCAR
 			sensors->timestamp = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].timestamp;				// 0 - oo
 			sensors->next = NULL;
 			*latest_timestamp = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].timestamp;

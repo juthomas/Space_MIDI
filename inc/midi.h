@@ -37,78 +37,76 @@ int errno;
 
 typedef struct s_sensors
 {
-	uint32_t date;
-	uint32_t time;
-	uint16_t photodiode_1;	  // 0 - 4095
-	uint16_t photodiode_2;	  // 0 - 4095
-	uint16_t photodiode_3;	  // 0 - 4095
-	uint16_t photodiode_4;	  // 0 - 4095
-	uint16_t photodiode_5;	  // 0 - 4095
-	uint16_t photodiode_6;	  // 0 - 4095
-	uint16_t temperature_1;	  // 0 - 4095
-	uint16_t temperature_2;	  // 0 - 4095
-	uint16_t temperature_3;	  // 0 - 4095
-	uint16_t temperature_4;	  // 0 - 4095
-	uint16_t temperature_5;	  // 0 - 4095
-	uint16_t temperature_6;	  // 0 - 4095
-	uint16_t temperature_7;	  // 0 - 4095
-	uint16_t temperature_8;	  // 0 - 4095
-	uint16_t temperature_9;	  // 0 - 4095
-	uint16_t temperature_10;  // 0 - 4095
-	int8_t microphone;		  // 0 - 1
-	int16_t spectro_current; // 0 - 65535
-	int8_t organ_current;	  // 0 - 255
-	int16_t vin_current;	  // 0 - 65535//
-	int8_t q7_current;		  // 0 - 255
-	int8_t t5v_current;	  // 0 - 255
-	int8_t t3_3v_current;	  // 0 - 255
-	int16_t motor_current;	  // 0 - 65535
-	uint8_t carousel_state;	  // 0 - 119
-	uint8_t lid_state;		  // 0 - 53
-	uint16_t organ_1;		  // 0 - 1023
-	uint16_t organ_2;		  // 0 - 1023
-	uint16_t organ_3;		  // 0 - 1023
-	uint16_t organ_4;		  // 0 - 1023
-	uint16_t organ_5;		  // 0 - 1023
-	uint16_t organ_6;		  // 0 - 1023
+	uint16_t photodiode_1;	  // 0 - 4095  PD0 
+	uint16_t photodiode_2;	  // 0 - 4095  PD1
+	uint16_t photodiode_3;	  // 0 - 4095  PD2
+	uint16_t photodiode_4;	  // 0 - 4095  PD3
+	uint16_t photodiode_5;	  // 0 - 4095  PD4
+	uint16_t photodiode_6;	  // 0 - 4095  PD5
+	uint16_t temperature_1;	  // 0 - 4095  PT0
+	uint16_t temperature_2;	  // 0 - 4095  PT1
+	uint16_t temperature_3;	  // 0 - 4095  PT2
+	uint16_t temperature_4;	  // 0 - 4095  PT3
+	uint16_t temperature_5;	  // 0 - 4095  PT4
+	uint16_t temperature_6;	  // 0 - 4095  PT5
+	uint16_t temperature_7;	  // 0 - 4095  PT6
+	uint16_t temperature_8;	  // 0 - 4095  PT1 OSCAR
+	uint16_t temperature_9;	  // 0 - 4095  PT2 OSCAR
+	uint16_t temperature_10;  // 0 - 4095  PT3 OSCAR
+	int8_t microphone;		  // 0 - 1     Mostly 0
+	int16_t spectro_current;  // -32768 - 32767 I INA SPECTRO
+	int8_t organ_current;	  // -128 - 127     I INA OSCAR
+	int16_t vin_current;	  // -32768 - 32767 I INA DC_BUS
+	int8_t q7_current;		  // -128 - 127     I INA Q7
+	int8_t t5v_current;	      // -128 - 127     I INA 5V
+	int8_t t3_3v_current;	  // -128 - 127     I INA 3V3
+	int16_t motor_current;	  // -32768 - 32767 I INA MOTORS
+	uint8_t carousel_state;	  // 0 - 119  Lid Open = 0, Lid Closed 0 - 119 
+	uint8_t lid_state;		  // 0 - 53   Lid Open = 0, Lid Closed 53/2
+	uint16_t organ_1;		  // 0 - 4096  POT1 OSCAR
+	uint16_t organ_2;		  // 0 - 4096  POT2 OSCAR
+	uint16_t organ_3;		  // 0 - 4096  POT3 OSCAR
+	uint16_t organ_4;		  // 0 - 4096  POT4 OSCAR
+	uint16_t organ_5;		  // 0 - 4096  POT5 OSCAR
+	uint16_t organ_6;		  // 0 - 4096  POT6 OSCAR
 	uint64_t timestamp;		  // 0 - oo
 	struct s_sensors *next;
 } t_sensors;
 
 typedef struct s_sensors2
 {
-	uint16_t photodiode_1;	  // 0 - 4095
-	uint16_t photodiode_2;	  // 0 - 4095
-	uint16_t photodiode_3;	  // 0 - 4095
-	uint16_t photodiode_4;	  // 0 - 4095
-	uint16_t photodiode_5;	  // 0 - 4095
-	uint16_t photodiode_6;	  // 0 - 4095
-	uint16_t temperature_1;	  // 0 - 4095
-	uint16_t temperature_2;	  // 0 - 4095
-	uint16_t temperature_3;	  // 0 - 4095
-	uint16_t temperature_4;	  // 0 - 4095
-	uint16_t temperature_5;	  // 0 - 4095
-	uint16_t temperature_6;	  // 0 - 4095
-	uint16_t temperature_7;	  // 0 - 4095
-	uint16_t temperature_8;	  // 0 - 4095
-	uint16_t temperature_9;	  // 0 - 4095
-	uint16_t temperature_10;  // 0 - 4095
-	int8_t microphone;		  // 0 - 1
-	uint16_t spectro_current; // 0 - 65535
-	uint8_t organ_current;	  // 0 - 255
-	uint16_t vin_current;	  // 0 - 65535//
-	uint8_t q7_current;		  // 0 - 255
-	uint8_t t5v_current;	  // 0 - 255
-	uint8_t t3_3v_current;	  // 0 - 255
-	uint16_t motor_current;	  // 0 - 65535
-	uint8_t carousel_state;	  // 0 - 119
-	uint8_t lid_state;		  // 0 - 53
-	uint16_t organ_1;		  // 0 - 1023
-	uint16_t organ_2;		  // 0 - 1023
-	uint16_t organ_3;		  // 0 - 1023
-	uint16_t organ_4;		  // 0 - 1023
-	uint16_t organ_5;		  // 0 - 1023
-	uint16_t organ_6;		  // 0 - 1023
+	uint16_t photodiode_1;	  // 0 - 4095  PD0 
+	uint16_t photodiode_2;	  // 0 - 4095  PD1
+	uint16_t photodiode_3;	  // 0 - 4095  PD2
+	uint16_t photodiode_4;	  // 0 - 4095  PD3
+	uint16_t photodiode_5;	  // 0 - 4095  PD4
+	uint16_t photodiode_6;	  // 0 - 4095  PD5
+	uint16_t temperature_1;	  // 0 - 4095  PT0
+	uint16_t temperature_2;	  // 0 - 4095  PT1
+	uint16_t temperature_3;	  // 0 - 4095  PT2
+	uint16_t temperature_4;	  // 0 - 4095  PT3
+	uint16_t temperature_5;	  // 0 - 4095  PT4
+	uint16_t temperature_6;	  // 0 - 4095  PT5
+	uint16_t temperature_7;	  // 0 - 4095  PT6
+	uint16_t temperature_8;	  // 0 - 4095  PT1 OSCAR
+	uint16_t temperature_9;	  // 0 - 4095  PT2 OSCAR
+	uint16_t temperature_10;  // 0 - 4095  PT3 OSCAR
+	int8_t microphone;		  // 0 - 1     Mostly 0
+	int16_t spectro_current;  // -32768 - 32767 I INA SPECTRO
+	int8_t organ_current;	  // -128 - 127     I INA OSCAR
+	int16_t vin_current;	  // -32768 - 32767 I INA DC_BUS
+	int8_t q7_current;		  // -128 - 127     I INA Q7
+	int8_t t5v_current;	      // -128 - 127     I INA 5V
+	int8_t t3_3v_current;	  // -128 - 127     I INA 3V3
+	int16_t motor_current;	  // -32768 - 32767 I INA MOTORS
+	uint8_t carousel_state;	  // 0 - 119  Lid Open = 0, Lid Closed 0 - 119 
+	uint8_t lid_state;		  // 0 - 53   Lid Open = 0, Lid Closed 53/2
+	uint16_t organ_1;		  // 0 - 4096  POT1 OSCAR
+	uint16_t organ_2;		  // 0 - 4096  POT2 OSCAR
+	uint16_t organ_3;		  // 0 - 4096  POT3 OSCAR
+	uint16_t organ_4;		  // 0 - 4096  POT4 OSCAR
+	uint16_t organ_5;		  // 0 - 4096  POT5 OSCAR
+	uint16_t organ_6;		  // 0 - 4096  POT6 OSCAR
 	uint64_t timestamp;		  // 0 - oo
 } t_sensors2;
 
