@@ -519,7 +519,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 												 sensors_data->photodiode_6);
 
 	// music_data->current_quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // CHANGE TO THAT
-	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 3500); // RM THAT
+	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 10000); // RM THAT
 	// update_quarter_value(music_data); // CHANGE TO THAT
 
 	// Iterate for each euclidean circle
