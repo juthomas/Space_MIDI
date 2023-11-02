@@ -485,6 +485,13 @@ uint16_t get_maximum_value(uint16_t a, uint16_t b, uint16_t c, uint16_t d, uint1
 	return (max);
 }
 
+// a : valeur de départ
+// b : valeur d'arrivée
+// t : facteur d'interpolation (doit être entre 0 et 1)
+float lerp(float a, float b, float t) {
+    return a + t * (b - a);
+}
+
 /**
  * @brief Function to write an multiple Euclidean (4 tps / measure)
  * @param [music_data] Midi struct
@@ -519,7 +526,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 												 sensors_data->photodiode_6);
 
 	// music_data->current_quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // CHANGE TO THAT
-	music_data->current_quarter_value = (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 10000); // RM THAT
+	music_data->current_quarter_value = (uint32_t)lerp((float)music_data->current_quarter_value, (float)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 70000), 0.1);
 	// update_quarter_value(music_data); // CHANGE TO THAT
 
 	// Iterate for each euclidean circle
