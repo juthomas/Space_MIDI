@@ -221,7 +221,7 @@ void create_chord(t_music_data *music_data, uint8_t *playing_notes_duration, uin
 				  uint8_t playing_notes_length, uint8_t mode, int16_t note_i,
 				  uint8_t note_offset, uint8_t chord_size, uint8_t velocity, uint8_t steps_duration)
 {
-		bool current_note_done = false;
+	bool current_note_done = false;
 
 	for (uint8_t current_note = 0; current_note < chord_size; current_note++)
 	{
@@ -488,8 +488,9 @@ uint16_t get_maximum_value(uint16_t a, uint16_t b, uint16_t c, uint16_t d, uint1
 // a : valeur de départ
 // b : valeur d'arrivée
 // t : facteur d'interpolation (doit être entre 0 et 1)
-float lerp(float a, float b, float t) {
-    return a + t * (b - a);
+float lerp(float a, float b, float t)
+{
+	return a + t * (b - a);
 }
 
 /**
@@ -512,6 +513,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	static int16_t circle_3_reset_ctdown = 0;
 
+	static int16_t smooth_photodiodes = -1;
+
 	// Initializing ast reset time with the current timestamp
 	if (last_time == 0)
 	{
@@ -525,6 +528,21 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 												 sensors_data->photodiode_5,
 												 sensors_data->photodiode_6);
 
+	if (smooth_photodiodes == -1)
+	{
+		smooth_photodiodes = get_maximum_value(sensors_data->photodiode_1,
+											   sensors_data->photodiode_2,
+											   sensors_data->photodiode_3,
+											   sensors_data->photodiode_4,
+											   sensors_data->photodiode_5,
+											   sensors_data->photodiode_6);
+	}
+	else
+	{
+
+		smooth_photodiodes = (uint32_t)lerp((float)smooth_photodiodes, get_maximum_value(sensors_data->photodiode_1, sensors_data->photodiode_2, sensors_data->photodiode_3, sensors_data->photodiode_4, sensors_data->photodiode_5, sensors_data->photodiode_6), 0.03);
+	}
+
 	// music_data->current_quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // CHANGE TO THAT
 	music_data->current_quarter_value = (uint32_t)lerp((float)music_data->current_quarter_value, (float)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 70000), 0.03);
 	// update_quarter_value(music_data); // CHANGE TO THAT
@@ -536,19 +554,19 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		if (!euclidean_datas[current_euclidean_data].initialized)
 		{
 			init_euclidean_struct(&euclidean_datas[current_euclidean_data],
-								  100,																/* steps_length */
-								  2,																/* octave_size */
-								  7,																/* chord_list_length */
-								  M_MODE_MAJOR,														/* mode */
-								  A2,																/* mode_beg_note */
-								  4,																/* notes_per_cycle */
-								  (uint8_t)map_number(sensors_data->carousel_state, 0, 54, 0, 80), /* mess_chance */
-								  1,																/* min_chord_size */
-								  1,																/* max_chord_size */
-								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 48, 35),		/* min_velocity */
-								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 70, 74),		/* max_velocity */
-								  10,																/* min_steps_duration */
-								  14																/* max_steps_duration */
+								  100,																	  /* steps_length */
+								  2,																	  /* octave_size */
+								  7,																	  /* chord_list_length */
+								  M_MODE_MAJOR,															  /* mode */
+								  A2,																	  /* mode_beg_note */
+								  4,																	  /* notes_per_cycle */
+								  (uint8_t)map_number(sensors_data->carousel_state, 0, 54, 0, 80),		  /* mess_chance */
+								  1,																	  /* min_chord_size */
+								  1,																	  /* max_chord_size */
+								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 30, 15),	  /* min_velocity */
+								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 100, 110), /* max_velocity */
+								  (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 10, 20),		  /* min_steps_duration */
+								  (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 14, 32)		  /* max_steps_duration */
 			);
 
 			if (current_euclidean_data == 0)
@@ -587,12 +605,12 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].step_gap =
 					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
-				euclidean_datas[current_euclidean_data].min_steps_duration = 2;
-				euclidean_datas[current_euclidean_data].max_steps_duration = 4;
+				euclidean_datas[current_euclidean_data].min_steps_duration = 6;
+				euclidean_datas[current_euclidean_data].max_steps_duration = 10;
 			}
 		}
 	}
-	//Changed spectro to motor
+	// Changed spectro to motor
 	if (delta_shift != (uint16_t)map_number((uint32_t)sensors_data->motor_current, 0, 12000, 0, 10))
 	{
 
@@ -669,7 +687,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	type_mode_requested = sensors_data->vin_current % 10;
 
-	if (max_photodiodes < 500)
+	if (smooth_photodiodes < 500)
 	{
 		if (euclidean_datas[0].mode != type_mode_requested)
 			reset_needed = 1;
@@ -686,7 +704,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 
 	// Change euclidean datas with sensors values
 	// \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/
-	if (max_photodiodes > 1024)
+	if (smooth_photodiodes > 1024)
 	{
 		euclidean_datas[1].mess_chance = 40;
 
@@ -719,7 +737,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		euclidean_datas[1].mess_chance = 100;
 	}
 
-	if (max_photodiodes > 2048)
+	if (smooth_photodiodes > 2048)
 	{
 		euclidean_datas[2].mess_chance = 40;
 	}
@@ -958,12 +976,12 @@ t_sensors *get_next_buffer_values(t_circular_buffer circular_buffer, uint64_t *l
 			sensors->microphone = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].microphone;			// 0 - 1     Mostly 0
 			sensors->spectro_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].spectro_current; // -32768 - 32767 I INA SPECTRO
 			sensors->organ_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_current;		// -128 - 127     I INA OSCAR
-			sensors->vin_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].vin_current;		 	// -32768 - 32767 I INA DC_BUS
+			sensors->vin_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].vin_current;			// -32768 - 32767 I INA DC_BUS
 			sensors->q7_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].q7_current;			// -128 - 127     I INA Q7
 			sensors->t5v_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].t5v_current;			// -128 - 127     I INA 5V
 			sensors->t3_3v_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].t3_3v_current;		// -128 - 127     I INA 3V3
 			sensors->motor_current = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].motor_current;		// -32768 - 32767 I INA MOTORS
-			sensors->carousel_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].carousel_state;	// 0 - 119  Lid Open = 0, Lid Closed 0 - 119 
+			sensors->carousel_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].carousel_state;	// 0 - 119  Lid Open = 0, Lid Closed 0 - 119
 			sensors->lid_state = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].lid_state;				// 0 - 53   Lid Open = 0, Lid Closed 53/2
 			sensors->organ_1 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_1;					// 0 - 4096  POT1 OSCAR
 			sensors->organ_2 = circular_buffer.data[(i + circular_buffer.older_block) % BUFFER_ROUNDS].organ_2;					// 0 - 4096  POT2 OSCAR
