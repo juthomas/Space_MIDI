@@ -563,8 +563,12 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 								  (uint8_t)map_number(sensors_data->carousel_state, 0, 54, 0, 80),		  /* mess_chance */
 								  1,																	  /* min_chord_size */
 								  1,																	  /* max_chord_size */
-								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 30, 15),	  /* min_velocity */
-								  (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 100, 110), /* max_velocity */
+								//   (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 30, 15),	  /* min_velocity */
+								  (uint8_t)30,	  /* min_velocity */
+								//   (uint8_t)map_number(sensors_data->smooth_photodiodes, 0, 4096, 15, 40),	  /* min_velocity */
+								//   (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 100, 110), /* max_velocity */
+								  (uint8_t)70, /* max_velocity */
+								//   (uint8_t)map_number(sensors_data->smooth_photodiodes, 0, 4096, 60, 110), /* max_velocity */
 								  (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 10, 20),		  /* min_steps_duration */
 								  (uint32_t)map_number((uint32_t)max_photodiodes, 0, 4096, 14, 32)		  /* max_steps_duration */
 			);
@@ -586,6 +590,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].octaves_size = 3;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
+				euclidean_datas[current_euclidean_data].min_velocity = 70;
+				euclidean_datas[current_euclidean_data].max_velocity = 110;
 			}
 			else if (current_euclidean_data == 2)
 			{
@@ -595,6 +601,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].step_gap =
 					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
+								euclidean_datas[current_euclidean_data].min_velocity = 90;
+				euclidean_datas[current_euclidean_data].max_velocity = 110;
 			}
 			else if (current_euclidean_data == 3)
 			{
@@ -607,6 +615,8 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
 				euclidean_datas[current_euclidean_data].min_steps_duration = 6;
 				euclidean_datas[current_euclidean_data].max_steps_duration = 10;
+				euclidean_datas[current_euclidean_data].min_velocity = 90;
+				euclidean_datas[current_euclidean_data].max_velocity = 100;
 			}
 		}
 	}
@@ -737,14 +747,14 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		euclidean_datas[1].mess_chance = 100;
 	}
 
-	if (smooth_photodiodes > 2048)
-	{
-		euclidean_datas[2].mess_chance = 40;
-	}
-	else
-	{
-		euclidean_datas[2].mess_chance = 100;
-	}
+	// if (smooth_photodiodes > 2048)
+	// {
+	// 	euclidean_datas[2].mess_chance = 40;
+	// }
+	// else
+	// {
+	// 	euclidean_datas[2].mess_chance = 100;
+	// }
 	// /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\ /\.
 
 	// Every X time of measures, get new notes in corresponding euclidean circle
