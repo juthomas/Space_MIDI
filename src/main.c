@@ -607,14 +607,14 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 			else if (current_euclidean_data == 3)
 			{
 				euclidean_datas[current_euclidean_data].octaves_size = 2;
-				euclidean_datas[current_euclidean_data].euclidean_steps_length = 5;
+				euclidean_datas[current_euclidean_data].euclidean_steps_length = 15;
 				euclidean_datas[current_euclidean_data].mode_beg_note = A2 - 12;
-				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
+				euclidean_datas[current_euclidean_data].notes_per_cycle = 10;
 				euclidean_datas[current_euclidean_data].step_gap =
 					euclidean_datas[current_euclidean_data].euclidean_steps_length / euclidean_datas[current_euclidean_data].notes_per_cycle;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
-				euclidean_datas[current_euclidean_data].min_steps_duration = 6;
-				euclidean_datas[current_euclidean_data].max_steps_duration = 10;
+				euclidean_datas[current_euclidean_data].min_steps_duration = 20;
+				euclidean_datas[current_euclidean_data].max_steps_duration = 30;
 				euclidean_datas[current_euclidean_data].min_velocity = 90;
 				euclidean_datas[current_euclidean_data].max_velocity = 100;
 			}
