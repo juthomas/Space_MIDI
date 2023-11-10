@@ -544,7 +544,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 	}
 
 	// music_data->current_quarter_value_goal = (uint32_t)map_number((uint32_t)sensors_data->photodiode_1, 0, 4096, 1000000, 3500); // CHANGE TO THAT
-	music_data->current_quarter_value = (uint32_t)lerp((float)music_data->current_quarter_value, (float)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 70000), 0.03);
+	music_data->current_quarter_value = (uint32_t)lerp((float)music_data->current_quarter_value, (float)map_number((uint32_t)max_photodiodes, 0, 4096, 500000, 60000), 0.03);
 	// update_quarter_value(music_data); // CHANGE TO THAT
 
 	// Iterate for each euclidean circle
@@ -564,7 +564,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 								  1,																	  /* min_chord_size */
 								  1,																	  /* max_chord_size */
 								//   (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 30, 15),	  /* min_velocity */
-								  (uint8_t)40,	  /* min_velocity */
+								  (uint8_t)50,	  /* min_velocity */
 								//   (uint8_t)map_number(sensors_data->smooth_photodiodes, 0, 4096, 15, 40),	  /* min_velocity */
 								//   (uint8_t)map_number(sensors_data->temperature_8, 1500, 1550, 100, 110), /* max_velocity */
 								  (uint8_t)70, /* max_velocity */
@@ -590,7 +590,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 				euclidean_datas[current_euclidean_data].octaves_size = 3;
 				euclidean_datas[current_euclidean_data].notes_per_cycle = 2;
 				euclidean_datas[current_euclidean_data].mess_chance = 100;
-				euclidean_datas[current_euclidean_data].min_velocity = 50;
+				euclidean_datas[current_euclidean_data].min_velocity = 60;
 				euclidean_datas[current_euclidean_data].max_velocity = 80;
 			}
 			else if (current_euclidean_data == 2)
