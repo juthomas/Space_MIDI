@@ -695,7 +695,7 @@ void midi_write_multiple_euclidean(t_music_data *music_data, t_sensors *sensors_
 		mode_requested = G2;
 	}
 
-	type_mode_requested = sensors_data->vin_current % 10;
+	type_mode_requested = sensors_data->vin_current % 15;
 
 	if (smooth_photodiodes < 500)
 	{
@@ -1166,10 +1166,8 @@ int main(int argc, char **argv)
 	signal(SIGINT, (void (*)(int))terminate_session);
 	signal(SIGSTOP, (void (*)(int))terminate_session);
 
-	char *currentDataFileName;
 	t_sensors *sensorsData;
 	sensorsData = NULL;
-	currentDataFileName = (char *)malloc(sizeof(char) * 200);
 
 	int semid = semget(SEM_KEY, 1, 0);
 	if (semid == -1)
